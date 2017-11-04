@@ -74,6 +74,26 @@ namespace AttackFridayMonsters
                         .ConvertTo<BinaryFormat>().Stream.WriteTo(output);
                     break;
 
+                case "carddata0":
+                    var carddata0 = inputFormat
+                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinaryConverter())
+                        .Root;
+
+                    carddata0.Children["File0.bin"].Format
+                            .ConvertWith<Po>(new CardDataToPo(0))
+                            .ConvertTo<BinaryFormat>().Stream.WriteTo(output);
+                    break;
+
+                case "carddata25":
+                    var carddata25 = inputFormat
+                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinaryConverter())
+                        .Root;
+
+                    carddata25.Children["File25.bin"].Format
+                            .ConvertWith<Po>(new CardDataToPo(25))
+                            .ConvertTo<BinaryFormat>().Stream.WriteTo(output);
+                    break;
+
                 default:
                     Console.WriteLine("Unsupported format");
                     break;
