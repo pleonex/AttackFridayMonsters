@@ -32,7 +32,6 @@ namespace AttackFridayMonsters
     {
         public static void Main(string[] args)
         {
-            args = "-e episode /home/pleonex/Dropbox/attack_friday_monster/ROM/originales/gkk/episode/episode.bin /tmp/afm/epsettings.po".Split();
             if (args.Length != 4) {
                 Console.WriteLine("USAGE: AttackFridayMonsters -e format input output");
                 return;
