@@ -23,13 +23,16 @@ namespace AttackFridayMonsters
     using System;
     using System.IO;
     using Formats.Container;
+    using Formats.Text;
     using Yarhl.FileFormat;
     using Yarhl.FileSystem;
+    using Yarhl.Media.Text;
 
     class MainClass
     {
         public static void Main(string[] args)
         {
+            args = "-e episode /home/pleonex/Dropbox/attack_friday_monster/ROM/originales/gkk/episode/episode.bin /tmp/afm/epsettings.po".Split();
             if (args.Length != 4) {
                 Console.WriteLine("USAGE: AttackFridayMonsters -e format input output");
                 return;
@@ -62,6 +65,14 @@ namespace AttackFridayMonsters
                         string outputFile = Path.Combine(output, child.Name);
                         child.GetFormatAs<BinaryFormat>().Stream.WriteTo(outputFile);
                     }
+                    break;
+
+                case "episode":
+                    inputFormat
+                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinaryConverter())
+                        .Root.Children["epsetting.dat"].Format
+                        .ConvertWith<Po>(new EpisodeSettingsToPo())
+                        .ConvertTo<BinaryFormat>().Stream.WriteTo(output);
                     break;
 
                 default:

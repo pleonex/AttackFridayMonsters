@@ -31,6 +31,9 @@
     <Reference Include="yarhl">
       <HintPath>..\..\Yarhl\yarhl.Media\bin\Debug\yarhl.dll</HintPath>
     </Reference>
+    <Reference Include="yarhl.Media">
+      <HintPath>..\..\Yarhl\yarhl.Media\bin\Debug\yarhl.Media.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
