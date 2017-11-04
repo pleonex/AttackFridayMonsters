@@ -1,1 +1,8 @@
 GameData
+
+# C# Projects
+bin/
+obj/
+*.userprefs
+*.user
+packages/

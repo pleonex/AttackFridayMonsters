@@ -1,0 +1,3 @@
+[submodule "Programs/Yarhl"]
+	path = Programs/Yarhl
+	url = https://github.com/SceneGate/Yarhl
