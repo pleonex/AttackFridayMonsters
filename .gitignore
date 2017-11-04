@@ -1,6 +1,7 @@
 GameData
 
 # C# Projects
+.addins
 bin/
 obj/
 *.userprefs

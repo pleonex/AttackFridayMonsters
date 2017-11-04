@@ -6,7 +6,7 @@
     <ProjectGuid>{87A571DE-963B-4235-834F-0129D4E5A85A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>AttackFridayMonsters.Formats</RootNamespace>
-    <AssemblyName>AttackFridayMonsters</AssemblyName>
+    <AssemblyName>AttackFridayMonsters.Formats</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
