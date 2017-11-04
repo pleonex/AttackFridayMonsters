@@ -94,6 +94,13 @@ namespace AttackFridayMonsters
                             .ConvertTo<BinaryFormat>().Stream.WriteTo(output);
                     break;
 
+                case "script":
+                    inputFormat.ConvertWith<NodeContainerFormat>(new Ofs3ToBinaryConverter())
+                               .Root.Children["File1.bin"].Format
+                               .ConvertWith<Po>(new ScriptToPo())
+                               .ConvertTo<BinaryFormat>().Stream.WriteTo(output);
+                    break;
+
                 default:
                     Console.WriteLine("Unsupported format");
                     break;

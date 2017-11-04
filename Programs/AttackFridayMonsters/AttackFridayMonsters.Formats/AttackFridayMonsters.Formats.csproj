@@ -43,6 +43,7 @@
     <Compile Include="Container\Ofs3ToBinaryConverter.cs" />
     <Compile Include="Text\EpisodeSettingsToPo.cs" />
     <Compile Include="Text\CardDataToPo.cs" />
+    <Compile Include="Text\ScriptToPo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Container\" />
