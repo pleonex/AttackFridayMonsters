@@ -21,14 +21,16 @@
 namespace AttackFridayMonsters
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
     using Formats.Container;
     using Formats.Text;
+    using Yarhl.IO;
     using Yarhl.FileFormat;
     using Yarhl.FileSystem;
     using Yarhl.Media.Text;
 
-    class MainClass
+    class Program
     {
         public static void Main(string[] args)
         {
@@ -54,6 +56,11 @@ namespace AttackFridayMonsters
         {
             BinaryFormat inputFormat = new BinaryFormat(input);
             switch (format.ToLower()) {
+                case "lzx_ofs3":
+                    inputFormat.Stream.Dispose();
+                    inputFormat = DecompressLzx(input);
+                    goto case "ofs3";
+
                 case "ofs3":
                     var folder = inputFormat
                         .ConvertWith<NodeContainerFormat>(new Ofs3ToBinaryConverter())
@@ -95,8 +102,11 @@ namespace AttackFridayMonsters
                     break;
 
                 case "script":
+                    inputFormat.Stream.Dispose();
+                    inputFormat = DecompressLzx(input);
+
                     inputFormat.ConvertWith<NodeContainerFormat>(new Ofs3ToBinaryConverter())
-                               .Root.Children["File1.bin"].Format
+                               .Root.Children["File1.bin"]?.Format
                                .ConvertWith<Po>(new ScriptToPo())
                                .ConvertTo<BinaryFormat>().Stream.WriteTo(output);
                     break;
@@ -105,6 +115,40 @@ namespace AttackFridayMonsters
                     Console.WriteLine("Unsupported format");
                     break;
             }
+
+            inputFormat.Stream.Dispose();
+        }
+
+        static BinaryFormat DecompressLzx(string file)
+        {
+            string tempFile = Path.GetTempFileName();
+            File.Copy(file, tempFile, true);
+
+            string program = "lzx.exe";
+            string arguments = "-d " + tempFile;
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT) {
+                arguments = program + " " + arguments;
+                program = "wine";
+            }
+
+            Process process = new Process();
+            process.StartInfo.FileName = program;
+            process.StartInfo.Arguments = arguments;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.ErrorDialog = false;
+            process.Start();
+
+            process.WaitForExit();
+
+            DataStream fileStream = new DataStream(tempFile, FileOpenMode.Read);
+            DataStream memoryStream = new DataStream();
+            fileStream.WriteTo(memoryStream);
+
+            fileStream.Dispose();
+            File.Delete(tempFile);
+
+            return new BinaryFormat(memoryStream);
         }
     }
 }
