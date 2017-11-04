@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AttackFridayMonsters.Formats", "AttackFridayMonsters.Formats\AttackFridayMonsters.Formats.csproj", "{87A571DE-963B-4235-834F-0129D4E5A85A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AttackFridayMonsters", "AttackFridayMonsters\AttackFridayMonsters.csproj", "{21F7C83B-92FA-4C4F-AD04-09D7D265E311}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,5 +15,9 @@ Global
 		{87A571DE-963B-4235-834F-0129D4E5A85A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87A571DE-963B-4235-834F-0129D4E5A85A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87A571DE-963B-4235-834F-0129D4E5A85A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21F7C83B-92FA-4C4F-AD04-09D7D265E311}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21F7C83B-92FA-4C4F-AD04-09D7D265E311}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21F7C83B-92FA-4C4F-AD04-09D7D265E311}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21F7C83B-92FA-4C4F-AD04-09D7D265E311}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
