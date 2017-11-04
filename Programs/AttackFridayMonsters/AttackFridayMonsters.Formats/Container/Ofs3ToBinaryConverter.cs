@@ -21,6 +21,7 @@
 namespace AttackFridayMonsters.Formats.Container
 {
     using System;
+    using System.Text;
     using Mono.Addins;
     using Yarhl.IO;
     using Yarhl.FileFormat;
@@ -50,21 +51,35 @@ namespace AttackFridayMonsters.Formats.Container
             // FAT
             uint numFiles = reader.ReadUInt32();
             for (int i = 0; i < numFiles; i++) {
-                DataStream fileStream = new DataStream(
-                    source.Stream,
-                    headerSize + reader.ReadUInt32(),
-                    reader.ReadUInt32());
+                uint offset = headerSize + reader.ReadUInt32();
+                uint size = reader.ReadUInt32();
+                DataStream fileStream = new DataStream(source.Stream, offset, size);
 
-                string filename = "File" + i + ".bin";
+                string filename = string.Empty;
                 if (fatType == 2) {
                     source.Stream.PushToPosition(
                         headerSize + reader.ReadUInt32(),
                         SeekMode.Start);
                     filename = reader.ReadString();
                     source.Stream.PopPosition();
+                } else if (fatType == 0) {
+                    filename = "File" + i + ".";
+
+                    // Try to guess the extension
+                    source.Stream.PushToPosition(fileStream.Offset, SeekMode.Start);
+                    byte[] fileMagic = reader.ReadBytes(4);
+                    filename += (fileMagic[0] >= 0x30 && fileMagic[0] <= 0x7F) &&
+                                (fileMagic[1] >= 0x30 && fileMagic[1] <= 0x7F) &&
+                                (fileMagic[2] >= 0x30 && fileMagic[2] <= 0x7F) &&
+                                (fileMagic[3] >= 0x30 && fileMagic[3] <= 0x7F) ?
+                        Encoding.ASCII.GetString(fileMagic) : "bin";
+                    source.Stream.PopPosition();
+                } else {
+                    throw new FormatException("Unkown FAT type: " + fatType);
                 }
 
-                container.Root.Add(new Node(filename, new BinaryFormat(fileStream)));
+                if (size > 0)
+                    container.Root.Add(new Node(filename, new BinaryFormat(fileStream)));
             }
 
             return container;
