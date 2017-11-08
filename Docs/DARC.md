@@ -23,6 +23,4 @@ Offset | Size | Description
 0x00   | 3    | Name relative offset to the end of entries
 0x03   | 1    | Entry type: 0=file, 1=folder
 0x04   | 4    | [File: absolute offset, Folder: null]
-0x08   | 4    | [File: size, Folder: number of files and folders]
-
-The root folder entry is special. The name offset is null and the number of elements is actually the total name of files and folders. From this number we can get the start of the name section by multiplying by the size of an entry (12 bytes).
+0x08   | 4    | [File: size, Folder: last entry ID]

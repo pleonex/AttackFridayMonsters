@@ -37,13 +37,15 @@
     <Reference Include="Mono.Addins">
       <HintPath>..\..\Yarhl\mono-addins\bin\Mono.Addins.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Container\Ofs3ToBinaryConverter.cs" />
+    <Compile Include="Container\Ofs3ToBinary.cs" />
     <Compile Include="Text\EpisodeSettingsToPo.cs" />
     <Compile Include="Text\CardDataToPo.cs" />
     <Compile Include="Text\ScriptToPo.cs" />
+    <Compile Include="Container\DarcToBinary.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Container\" />

@@ -111,6 +111,19 @@ namespace AttackFridayMonsters
                                .ConvertTo<BinaryFormat>().Stream.WriteTo(output);
                     break;
 
+                case "darc":
+                    var darcRoot = inputFormat
+                        .ConvertWith<NodeContainerFormat>(new DarcToBinary()).Root;
+
+                    foreach (var child in Navigator.IterateNodes(darcRoot)) {
+                        string outputDir = Path.Combine(output, child.Parent?.Path.TrimStart('/'));
+                        string outputFile = Path.Combine(outputDir, child.Name);
+                        if (!Directory.Exists(outputDir))
+                            Directory.CreateDirectory(outputDir);
+                        child.GetFormatAs<BinaryFormat>()?.Stream.WriteTo(outputFile);
+                    }
+                    break;
+
                 default:
                     Console.WriteLine("Unsupported format");
                     break;
