@@ -1,4 +1,6 @@
 GameData
+Compiler/tools
+Compiler/temp
 
 # C# Projects
 .addins
