@@ -4,3 +4,6 @@
 [submodule "Programs/3dstools"]
 	path = Programs/FontTool
 	url = https://github.com/ObsidianX/3dstools
+[submodule "Programs/ROMTool"]
+	path = Programs/ROMTool
+	url = https://github.com/dnasdw/3dstool
