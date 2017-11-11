@@ -115,8 +115,13 @@ namespace AttackFridayMonsters
                     var darcRoot = inputFormat
                         .ConvertWith<NodeContainerFormat>(new DarcToBinary()).Root;
 
+                    string basePath = darcRoot.Children[0].Path; // root darc
                     foreach (var child in Navigator.IterateNodes(darcRoot)) {
-                        string outputDir = Path.Combine(output, child.Parent?.Path.TrimStart('/'));
+                        if (child.IsContainer)
+                            continue;
+
+                        string path = child.Parent.Path.Replace(basePath, "").TrimStart('/');
+                        string outputDir = Path.Combine(output, path);
                         string outputFile = Path.Combine(outputDir, child.Name);
                         if (!Directory.Exists(outputDir))
                             Directory.CreateDirectory(outputDir);
