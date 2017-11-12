@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 cmake_minimum_required(VERSION 3.0)
-project(AttackFridayMonstersTools VERSION 1.0)
+project(AttackFridayMonstersTools VERSION 1.0 LANGUAGES C)
 
 include(ExternalProject)
 
@@ -31,12 +31,34 @@ install(FILES bclimtool/bin/libPVRTexLib.so DESTINATION tools)
 install(PROGRAMS FontTool/bcfnt.py DESTINATION tools)
 
 # 4. AttackFridayMonsters
+# If we depend on the projects too, it will trigger when adding a new file.
+file(GLOB_RECURSE attackfridaymonsters_sources
+    "${PROJECT_SOURCE_DIR}/AttackFridayMonsters/*.cs"
+    "${PROJECT_SOURCE_DIR}/AttackFridayMonsters/*.csproj"
+    "${PROJECT_SOURCE_DIR}/AttackFridayMonsters/*.sln"
+    "${PROJECT_SOURCE_DIR}/Yarhl/*.cs"
+    "${PROJECT_SOURCE_DIR}/Yarhl/*.csproj"
+    "${PROJECT_SOURCE_DIR}/Yarhl/*.sln"
+)
+add_custom_command(
+    OUTPUT
+    "${CMAKE_BINARY_DIR}/AttackFridayMonsters/AttackFridayMonsters.exe"
+    COMMAND
+    msbuild /v:minimal
+        /p:OutputPath=${CMAKE_BINARY_DIR}/AttackFridayMonsters
+        ${PROJECT_SOURCE_DIR}/AttackFridayMonsters/AttackFridayMonsters.sln
+    DEPENDS
+    ${attackfridaymonsters_sources}
+)
 add_custom_target(AttackFridayMonsters ALL
-    COMMAND msbuild /v:minimal /p:OutputPath=\"${CMAKE_BINARY_DIR}\"/AttackFridayMonsters \"${PROJECT_SOURCE_DIR}\"/AttackFridayMonsters/AttackFridayMonsters.sln)
+    DEPENDS
+    "${CMAKE_BINARY_DIR}/AttackFridayMonsters/AttackFridayMonsters.exe"
+)
 install(DIRECTORY "${CMAKE_BINARY_DIR}/AttackFridayMonsters/"
     DESTINATION tools
     USE_SOURCE_PERMISSIONS
-    FILES_MATCHING PATTERN "*" PATTERN "*.pdb" EXCLUDE)
+    FILES_MATCHING PATTERN "*" PATTERN "*.pdb" EXCLUDE
+)
 
 # 5. CUE tool
 add_executable(lzx "${PROJECT_SOURCE_DIR}/CUETools/lzx.c")

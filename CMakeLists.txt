@@ -12,22 +12,29 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.0)
 project(AttackFridayMonsters VERSION 1.0 LANGUAGES NONE)
 
 include(ExternalProject)
 
-set(ACTION "decompile" CACHE STRING "Compile/Decompile action")
-string(TOLOWER ACTION ${ACTION})
+set(AFM_ACTION "decompile" CACHE STRING "Compile or decompile")
+string(TOLOWER ${AFM_ACTION} AFM_ACTION)
 
 # Compile tools
 ExternalProject_add(Tools
     SOURCE_DIR "${PROJECT_SOURCE_DIR}/Programs"
-    CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${PROJECT_SOURCE_DIR}/GameData")
+    CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${PROJECT_SOURCE_DIR}/GameData"
+)
 
-if(ACTION STREQUAL "decompile")
+# Run the action
+if(AFM_ACTION STREQUAL "decompile")
     ExternalProject_add(Decompile
         SOURCE_DIR "${PROJECT_SOURCE_DIR}/Decompiler"
         DEPENDS Tools
-        INSTALL_COMMAND "")
+        INSTALL_COMMAND ""  # Don't support install
+    )
+elseif(AFM_ACTION STREQUAL "compile")
+    message(FATAL_ERROR "Not implemented yet")
+else()
+    message(FATAL_ERROR "Unknown action '${AFM_ACTION}'")
 endif()
