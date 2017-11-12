@@ -15,7 +15,9 @@
 cmake_minimum_required(VERSION 3.0)
 project(AttackFridayMonstersTools VERSION 1.0 LANGUAGES C)
 
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../CMakeModules")
 include(ExternalProject)
+include(CSharpTarget)
 
 # 1. 3dstool: create ROMs
 ExternalProject_add(3dstools SOURCE_DIR "${PROJECT_SOURCE_DIR}/ROMTool")
@@ -32,32 +34,11 @@ install(PROGRAMS FontTool/bcfnt.py DESTINATION tools)
 
 # 4. AttackFridayMonsters
 # If we depend on the projects too, it will trigger when adding a new file.
-file(GLOB_RECURSE attackfridaymonsters_sources
-    "${PROJECT_SOURCE_DIR}/AttackFridayMonsters/*.cs"
-    "${PROJECT_SOURCE_DIR}/AttackFridayMonsters/*.csproj"
-    "${PROJECT_SOURCE_DIR}/AttackFridayMonsters/*.sln"
-    "${PROJECT_SOURCE_DIR}/Yarhl/*.cs"
-    "${PROJECT_SOURCE_DIR}/Yarhl/*.csproj"
-    "${PROJECT_SOURCE_DIR}/Yarhl/*.sln"
-)
-add_custom_command(
-    OUTPUT
-    "${CMAKE_BINARY_DIR}/AttackFridayMonsters/AttackFridayMonsters.exe"
-    COMMAND
-    msbuild /v:minimal
-        /p:OutputPath=${CMAKE_BINARY_DIR}/AttackFridayMonsters
-        ${PROJECT_SOURCE_DIR}/AttackFridayMonsters/AttackFridayMonsters.sln
-    DEPENDS
-    ${attackfridaymonsters_sources}
-)
-add_custom_target(AttackFridayMonsters ALL
-    DEPENDS
-    "${CMAKE_BINARY_DIR}/AttackFridayMonsters/AttackFridayMonsters.exe"
-)
-install(DIRECTORY "${CMAKE_BINARY_DIR}/AttackFridayMonsters/"
+add_csharp_target(
+    PROJECT "${PROJECT_SOURCE_DIR}/AttackFridayMonsters/AttackFridayMonsters.sln"
+    OUTPUT AttackFridayMonsters.exe
+    DEPEND_DIRS "${PROJECT_SOURCE_DIR}/Yarhl"
     DESTINATION tools
-    USE_SOURCE_PERMISSIONS
-    FILES_MATCHING PATTERN "*" PATTERN "*.pdb" EXCLUDE
 )
 
 # 5. CUE tool
