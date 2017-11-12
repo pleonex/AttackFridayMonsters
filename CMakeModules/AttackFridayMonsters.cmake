@@ -25,7 +25,7 @@ endmacro()
 
 function(extract_darc)
     set(options "")
-    set(oneValueArgs FILE NAME)
+    set(oneValueArgs FILE NAME OUTPUT)
     set(multiValueArgs "")
     cmake_parse_arguments(AFM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -37,11 +37,11 @@ function(extract_darc)
     find_afm_tool()
     add_custom_command(
         OUTPUT
-        "${CMAKE_BINARY_DIR}/${AFM_NAME}/touch.cmake"
+        "${AFM_OUTPUT}/touch.cmake"
         COMMAND
-        ${MONO} ${AFM_TOOL} -e darc ${AFM_FILE} ${CMAKE_BINARY_DIR}/${AFM_NAME}
+        ${MONO} ${AFM_TOOL} -e darc ${AFM_FILE} ${AFM_OUTPUT}
         COMMAND
-        ${CMAKE_COMMAND} -E touch ${CMAKE_BINARY_DIR}/${AFM_NAME}/touch.cmake
+        ${CMAKE_COMMAND} -E touch ${AFM_OUTPUT}/touch.cmake
         COMMENT
         "Extracting DARC ${AFM_NAME}"
         DEPENDS
@@ -49,7 +49,7 @@ function(extract_darc)
     )
     add_custom_target(ExtractDarc${AFM_NAME} ALL
         DEPENDS
-        "${CMAKE_BINARY_DIR}/${AFM_NAME}/touch.cmake"
+        "${AFM_OUTPUT}/touch.cmake"
     )
 endfunction()
 
@@ -114,11 +114,12 @@ function(export_scripts_text)
     get_filename_component(AFM_TOOLS_DIR "${AFM_TOOL}" DIRECTORY)
 
     # For each map
+    set(AFM_TEXT_SCRIPTS "")
     foreach(AFM_MAP_FILE ${AFM_MAP_FILES})
         # Get output file and append to full output files list
         get_filename_component(AFM_MAP_NAME "${AFM_MAP_FILE}" NAME_WE)
         set(AFM_TEXT_SCRIPT "${AFM_OUTPUT}/${AFM_MAP_NAME}.po")
-        list(APPEND AFM_TEXT_SCRIPTS ${AFM_TEXT_SCRIPT})
+        list(APPEND AFM_TEXT_SCRIPTS "${AFM_TEXT_SCRIPT}")
 
         add_custom_command(
             OUTPUT
@@ -135,8 +136,5 @@ function(export_scripts_text)
     endforeach()
 
     # Link all the script custom commands into a single target
-    add_custom_target(ExtractScripts ALL
-        DEPENDS ${AFM_TEXT_SCRIPTS}
-        COMMENT "Extracting text from scripts"
-    )
+    add_custom_target(ExtractScripts ALL DEPENDS ${AFM_TEXT_SCRIPTS})
 endfunction()
