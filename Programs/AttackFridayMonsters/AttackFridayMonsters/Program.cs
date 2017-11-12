@@ -145,8 +145,7 @@ namespace AttackFridayMonsters
             string program = "lzx.exe";
             string arguments = "-d " + tempFile;
             if (Environment.OSVersion.Platform != PlatformID.Win32NT) {
-                arguments = program + " " + arguments;
-                program = "wine";
+                program = "lzx";
             }
 
             Process process = new Process();
