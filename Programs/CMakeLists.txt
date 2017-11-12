@@ -31,11 +31,8 @@ install(FILES bclimtool/bin/libPVRTexLib.so DESTINATION tools)
 install(PROGRAMS FontTool/bcfnt.py DESTINATION tools)
 
 # 4. AttackFridayMonsters
-add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/AttackFridayMonsters.exe
-    COMMAND msbuild /v:minimal /p:OutputPath=\"${CMAKE_BINARY_DIR}\"/AttackFridayMonsters \"${PROJECT_SOURCE_DIR}\"/AttackFridayMonsters/AttackFridayMonsters.sln)
 add_custom_target(AttackFridayMonsters ALL
-DEPENDS ${CMAKE_BINARY_DIR}/AttackFridayMonsters.exe)
+    COMMAND msbuild /v:minimal /p:OutputPath=\"${CMAKE_BINARY_DIR}\"/AttackFridayMonsters \"${PROJECT_SOURCE_DIR}\"/AttackFridayMonsters/AttackFridayMonsters.sln)
 install(DIRECTORY "${CMAKE_BINARY_DIR}/AttackFridayMonsters/"
     DESTINATION tools
     USE_SOURCE_PERMISSIONS

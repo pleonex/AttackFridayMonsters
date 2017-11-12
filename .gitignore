@@ -1,6 +1,10 @@
 GameData
 Compiler/tools
 Compiler/temp
+build/
+Decompiler/*
+!Decompiler/CMakeLists.txt
+
 
 # C# Projects
 .addins
