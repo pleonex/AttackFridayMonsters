@@ -22,7 +22,7 @@ cmake --build . --target install
 The tools will be under *GameData/tools*.
 
 ## Decompile
-You can the files to translate using CMake as follows:
+You can get the files to translate using CMake as follows:
 ```cmake
 cd Decompiler
 mkdir build; cd build
@@ -30,7 +30,13 @@ cmake ..
 cmake --build .
 ```
 
-The files will be under *Decompiler/mod*.
+The files will be under *Decompiler/mod*. CMake variables to change:
+* `DECOMPILER_ROM_FILE`: ROM file to decompile
+* `DECOMPILER_TOOLS_DIR`: Decompilation tools
+* `DECOMPILER_PREFIX`: Root directory for decompilation
+* `DECOMPILER_ROM_DIR`: Directory to store ROM files
+* `DECOMPILER_MOD_DIR`: Directory to store modification files
+* `DECOMPILER_ROM_INTERNAL_DIR`: Directory to store ROM internal data for compilation
 
 ## Compile
 You can generate a new ROM using CMake as follows:
