@@ -17,7 +17,7 @@ project(AttackFridayMonstersTools VERSION 1.0 LANGUAGES C)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../CMakeModules")
 include(ExternalProject)
-include(CSharpTarget)
+include(CSharpProject)
 
 # 1. 3dstool: create ROMs
 ExternalProject_add(3dstools SOURCE_DIR "${PROJECT_SOURCE_DIR}/ROMTool")
