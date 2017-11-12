@@ -12,6 +12,17 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+macro(find_afm_tool)
+    find_program(MONO mono)
+    find_program(AFM_TOOL AttackFridayMonsters.exe)
+    if(NOT AFM_TOOL)
+        message(FATAL_ERROR "Missing generic tool for AttackFridayMonsters formats")
+    endif()
+    if(NOT WIN32 AND NOT MONO)
+        message(FATAL_ERROR "Missing mono installation")
+    endif()
+endmacro()
+
 function(extract_darc)
     set(options "")
     set(oneValueArgs FILE NAME)
@@ -23,16 +34,7 @@ function(extract_darc)
         get_filename_component(AFM_NAME "${AFM_FILE}" NAME_WE)
     endif()
 
-    # Find tools
-    find_program(MONO mono)
-    find_program(AFM_TOOL AttackFridayMonsters.exe)
-    if(NOT AFM_TOOL)
-        message(FATAL_ERROR "Missing generic tool for AttackFridayMonsters formats")
-    endif()
-    if(NOT WIN32 AND NOT MONO)
-        message(FATAL_ERROR "Missing mono installation")
-    endif()
-
+    find_afm_tool()
     add_custom_command(
         OUTPUT
         "${CMAKE_BINARY_DIR}/${AFM_NAME}/touch.cmake"
@@ -48,5 +50,93 @@ function(extract_darc)
     add_custom_target(ExtractDarc${AFM_NAME} ALL
         DEPENDS
         "${CMAKE_BINARY_DIR}/${AFM_NAME}/touch.cmake"
+    )
+endfunction()
+
+function(export_card_texts)
+    set(options "")
+    set(oneValueArgs FILE OUTPUT)
+    set(multiValueArgs "")
+    cmake_parse_arguments(AFM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    find_afm_tool()
+    add_custom_command(
+        OUTPUT
+        "${AFM_OUTPUT}/cardinfo.po"
+        "${AFM_OUTPUT}/cardgame_dialogs.po"
+        COMMAND
+        ${MONO} ${AFM_TOOL} -e carddata0 ${AFM_FILE} ${AFM_OUTPUT}/cardinfo.po
+        COMMAND
+        ${MONO} ${AFM_TOOL} -e carddata25 ${AFM_FILE} ${AFM_OUTPUT}/cardgame_dialogs.po
+        COMMENT
+        "Exporting cardgame texts"
+        DEPENDS
+        Extract3DSROM
+    )
+    add_custom_target(AfmCardText ALL
+        DEPENDS
+        "${AFM_OUTPUT}/cardinfo.po"
+        "${AFM_OUTPUT}/cardgame_dialogs.po"
+    )
+endfunction()
+
+function(export_episodes_titles)
+    set(options "")
+    set(oneValueArgs FILE OUTPUT)
+    set(multiValueArgs "")
+    cmake_parse_arguments(AFM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    find_afm_tool()
+    add_custom_command(
+        OUTPUT
+        "${AFM_OUTPUT}/episodes_title.po"
+        COMMAND
+        ${MONO} ${AFM_TOOL} -e episode ${AFM_FILE} ${AFM_OUTPUT}/episodes_title.po
+        COMMENT
+        "Exporting episodes title"
+        DEPENDS
+        Extract3DSROM
+    )
+    add_custom_target(AfmEpisodesTitle ALL
+        DEPENDS
+        "${AFM_OUTPUT}/episodes_title.po"
+    )
+endfunction()
+
+function(export_scripts_text)
+    set(options "")
+    set(oneValueArgs OUTPUT)
+    set(multiValueArgs MAP_FILES)
+    cmake_parse_arguments(AFM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    # Get tools
+    find_afm_tool()
+    get_filename_component(AFM_TOOLS_DIR "${AFM_TOOL}" DIRECTORY)
+
+    # For each map
+    foreach(AFM_MAP_FILE ${AFM_MAP_FILES})
+        # Get output file and append to full output files list
+        get_filename_component(AFM_MAP_NAME "${AFM_MAP_FILE}" NAME_WE)
+        set(AFM_TEXT_SCRIPT "${AFM_OUTPUT}/${AFM_MAP_NAME}.po")
+        list(APPEND AFM_TEXT_SCRIPTS ${AFM_TEXT_SCRIPT})
+
+        add_custom_command(
+            OUTPUT
+            "${AFM_TEXT_SCRIPT}"
+            COMMAND
+            ${MONO} ${AFM_TOOL} -e script ${AFM_MAP_FILE} ${AFM_TEXT_SCRIPT}
+            COMMENT
+            "Exporting text script ${AFM_MAP_NAME}"
+            DEPENDS
+            Extract3DSROM
+            WORKING_DIRECTORY
+            "${AFM_TOOLS_DIR}"
+        )
+    endforeach()
+
+    # Link all the script custom commands into a single target
+    add_custom_target(ExtractScripts ALL
+        DEPENDS ${AFM_TEXT_SCRIPTS}
+        COMMENT "Extracting text from scripts"
     )
 endfunction()
