@@ -37,7 +37,7 @@ install(PROGRAMS FontTool/bcfnt.py DESTINATION tools)
 add_csharp_target(
     PROJECT "${PROJECT_SOURCE_DIR}/AttackFridayMonsters/AttackFridayMonsters.sln"
     OUTPUT AttackFridayMonsters.exe
-    DEPEND_DIRS "${PROJECT_SOURCE_DIR}/Yarhl"
+    DEPENDS "${PROJECT_SOURCE_DIR}/Yarhl"
     DESTINATION tools
 )
 

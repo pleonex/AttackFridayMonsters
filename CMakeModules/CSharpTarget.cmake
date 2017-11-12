@@ -15,7 +15,7 @@
 function(add_csharp_target)
     set(options "")
     set(oneValueArgs PROJECT OUTPUT DESTINATION)
-    set(multiValueArgs DEPEND_DIRS)
+    set(multiValueArgs DEPENDS)
     cmake_parse_arguments(CSHARP_TARGET "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     # Check arguments
@@ -39,7 +39,7 @@ function(add_csharp_target)
     )
 
     # We want to depend on the dependency folders in case they change too.
-    foreach(CSHARP_TARGET_DEPENDENCY ${CSHARP_TARGET_DEPEND_DIRS})
+    foreach(CSHARP_TARGET_DEPENDENCY ${CSHARP_TARGET_DEPENDS})
         file(GLOB_RECURSE CSHARP_TARGET_DEPENDENCY_SOURCES
             "${CSHARP_TARGET_DEPENDENCY}/*.cs"
             "${CSHARP_TARGET_DEPENDENCY}/*.csproj"
