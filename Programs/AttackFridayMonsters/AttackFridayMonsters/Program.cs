@@ -154,6 +154,7 @@ namespace AttackFridayMonsters
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.ErrorDialog = false;
+            process.StartInfo.RedirectStandardOutput = true;
             process.Start();
 
             process.WaitForExit();
