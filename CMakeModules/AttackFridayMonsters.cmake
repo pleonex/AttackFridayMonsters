@@ -53,6 +53,36 @@ function(extract_darc)
     )
 endfunction()
 
+function(extract_ofs3)
+    set(options "")
+    set(oneValueArgs FILE NAME OUTPUT)
+    set(multiValueArgs "")
+    cmake_parse_arguments(AFM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    # Get default name
+    if(NOT AFM_NAME)
+        get_filename_component(AFM_NAME "${AFM_FILE}" NAME_WE)
+    endif()
+
+    find_afm_tool()
+    add_custom_command(
+        OUTPUT
+        "${AFM_OUTPUT}/touch.cmake"
+        COMMAND
+        ${MONO} ${AFM_TOOL} -e ofs3 ${AFM_FILE} ${AFM_OUTPUT}
+        COMMAND
+        ${CMAKE_COMMAND} -E touch ${AFM_OUTPUT}/touch.cmake
+        COMMENT
+        "Extracting OFS3 ${AFM_NAME}"
+        DEPENDS
+        Extract3DSROM
+    )
+    add_custom_target(ExtractOfs3${AFM_NAME} ALL
+        DEPENDS
+        "${AFM_OUTPUT}/touch.cmake"
+    )
+endfunction()
+
 function(export_card_texts)
     set(options "")
     set(oneValueArgs FILE OUTPUT)
