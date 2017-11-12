@@ -27,7 +27,9 @@ function(export_3ds_font)
 
     # Target rule
     get_filename_component(EXTRACT_3DS_FONT_NAME ${EXTRACT_3DS_FONT} NAME_WE)
-    add_custom_target(ExportFont${EXTRACT_3DS_FONT_NAME} ALL
+    add_custom_command(
+        OUTPUT
+        "${EXTRACT_3DS_OUTPUT}/${EXTRACT_3DS_FONT_NAME}_manifest.json"
         COMMAND
         ${PYTHON_EXECUTABLE} ${EXTRACT_3DS_FONT_TOOL} -x -y -f ${EXTRACT_3DS_FONT}
         COMMENT
@@ -36,5 +38,9 @@ function(export_3ds_font)
         ${EXTRACT_3DS_OUTPUT}
         DEPENDS
         ${EXTRACT_3DS_DEPENDS}
+    )
+    add_custom_target(ExportFont${EXTRACT_3DS_FONT_NAME} ALL
+        DEPENDS
+        "${EXTRACT_3DS_OUTPUT}/${EXTRACT_3DS_FONT_NAME}_manifest.json"
     )
 endfunction()
