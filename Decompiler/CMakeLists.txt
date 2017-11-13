@@ -340,6 +340,7 @@ extract_darc(
 export_image_bclim(
     NAME Subscreen
     OUTPUT "${DECOMPILER_MOD_IMGS_DIR}/sub_screen"
+    DEPENDS ExtractDarcSubscreen
     BCLIM_FILES
     "${CMAKE_BINARY_DIR}/sub_screen0/timg/A_moji.bclim"
     "${CMAKE_BINARY_DIR}/sub_screen0/timg/auto_moji.bclim"
