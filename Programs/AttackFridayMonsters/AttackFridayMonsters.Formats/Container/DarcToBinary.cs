@@ -174,8 +174,9 @@ namespace AttackFridayMonsters.Formats.Container
 
                     // Write file
                     binary.Stream.PushToPosition(0, SeekMode.End);
-                    writer.WritePadding(0x00, 0x80);
                     fileStream.WriteTo(binary.Stream);
+                    if (stack.Any())
+                        writer.WritePadding(0x00, 0x80);
                     binary.Stream.PopPosition();
                 } else {
                     writer.Write((ushort)0x100);
