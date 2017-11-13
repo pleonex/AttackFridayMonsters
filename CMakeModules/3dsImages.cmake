@@ -49,3 +49,40 @@ function(export_image_bclim)
     # Link all the images to single target
     add_custom_target(ExtractBclim${3DS_IMG_NAME} ALL DEPENDS ${3DS_IMG_OUTPUT_IMAGES})
 endfunction()
+
+function(import_image_bclim)
+    set(options "")
+    set(oneValueArgs OUTPUT NAME)
+    set(multiValueArgs PNG_FILES DEPENDS)
+    cmake_parse_arguments(3DS_IMG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    # Find tools
+    find_program(3DS_IMG_TOOL bclimtool)
+    if(NOT 3DS_IMG_TOOL)
+        message(FATAL_ERROR "Missing bclimtool for images")
+    endif()
+    get_filename_component(3DS_IMG_TOOLS_DIR "${3DS_IMG_TOOL}" DIRECTORY)
+
+    foreach(3DS_IMG_PNG ${3DS_IMG_PNG_FILES})
+        # Get output bclim file and append to images list
+        get_filename_component(3DS_IMG_PNG_NAME "${3DS_IMG_PNG}" NAME_WE)
+        set(3DS_IMG_OUTPUT_BCLIM "${3DS_IMG_OUTPUT}/${3DS_IMG_PNG_NAME}.bclim")
+        list(APPEND 3DS_IMG_OUTPUT_IMAGES "${3DS_IMG_OUTPUT_BCLIM}_fake")
+
+        add_custom_command(
+            OUTPUT
+            "${3DS_IMG_OUTPUT_BCLIM}_fake"
+            COMMAND
+            ${3DS_IMG_TOOL} -efp ${3DS_IMG_OUTPUT_BCLIM} ${3DS_IMG_PNG}
+            COMMENT
+            "Importing BCLIM image ${3DS_IMG_NAME}/${3DS_IMG_PNG_NAME}"
+            WORKING_DIRECTORY
+            "${3DS_IMG_TOOLS_DIR}"
+            DEPENDS
+            ${3DS_IMG_DEPENDS}
+        )
+    endforeach()
+
+    # Link all the images to single target
+    add_custom_target(ImportBclim${3DS_IMG_NAME} ALL DEPENDS ${3DS_IMG_OUTPUT_IMAGES})
+endfunction()

@@ -63,7 +63,7 @@ import_3ds_font(
     OUTPUT "${CMAKE_BINARY_DIR}/title/font/kk_KN_Font.bcfnt"
     DEPENDS ExtractDarcTitle
 )
-# TODO: Pack DARC again
+# We will pack after importing title images
 
 # 2. Convert texts
 # 2.1. Card related texts
@@ -80,22 +80,161 @@ import_3ds_font(
 
 # 3. Images
 # title
+# Already exported for the font
+import_image_bclim(
+    NAME Title
+    OUTPUT "${CMAKE_BINARY_DIR}/title/timg"
+    DEPENDS ExtractDarcTitle
+    PNG_FILES
+    "${COMPILER_MOD_IMGS_DIR}/title/auto_mk.png"
+    "${COMPILER_MOD_IMGS_DIR}/title/butji_mdr.png"
+    "${COMPILER_MOD_IMGS_DIR}/title/butji_n.png"
+    "${COMPILER_MOD_IMGS_DIR}/title/butji_y.png"
+    "${COMPILER_MOD_IMGS_DIR}/title/epi_moji.png"
+    "${COMPILER_MOD_IMGS_DIR}/title/head_load.png"
+    "${COMPILER_MOD_IMGS_DIR}/title/head_save.png"
+    "${COMPILER_MOD_IMGS_DIR}/title/title_rogo.png"
 
+)
+import_darc(
+    NAME Title
+    INPUT "${CMAKE_BINARY_DIR}/title"
+    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/lyt/title.arc"
+    DEPENDS ImportFontAfm ImportBclimTitle
+)
 
 # bumper
+extract_darc(
+    NAME Bumper
+    FILE "${COMPILER_ROM_DIR}/data/gkk/lyt/bumper.arc"
+    OUTPUT "${CMAKE_BINARY_DIR}/bumper"
+)
+import_image_bclim(
+    NAME Bumper
+    OUTPUT "${CMAKE_BINARY_DIR}/bumper/timg"
+    DEPENDS ExtractDarcBumper
+    PNG_FILES
+    "${COMPILER_MOD_IMGS_DIR}/bumper/ex_msg_A.png"
+    "${COMPILER_MOD_IMGS_DIR}/bumper/ex_msg_B.png"
+    "${COMPILER_MOD_IMGS_DIR}/bumper/ex_msg_C.png"
+    "${COMPILER_MOD_IMGS_DIR}/bumper/stereo_ji.png"
 
+)
+import_darc(
+    NAME Bumper
+    INPUT "${CMAKE_BINARY_DIR}/bumper"
+    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/lyt/bumper.arc"
+    DEPENDS ImportBclimBumper
+)
 
 # cardly_d
-
+extract_darc(
+    NAME Cardlyt
+    FILE "${COMPILER_ROM_DIR}/data/gkk/cardgame/cardlyt_d.arc"
+    OUTPUT "${CMAKE_BINARY_DIR}/cardlyt"
+)
+import_image_bclim(
+    NAME Cardlyt
+    OUTPUT "${CMAKE_BINARY_DIR}/cardlyt/timg"
+    DEPENDS ExtractDarcCardlyt
+    PNG_FILES
+    "${COMPILER_MOD_IMGS_DIR}/cardlyt/butji_mdr.png"
+    "${COMPILER_MOD_IMGS_DIR}/cardlyt/butji_n.png"
+    "${COMPILER_MOD_IMGS_DIR}/cardlyt/butji_y.png"
+    "${COMPILER_MOD_IMGS_DIR}/cardlyt/chan_moji.png"
+    "${COMPILER_MOD_IMGS_DIR}/cardlyt/dasu_butt.png"
+    "${COMPILER_MOD_IMGS_DIR}/cardlyt/mai_1.png"
+    "${COMPILER_MOD_IMGS_DIR}/cardlyt/mai_2.png"
+    "${COMPILER_MOD_IMGS_DIR}/cardlyt/mai_3.png"
+    "${COMPILER_MOD_IMGS_DIR}/cardlyt/mai_4.png"
+    "${COMPILER_MOD_IMGS_DIR}/cardlyt/mai_5.png"
+)
+import_darc(
+    NAME Cardlyt
+    INPUT "${CMAKE_BINARY_DIR}/cardlyt"
+    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/cardgame/cardlyt_d.arc"
+    DEPENDS ImportBclimCardlyt
+)
 
 # movie_low
-
+extract_darc(
+    NAME Movielow
+    FILE "${COMPILER_ROM_DIR}/data/gkk/lyt/movie_low.arc"
+    OUTPUT "${CMAKE_BINARY_DIR}/movie_low"
+)
+import_image_bclim(
+    NAME Movielow
+    OUTPUT "${CMAKE_BINARY_DIR}/movie_low/timg"
+    DEPENDS ExtractDarcMovielow
+    PNG_FILES
+    "${COMPILER_MOD_IMGS_DIR}/movie_low/skip_ji.png"
+)
+import_darc(
+    NAME Movielow
+    INPUT "${CMAKE_BINARY_DIR}/movie_low"
+    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/lyt/movie_low.arc"
+    DEPENDS ImportBclimMovielow
+)
 
 # notebook
-
+extract_darc(
+    NAME Notebook
+    FILE "${COMPILER_ROM_DIR}/data/gkk/lyt/notebook.arc"
+    OUTPUT "${CMAKE_BINARY_DIR}/notebook"
+)
+import_image_bclim(
+    NAME Notebook
+    OUTPUT "${CMAKE_BINARY_DIR}/notebook/timg"
+    DEPENDS ExtractDarcNotebook
+    PNG_FILES
+    "${COMPILER_MOD_IMGS_DIR}/notebook/auto_moji.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/butji_mdr.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_00.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_01.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_02a.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_02b.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_03.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_04.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_05a.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_05b.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_06a.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_06b.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_07.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_08.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_09.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_10.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_11.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_12.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_13.png"
+    "${COMPILER_MOD_IMGS_DIR}/notebook/page_14.png"
+)
+import_darc(
+    NAME Notebook
+    INPUT "${CMAKE_BINARY_DIR}/notebook"
+    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/lyt/notebook.arc"
+    DEPENDS ImportBclimNotebook
+)
 
 # selwin
-
+extract_darc(
+    NAME Selwin
+    FILE "${COMPILER_ROM_DIR}/data/gkk/lyt/selwin.arc"
+    OUTPUT "${CMAKE_BINARY_DIR}/selwin"
+)
+import_image_bclim(
+    NAME Selwin
+    OUTPUT "${CMAKE_BINARY_DIR}/selwin/timg"
+    DEPENDS ExtractDarcSelwin
+    PNG_FILES
+    "${COMPILER_MOD_IMGS_DIR}/selwin/butji_n.png"
+    "${COMPILER_MOD_IMGS_DIR}/selwin/butji_y.png"
+)
+import_darc(
+    NAME Selwin
+    INPUT "${CMAKE_BINARY_DIR}/selwin"
+    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/lyt/selwin.arc"
+    DEPENDS ImportBclimSelwin
+)
 
 # subscreen
 
@@ -106,5 +245,5 @@ pack_3ds_rom(
     INTERNAL_DIR "${COMPILER_ROM_INTERNAL_DIR}"
     OUTPUT "${COMPILER_OUTPUT_FILE}"
     DEPENDS
-    ImportFontAfm
+    PackDarcTitle PackDarcBumper PackDarcCardlyt PackDarcMovielow PackDarcNotebook PackDarcSelwin
 )

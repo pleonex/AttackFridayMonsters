@@ -33,23 +33,43 @@ function(extract_darc)
     if(NOT AFM_NAME)
         get_filename_component(AFM_NAME "${AFM_FILE}" NAME_WE)
     endif()
+    set(AFM_TOUCH_FILE "${CMAKE_CURRENT_BINARY_DIR}/${AFM_NAME}_touch.cmake")
 
     find_afm_tool()
     add_custom_command(
         OUTPUT
-        "${AFM_OUTPUT}/touch.cmake"
+        "${AFM_TOUCH_FILE}"
         COMMAND
         ${MONO} ${AFM_TOOL} -e darc ${AFM_FILE} ${AFM_OUTPUT}
         COMMAND
-        ${CMAKE_COMMAND} -E touch ${AFM_OUTPUT}/touch.cmake
+        ${CMAKE_COMMAND} -E touch ${AFM_TOUCH_FILE}
         COMMENT
         "Extracting DARC ${AFM_NAME}"
         DEPENDS
         ${AFM_DEPENDS}
     )
-    add_custom_target(ExtractDarc${AFM_NAME} ALL
+    add_custom_target(ExtractDarc${AFM_NAME} ALL DEPENDS "${AFM_TOUCH_FILE}")
+endfunction()
+
+function(import_darc)
+    set(options "")
+    set(oneValueArgs INPUT NAME OUTPUT)
+    set(multiValueArgs DEPENDS)
+    cmake_parse_arguments(AFM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    # Get default name
+    if(NOT AFM_NAME)
+        get_filename_component(AFM_NAME "${AFM_INPUT}" NAME)
+    endif()
+
+    find_afm_tool()
+    add_custom_target(PackDarc${AFM_NAME} ALL
+        COMMAND
+        ${MONO} ${AFM_TOOL} -i darc ${AFM_INPUT} ${AFM_OUTPUT}
+        COMMENT
+        "Packing DARC ${AFM_NAME}"
         DEPENDS
-        "${AFM_OUTPUT}/touch.cmake"
+        ${AFM_DEPENDS}
     )
 endfunction()
 
