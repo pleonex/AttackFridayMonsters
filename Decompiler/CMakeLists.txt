@@ -37,7 +37,7 @@ message(STATUS "ROM file ....................: ${DECOMPILER_ROM_FILE}")
 message(STATUS "Tools dir ...................: ${DECOMPILER_TOOLS_DIR}")
 message(STATUS "Prefix path .................: ${DECOMPILER_PREFIX}")
 message(STATUS "Output ROM dir ..............: ${DECOMPILER_ROM_DIR}")
-message(STATUS "Output modificatins dir......: ${DECOMPILER_MOD_DIR}")
+message(STATUS "Output modifications dir.....: ${DECOMPILER_MOD_DIR}")
 message(STATUS "Output ROM internals dir.....: ${DECOMPILER_ROM_INTERNAL_DIR}")
 message(STATUS "##############################")
 
@@ -73,6 +73,7 @@ extract_darc(
     NAME Title
     FILE "${DECOMPILER_ROM_DIR}/data/gkk/lyt/title.arc"
     OUTPUT "${CMAKE_BINARY_DIR}/title"
+    DEPENDS Extract3DSROM
 )
 export_3ds_font(
     FONT "${CMAKE_BINARY_DIR}/title/font/kk_KN_Font.bcfnt"
@@ -221,6 +222,7 @@ extract_darc(
     NAME Bumper
     FILE "${DECOMPILER_ROM_DIR}/data/gkk/lyt/bumper.arc"
     OUTPUT "${CMAKE_BINARY_DIR}/bumper"
+    DEPENDS Extract3DSROM
 )
 export_image_bclim(
     NAME Bumper
@@ -238,6 +240,7 @@ extract_darc(
     NAME Cardlyt
     FILE "${DECOMPILER_ROM_DIR}/data/gkk/cardgame/cardlyt_d.arc"
     OUTPUT "${CMAKE_BINARY_DIR}/cardlyt"
+    DEPENDS Extract3DSROM
 )
 export_image_bclim(
     NAME Cardlyt
@@ -261,6 +264,7 @@ extract_darc(
     NAME Movielow
     FILE "${DECOMPILER_ROM_DIR}/data/gkk/lyt/movie_low.arc"
     OUTPUT "${CMAKE_BINARY_DIR}/movie_low"
+    DEPENDS Extract3DSROM
 )
 export_image_bclim(
     NAME Movielow
@@ -275,6 +279,7 @@ extract_darc(
     NAME Notebook
     FILE "${DECOMPILER_ROM_DIR}/data/gkk/lyt/notebook.arc"
     OUTPUT "${CMAKE_BINARY_DIR}/notebook"
+    DEPENDS Extract3DSROM
 )
 export_image_bclim(
     NAME Notebook
@@ -308,6 +313,7 @@ extract_darc(
     NAME Selwin
     FILE "${DECOMPILER_ROM_DIR}/data/gkk/lyt/selwin.arc"
     OUTPUT "${CMAKE_BINARY_DIR}/selwin"
+    DEPENDS Extract3DSROM
 )
 export_image_bclim(
     NAME Selwin
@@ -323,13 +329,14 @@ extract_ofs3(
     NAME Subscreen
     FILE "${DECOMPILER_ROM_DIR}/data/gkk/lyt/sub_screen.bin"
     OUTPUT "${CMAKE_BINARY_DIR}/sub_screen"
+    DEPENDS Extract3DSROM
 )
 extract_darc(
     NAME Subscreen
     FILE "${CMAKE_BINARY_DIR}/sub_screen/File0.darc"
     OUTPUT "${CMAKE_BINARY_DIR}/sub_screen0"
+    DEPENDS ExtractOfs3Subscreen
 )
-add_dependencies(ExtractDarcSubscreen ExtractOfs3Subscreen)
 export_image_bclim(
     NAME Subscreen
     OUTPUT "${DECOMPILER_MOD_IMGS_DIR}/sub_screen"

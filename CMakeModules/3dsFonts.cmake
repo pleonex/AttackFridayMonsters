@@ -44,3 +44,33 @@ function(export_3ds_font)
         "${EXTRACT_3DS_OUTPUT}/${EXTRACT_3DS_FONT_NAME}_manifest.json"
     )
 endfunction()
+
+function(import_3ds_font)
+    set(options "")
+    set(oneValueArgs NAME OUTPUT FONT_DIR)
+    set(multiValueArgs DEPENDS)
+    cmake_parse_arguments(3DS_FONTS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    if(NOT 3DS_FONTS_NAME)
+        get_filename_component(3DS_FONTS_NAME ${3DS_FONTS_OUTPUT} NAME_WE)
+    endif()
+
+    # Get and check dependencies
+    find_package(PythonInterp REQUIRED)
+    find_program(3DS_FONTS_TOOL bcfnt.py)
+    if(NOT 3DS_FONTS_TOOL)
+        message(FATAL_ERROR "Missing font tool")
+    endif()
+
+    # Target rule
+    add_custom_target(ImportFont${3DS_FONTS_NAME} ALL
+        COMMAND
+        ${PYTHON_EXECUTABLE} ${3DS_FONTS_TOOL} -c -y -f ${3DS_FONTS_OUTPUT}
+        COMMENT
+        "Importing font ${3DS_FONTS_NAME}"
+        WORKING_DIRECTORY
+        ${3DS_FONTS_FONT_DIR}
+        DEPENDS
+        ${3DS_FONTS_DEPENDS}
+    )
+endfunction()

@@ -26,7 +26,7 @@ endmacro()
 function(extract_darc)
     set(options "")
     set(oneValueArgs FILE NAME OUTPUT)
-    set(multiValueArgs "")
+    set(multiValueArgs DEPENDS)
     cmake_parse_arguments(AFM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     # Get default name
@@ -45,7 +45,7 @@ function(extract_darc)
         COMMENT
         "Extracting DARC ${AFM_NAME}"
         DEPENDS
-        Extract3DSROM
+        ${AFM_DEPENDS}
     )
     add_custom_target(ExtractDarc${AFM_NAME} ALL
         DEPENDS
@@ -56,7 +56,7 @@ endfunction()
 function(extract_ofs3)
     set(options "")
     set(oneValueArgs FILE NAME OUTPUT)
-    set(multiValueArgs "")
+    set(multiValueArgs DEPENDS)
     cmake_parse_arguments(AFM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     # Get default name
@@ -75,7 +75,7 @@ function(extract_ofs3)
         COMMENT
         "Extracting OFS3 ${AFM_NAME}"
         DEPENDS
-        Extract3DSROM
+        ${AFM_DEPENDS}
     )
     add_custom_target(ExtractOfs3${AFM_NAME} ALL
         DEPENDS

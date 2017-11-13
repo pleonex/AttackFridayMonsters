@@ -31,8 +31,8 @@ function(extract_3ds_rom)
 
         # Extract the game partition from the .3ds / cci file
         COMMAND
-        ${EXTRACT_3DS_ROM_TOOL} -xt0f cci
-            ${CMAKE_BINARY_DIR}/game.bin
+        ${EXTRACT_3DS_ROM_TOOL} -xt01f cci
+            ${CMAKE_BINARY_DIR}/game.bin ${EXTRACT_3DS_INTERNAL_DIR}/manual.bin
             ${EXTRACT_3DS_ROM}
             --header ${EXTRACT_3DS_INTERNAL_DIR}/header_cci.bin
 
@@ -66,5 +66,52 @@ function(extract_3ds_rom)
         DEPENDS
         "${CMAKE_BINARY_DIR}/exefs.bin"
         "${CMAKE_BINARY_DIR}/romfs.bin"
+    )
+endfunction()
+
+function(pack_3ds_rom)
+    set(options "")
+    set(oneValueArgs OUTPUT ROM_DIR INTERNAL_DIR)
+    set(multiValueArgs DEPENDS)
+    cmake_parse_arguments(3DS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    # Find the tool
+    find_program(3DS_ROM_TOOL 3dstool)
+    if(NOT 3DS_ROM_TOOL)
+        message(FATAL_ERROR "Missing 3dstool for ROMs")
+    endif()
+
+    add_custom_target(Pack3DSROM ALL
+        # Pack the ROM files
+        COMMAND
+        ${3DS_ROM_TOOL} -ctf romfs ${CMAKE_BINARY_DIR}/romfs.bin
+            --romfs-dir ${3DS_ROM_DIR}/data
+
+        # Pack the system files
+        COMMAND
+        ${3DS_ROM_TOOL} -ctfz exefs ${CMAKE_BINARY_DIR}/exefs.bin
+            --exefs-dir ${3DS_ROM_DIR}/system
+            --header ${3DS_INTERNAL_DIR}/header_system.bin
+
+        # Pack the file systems from the game
+        COMMAND
+        ${3DS_ROM_TOOL} -ctf cxi ${CMAKE_BINARY_DIR}/game.bin
+            --exefs ${CMAKE_BINARY_DIR}/exefs.bin
+            --romfs ${CMAKE_BINARY_DIR}/romfs.bin
+            --header ${3DS_INTERNAL_DIR}/header_ncch0.bin
+            --exh ${3DS_INTERNAL_DIR}/exheader_ncch0.bin
+            --plain ${3DS_INTERNAL_DIR}/plain.bin
+
+        # Pack the game partition from the .3ds / cci file
+        COMMAND
+        ${3DS_ROM_TOOL} -ct01f cci
+            ${CMAKE_BINARY_DIR}/game.bin ${3DS_INTERNAL_DIR}/manual.bin
+            ${3DS_OUTPUT}
+            --header ${3DS_INTERNAL_DIR}/header_cci.bin
+
+        COMMENT
+        "Packing ROM ${3DS_OUTPUT}"
+        DEPENDS
+        ${3DS_DEPENDS}
     )
 endfunction()
