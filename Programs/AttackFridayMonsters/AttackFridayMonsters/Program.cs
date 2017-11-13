@@ -117,7 +117,7 @@ namespace AttackFridayMonsters
 
                     string basePath = darcRoot.Children[0].Path; // root darc
                     foreach (var child in Navigator.IterateNodes(darcRoot)) {
-                        if (child.IsContainer)
+                        if (!(child.Format is BinaryFormat))
                             continue;
 
                         string path = child.Parent.Path.Replace(basePath, "").TrimStart('/');
