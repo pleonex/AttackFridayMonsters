@@ -45,14 +45,33 @@ namespace AttackFridayMonsters
             string output = args[3];
 
             if (operation == "-e") {
-                Convert(format, input, output);
+                Export(format, input, output);
+            } else if (operation =="-i") {
+                Import(format, input, output);
             } else {
                 Console.WriteLine("Unknown operation");
                 return;
             }
         }
 
-        static void Convert(string format, string input, string output)
+        static void Import(string format, string input, string output)
+        {
+            switch (format.ToLower()) {
+                case "darc":
+                    var darcRoot = NodeFactory.CreateContainer("root");
+                    foreach (string filePath in Directory.GetFiles(input, "*", SearchOption.AllDirectories)) {
+                        string parent = Path.GetDirectoryName(filePath);
+                        NodeFactory.CreateContainersForChild(darcRoot, parent.Replace(input, ""), NodeFactory.FromFile(filePath));
+                    }
+                    var darcFormat = new NodeContainerFormat();
+                    darcFormat.Root.Add(darcRoot.Children);
+                    darcFormat.ConvertWith<BinaryFormat>(new DarcToBinary())
+                              .Stream.WriteTo(output);
+                    break;
+            }
+        }
+
+        static void Export(string format, string input, string output)
         {
             BinaryFormat inputFormat = new BinaryFormat(input);
             switch (format.ToLower()) {
