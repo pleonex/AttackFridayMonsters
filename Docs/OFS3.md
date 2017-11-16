@@ -7,13 +7,14 @@ Offset | Size | Description
 0x00   | 0x10 | Header
 0x10   | ...  | FAT
 ...    | ...  | Children data
+...    | ...  | File names if present
 
 ### Header
 Offset | Size | Description
 ------ | ---- | -----------
 0x00   | 4    | Magic stamp (`OFS3`)
 0x04   | 4    | Header size, always 0x10
-0x08   | 2    | FAT type (known values: 0, 2)
+0x08   | 2    | FAT type (known values: 0, 1, 2)
 0x0A   | 2    | Padding value
 0x0C   | 4    | FAT + Children data sizes
 
