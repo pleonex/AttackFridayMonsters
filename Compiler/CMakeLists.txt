@@ -237,7 +237,115 @@ import_darc(
 )
 
 # subscreen
-
+extract_ofs3(
+    NAME Subscreen
+    FILE "${COMPILER_ROM_DIR}/data/gkk/lyt/sub_screen.bin"
+    OUTPUT "${CMAKE_BINARY_DIR}/sub_screen"
+)
+extract_darc(
+    NAME Subscreen
+    FILE "${CMAKE_BINARY_DIR}/sub_screen/File0.bin"
+    OUTPUT "${CMAKE_BINARY_DIR}/sub_screen0"
+    DEPENDS ExtractOfs3Subscreen
+)
+import_image_bclim(
+    NAME Subscreen
+    OUTPUT "${CMAKE_BINARY_DIR}/sub_screen0/timg"
+    DEPENDS ExtractDarcSubscreen
+    PNG_FILES
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/A_moji.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/auto_moji.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/butji_mdr.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/butji_n.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/butji_y.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/butt_gattai.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/butt_jk.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/epi_tag_0.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/epi_tag_dw0_e.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/epi_tag_dw0_ge.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/epi_tag_g0.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/head_card.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/head_epi.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/head_map00.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/head_map01.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/head_map02.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/head_map03.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/head_map04.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/head_piece.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/head_tool.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/hint_fuki.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/je_head_1.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/je_head_2.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/je_head_3.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/je_head_4.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/kouko_F.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/kouko_moji.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/mai_1.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/mai_2.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/mai_3.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/mai_4.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/mai_5.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/map_01.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/map_02.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/map_04.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/map_mk.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_00_A.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_00_B.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_01_A.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_01_B.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_02_A.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_03_A.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_03_B.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_04_A.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_04_B.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_05_A.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_05_B.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_06_A.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_06_B.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_07_A.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_07_B.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_08_A.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_08_B.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_09_A.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_09_B.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_10_A.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_11_A.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_11_B.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_12_A.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_12_B.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_13_A.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_13_B.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_14_A.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_14_B.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/name_20_A.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/pie_tag_3.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/pie_tag_dw2_e.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/save_moji.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/senko_F.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/senko_moji.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/slct_moji_gt0.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/slct_moji_gt1.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/slct_moji_gt2.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/slct_moji_gt3.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/syobu_fuki.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/tub_card.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/tub_epi.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/tub_piece.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/tub_tool.png"
+    "${COMPILER_MOD_IMGS_DIR}/sub_screen/zenz_mk_a.png"
+)
+import_darc(
+    NAME Subscreen
+    INPUT "${CMAKE_BINARY_DIR}/sub_screen0"
+    OUTPUT "${CMAKE_BINARY_DIR}/sub_screen/File0.bin"
+    DEPENDS ImportBclimSubscreen
+)
+import_ofs3(
+    NAME Subscreen
+    INPUT "${CMAKE_BINARY_DIR}/sub_screen"
+    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/lyt/sub_screen.bin"
+    DEPENDS PackDarcSubscreen
+)
 
 # 4. Create ROM
 pack_3ds_rom(
@@ -245,5 +353,5 @@ pack_3ds_rom(
     INTERNAL_DIR "${COMPILER_ROM_INTERNAL_DIR}"
     OUTPUT "${COMPILER_OUTPUT_FILE}"
     DEPENDS
-    PackDarcTitle PackDarcBumper PackDarcCardlyt PackDarcMovielow PackDarcNotebook PackDarcSelwin
+    PackDarcTitle PackDarcBumper PackDarcCardlyt PackDarcMovielow PackDarcNotebook PackDarcSelwin PackOfs3Subscreen
 )
