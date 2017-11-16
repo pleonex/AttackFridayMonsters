@@ -199,6 +199,7 @@ export_scripts_text(
     "${DECOMPILER_ROM_DIR}/data/gkk/map_gz/B08000.lz"
     "${DECOMPILER_ROM_DIR}/data/gkk/map_gz/B08100.lz"
 )
+# TODO: extract scripts from sysdata
 
 # 4. Exract images
 # Title (already extracted for fonts)
@@ -333,7 +334,7 @@ extract_ofs3(
 )
 extract_darc(
     NAME Subscreen
-    FILE "${CMAKE_BINARY_DIR}/sub_screen/File0.darc"
+    FILE "${CMAKE_BINARY_DIR}/sub_screen/File0.bin"
     OUTPUT "${CMAKE_BINARY_DIR}/sub_screen0"
     DEPENDS ExtractOfs3Subscreen
 )
@@ -423,3 +424,6 @@ export_image_bclim(
     "${CMAKE_BINARY_DIR}/sub_screen0/timg/tub_tool.bclim"
     "${CMAKE_BINARY_DIR}/sub_screen0/timg/zenz_mk_a.bclim"
 )
+
+# 5. Extract 3D textures
+# TODO: cardtex: result_make, result_kachi, result_aiko

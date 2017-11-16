@@ -68,6 +68,14 @@ namespace AttackFridayMonsters
                     darcFormat.ConvertWith<BinaryFormat>(new DarcToBinary())
                               .Stream.WriteTo(output);
                     break;
+
+                case "ofs3":
+                    var ofs3Root = NodeFactory.FromDirectory(input);
+                    var ofs3Format = new NodeContainerFormat();
+                    ofs3Format.Root.Add(ofs3Root.Children);
+                    ofs3Format.ConvertWith<BinaryFormat>(new Ofs3ToBinary())
+                              .Stream.WriteTo(output);
+                    break;
             }
         }
 
@@ -82,7 +90,7 @@ namespace AttackFridayMonsters
 
                 case "ofs3":
                     var folder = inputFormat
-                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinaryConverter())
+                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary())
                         .Root;
 
                     Directory.CreateDirectory(output);
@@ -94,7 +102,7 @@ namespace AttackFridayMonsters
 
                 case "episode":
                     inputFormat
-                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinaryConverter())
+                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary())
                         .Root.Children["epsetting.dat"].Format
                         .ConvertWith<Po>(new EpisodeSettingsToPo())
                         .ConvertTo<BinaryFormat>().Stream.WriteTo(output);
@@ -102,7 +110,7 @@ namespace AttackFridayMonsters
 
                 case "carddata0":
                     var carddata0 = inputFormat
-                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinaryConverter())
+                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary())
                         .Root;
 
                     carddata0.Children["File0.bin"].Format
@@ -112,7 +120,7 @@ namespace AttackFridayMonsters
 
                 case "carddata25":
                     var carddata25 = inputFormat
-                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinaryConverter())
+                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary())
                         .Root;
 
                     carddata25.Children["File25.bin"].Format
@@ -124,7 +132,7 @@ namespace AttackFridayMonsters
                     inputFormat.Stream.Dispose();
                     inputFormat = DecompressLzx(input);
 
-                    inputFormat.ConvertWith<NodeContainerFormat>(new Ofs3ToBinaryConverter())
+                    inputFormat.ConvertWith<NodeContainerFormat>(new Ofs3ToBinary())
                                .Root.Children["File1.bin"]?.Format
                                .ConvertWith<Po>(new ScriptToPo())
                                .ConvertTo<BinaryFormat>().Stream.WriteTo(output);

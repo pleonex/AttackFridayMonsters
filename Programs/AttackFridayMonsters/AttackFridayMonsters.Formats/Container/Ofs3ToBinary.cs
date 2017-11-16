@@ -28,8 +28,80 @@ namespace AttackFridayMonsters.Formats.Container
     using Yarhl.FileSystem;
 
     [Extension]
-    public class Ofs3ToBinaryConverter : IConverter<BinaryFormat, NodeContainerFormat>
+    public class Ofs3ToBinary :
+        IConverter<BinaryFormat, NodeContainerFormat>,
+        IConverter<NodeContainerFormat, BinaryFormat>
     {
+        public BinaryFormat Convert(NodeContainerFormat source)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+
+            BinaryFormat binary = new BinaryFormat();
+            DataWriter writer = new DataWriter(binary.Stream);
+
+            bool hasNames = !source.Root.Children[0].Name.StartsWith("File", StringComparison.InvariantCulture);
+            int numFiles = source.Root.Children.Count;
+            int fatEntrySize = hasNames ? 0x0C : 0x08;
+
+            ushort padding = 0x80;
+            uint headerSize = 0x10;
+
+            // Header
+            writer.Write("OFS3", false);
+            writer.Write(headerSize); // header size
+            writer.Write((ushort)(hasNames ? 2 : 0));
+            writer.Write(padding);
+            writer.Write(0x00); // placeholder for data size
+            writer.Write(numFiles);
+
+            // FAT
+            // write first empty FAT to write names at the same time
+            writer.WriteTimes(0x00, fatEntrySize * numFiles);
+            writer.WritePadding(0x00, padding);
+
+            binary.Stream.Seek(0x14, SeekMode.Start);
+            for (int i = 0; i < numFiles; i++) {
+                // Get file without names in order
+                Node child;
+                if (hasNames)
+                    child = source.Root.Children[i];
+                else
+                    child = source.Root.Children["File" + i + ".bin"];
+
+                // Fat Entry
+                writer.Write((uint)(binary.Stream.Length - headerSize));
+                writer.Write((uint)child.GetFormatAs<BinaryFormat>()?.Stream.Length);
+                if (hasNames)
+                    writer.Write(0x00);
+
+                // File data
+                binary.Stream.PushToPosition(0, SeekMode.End);
+                child.GetFormatAs<BinaryFormat>()?.Stream.WriteTo(binary.Stream);
+                writer.WritePadding(0x00, padding);
+                binary.Stream.PopPosition();
+            }
+
+            // Update the file size (without names)
+            binary.Stream.Position = 0x0C;
+            writer.Write((uint)(binary.Stream.Length - headerSize));
+
+            // If has name, write them and update FAT
+            for (int i = 0; hasNames && i < numFiles; i++) {
+                Node child = source.Root.Children[i];
+
+                binary.Stream.Seek(0x14 + i * fatEntrySize + 0x08, SeekMode.Start);
+                writer.Write((uint)(binary.Stream.Length - headerSize));
+
+                binary.Stream.Seek(0x00, SeekMode.End);
+                writer.Write(child.Name);
+            }
+
+            binary.Stream.Seek(0, SeekMode.End);
+            writer.WritePadding(0x00, padding);
+            return binary;
+        }
+
         public NodeContainerFormat Convert(BinaryFormat source)
         {
             if (source == null)
@@ -62,24 +134,13 @@ namespace AttackFridayMonsters.Formats.Container
                         SeekMode.Start);
                     filename = reader.ReadString();
                     source.Stream.PopPosition();
-                } else if (fatType == 0) {
-                    filename = "File" + i + ".";
-
-                    // Try to guess the extension
-                    source.Stream.PushToPosition(fileStream.Offset, SeekMode.Start);
-                    byte[] fileMagic = reader.ReadBytes(4);
-                    filename += (fileMagic[0] >= 0x30 && fileMagic[0] <= 0x7F) &&
-                                (fileMagic[1] >= 0x30 && fileMagic[1] <= 0x7F) &&
-                                (fileMagic[2] >= 0x30 && fileMagic[2] <= 0x7F) &&
-                                (fileMagic[3] >= 0x30 && fileMagic[3] <= 0x7F) ?
-                        Encoding.ASCII.GetString(fileMagic) : "bin";
-                    source.Stream.PopPosition();
+                } else if (fatType == 0 || fatType == 1) {
+                    filename = "File" + i + ".bin";
                 } else {
                     throw new FormatException("Unkown FAT type: " + fatType);
                 }
 
-                if (size > 0)
-                    container.Root.Add(new Node(filename, new BinaryFormat(fileStream)));
+                container.Root.Add(new Node(filename, new BinaryFormat(fileStream)));
             }
 
             return container;

@@ -33,7 +33,7 @@ function(extract_darc)
     if(NOT AFM_NAME)
         get_filename_component(AFM_NAME "${AFM_FILE}" NAME_WE)
     endif()
-    set(AFM_TOUCH_FILE "${CMAKE_CURRENT_BINARY_DIR}/${AFM_NAME}_touch.cmake")
+    set(AFM_TOUCH_FILE "${CMAKE_CURRENT_BINARY_DIR}/${AFM_NAME}_darc_touch.cmake")
 
     find_afm_tool()
     add_custom_command(
@@ -83,15 +83,16 @@ function(extract_ofs3)
     if(NOT AFM_NAME)
         get_filename_component(AFM_NAME "${AFM_FILE}" NAME_WE)
     endif()
+    set(AFM_TOUCH_FILE "${CMAKE_CURRENT_BINARY_DIR}/${AFM_NAME}_ofs3_touch.cmake")
 
     find_afm_tool()
     add_custom_command(
         OUTPUT
-        "${AFM_OUTPUT}/touch.cmake"
+        "${AFM_TOUCH_FILE}"
         COMMAND
         ${MONO} ${AFM_TOOL} -e ofs3 ${AFM_FILE} ${AFM_OUTPUT}
         COMMAND
-        ${CMAKE_COMMAND} -E touch ${AFM_OUTPUT}/touch.cmake
+        ${CMAKE_COMMAND} -E touch ${AFM_TOUCH_FILE}
         COMMENT
         "Extracting OFS3 ${AFM_NAME}"
         DEPENDS
@@ -99,7 +100,29 @@ function(extract_ofs3)
     )
     add_custom_target(ExtractOfs3${AFM_NAME} ALL
         DEPENDS
-        "${AFM_OUTPUT}/touch.cmake"
+        "${AFM_TOUCH_FILE}"
+    )
+endfunction()
+
+function(import_ofs3)
+    set(options "")
+    set(oneValueArgs INPUT NAME OUTPUT)
+    set(multiValueArgs DEPENDS)
+    cmake_parse_arguments(AFM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    # Get default name
+    if(NOT AFM_NAME)
+        get_filename_component(AFM_NAME "${AFM_INPUT}" NAME)
+    endif()
+
+    find_afm_tool()
+    add_custom_target(PackOfs3${AFM_NAME} ALL
+        COMMAND
+        ${MONO} ${AFM_TOOL} -i ofs3 ${AFM_INPUT} ${AFM_OUTPUT}
+        COMMENT
+        "Packing OFS3 ${AFM_NAME}"
+        DEPENDS
+        ${AFM_DEPENDS}
     )
 endfunction()
 
