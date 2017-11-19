@@ -211,3 +211,35 @@ function(export_scripts_text)
     # Link all the script custom commands into a single target
     add_custom_target(ExtractScripts ALL DEPENDS ${AFM_TEXT_SCRIPTS})
 endfunction()
+
+function(import_scripts_text)
+    set(options "")
+    set(oneValueArgs INPUT)
+    set(multiValueArgs MAP_FILES)
+    cmake_parse_arguments(AFM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    # Get tools
+    find_afm_tool()
+    get_filename_component(AFM_TOOLS_DIR "${AFM_TOOL}" DIRECTORY)
+
+    # For each map
+    set(AFM_TEXT_SCRIPTS "")
+    foreach(AFM_MAP_FILE ${AFM_MAP_FILES})
+        # Get output file and append to full output files list
+        get_filename_component(AFM_MAP_NAME "${AFM_MAP_FILE}" NAME_WE)
+        set(AFM_TEXT_SCRIPT "${AFM_INPUT}/${AFM_MAP_NAME}.po")
+        list(APPEND AFM_TEXT_SCRIPTS Importing${AFM_MAP_NAME})
+
+        add_custom_target(Importing${AFM_MAP_NAME}
+            COMMAND
+            ${MONO} ${AFM_TOOL} -i script ${AFM_TEXT_SCRIPT} ${AFM_MAP_FILE}
+            COMMENT
+            "Importing text script ${AFM_MAP_NAME}"
+            WORKING_DIRECTORY
+            "${AFM_TOOLS_DIR}"
+        )
+    endforeach()
+
+    # Link all the script custom commands into a single target
+    add_custom_target(ImportScripts ALL DEPENDS ${AFM_TEXT_SCRIPTS})
+endfunction()
