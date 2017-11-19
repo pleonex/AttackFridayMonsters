@@ -45,10 +45,12 @@ namespace AttackFridayMonsters.Formats.Text
 
             while (!source.Stream.EndOfStream) {
                 uint id = reader.ReadUInt32();
+
+                // Japanese version has 0x38 bytes of text and 0x74 of unknown
                 string text = reader.ReadString(0x50).Replace("\0", "");
                 source.Stream.Seek(0x6C, SeekMode.Current); // Unknown
 
-                po.Add(new PoEntry(text) { Context = id.ToString("X8") });
+                po.Add(new PoEntry(text) { Context = "id:" + id });
             }
 
             return po;
