@@ -108,6 +108,7 @@ namespace AttackFridayMonsters.Formats.Container
                 throw new ArgumentNullException(nameof(source));
 
             NodeContainerFormat container = new NodeContainerFormat();
+            source.Stream.Seek(0, SeekMode.Start);
             DataReader reader = new DataReader(source.Stream);
 
             // Header
