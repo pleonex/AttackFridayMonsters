@@ -76,6 +76,26 @@ namespace AttackFridayMonsters
                     ofs3Format.ConvertWith<BinaryFormat>(new Ofs3ToBinary())
                               .Stream.WriteTo(output);
                     break;
+
+                case "script":
+                    var container = DecompressLzx(output, "-d")
+                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary());
+                    var oldBinScript = container.Root.Children["File1.bin"];
+                    var converter = new ScriptToPo {
+                        OriginalScript = oldBinScript.GetFormatAs<BinaryFormat>().Stream };
+
+                    var newBinScript = NodeFactory.FromFile(input)
+                        .Transform<BinaryFormat, Po, Po2Binary>()
+                        .Transform<BinaryFormat>(converter: converter);
+
+                    oldBinScript.GetFormatAs<BinaryFormat>().Stream.Dispose();
+                    oldBinScript.Format.Dispose();
+                    oldBinScript.Format = newBinScript.Format;
+
+                    container.ConvertWith<BinaryFormat>(new Ofs3ToBinary())
+                             .Stream.WriteTo(output);
+                    DecompressLzx(output, "-evb").Stream.WriteTo(output);
+                    break;
             }
         }
 
@@ -85,7 +105,7 @@ namespace AttackFridayMonsters
             switch (format.ToLower()) {
                 case "lzx_ofs3":
                     inputFormat.Stream.Dispose();
-                    inputFormat = DecompressLzx(input);
+                    inputFormat = DecompressLzx(input, "-d");
                     goto case "ofs3";
 
                 case "ofs3":
@@ -130,12 +150,19 @@ namespace AttackFridayMonsters
 
                 case "script":
                     inputFormat.Stream.Dispose();
-                    inputFormat = DecompressLzx(input);
+                    inputFormat = DecompressLzx(input, "-d");
 
-                    inputFormat.ConvertWith<NodeContainerFormat>(new Ofs3ToBinary())
-                               .Root.Children["File1.bin"]?.Format
-                               .ConvertWith<Po>(new ScriptToPo())
-                               .ConvertTo<BinaryFormat>().Stream.WriteTo(output);
+                    var binScript = inputFormat
+                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary())
+                        .Root.Children["File1.bin"].GetFormatAs<BinaryFormat>();
+
+                    // Ignore empty scripts
+                    if (binScript.Stream.Length > 0)
+                        binScript.ConvertWith<Po>(new ScriptToPo())
+                                 .ConvertWith<BinaryFormat>(new Po2Binary())
+                                 .Stream.WriteTo(output);
+                    else
+                        Console.WriteLine("No script for " + input);
                     break;
 
                 case "darc":
@@ -164,13 +191,13 @@ namespace AttackFridayMonsters
             inputFormat.Stream.Dispose();
         }
 
-        static BinaryFormat DecompressLzx(string file)
+        static BinaryFormat DecompressLzx(string file, string mode)
         {
             string tempFile = Path.GetTempFileName();
             File.Copy(file, tempFile, true);
 
             string program = "lzx.exe";
-            string arguments = "-d " + tempFile;
+            string arguments = mode + " " + tempFile;
             if (Environment.OSVersion.Platform != PlatformID.Win32NT) {
                 program = "lzx";
             }
