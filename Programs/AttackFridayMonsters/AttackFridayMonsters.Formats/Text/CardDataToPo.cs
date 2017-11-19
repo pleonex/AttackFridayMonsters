@@ -61,6 +61,7 @@ namespace AttackFridayMonsters.Formats.Text
             int textSize = FileId == 0 ? 0x140 : 0x280;
             int numBlocks = FileId == 0 ? 5 : 6;
             bool hasId = FileId == 25;
+            string[] cardInfo = { "Glim name", "Name", "Length", "Weight", "Description" };
 
             int textId = 0;
             int blockId = 0;
@@ -74,10 +75,14 @@ namespace AttackFridayMonsters.Formats.Text
                     }
                 }
 
-                string text = reader.ReadString(textSize).Replace("\0", "");
+                string text = reader.ReadString(textSize)
+                                    .Replace("\0", "").Replace("▼", "\n");
                 if (!string.IsNullOrEmpty(text)) {
+                    int subblock = textId % numBlocks;
                     PoEntry entry = new PoEntry(text) {
-                        Context = $"Block:{blockId},Text:{textId % numBlocks}"};
+                        Context = $"b:{blockId}|s:{subblock}"};
+                    if (FileId == 0)
+                        entry.ExtractedComments = $"[{blockId}] {cardInfo[subblock]}";
                     po.Add(entry);
                 }
 
