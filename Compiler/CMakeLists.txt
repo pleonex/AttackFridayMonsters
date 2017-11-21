@@ -70,7 +70,10 @@ import_3ds_font(
 
 
 # 2.2 Episode titles
-
+import_episodes_titles(
+    PO "${COMPILER_MOD_TEXTS_DIR}/episodes_title.po"
+    BINARY "${COMPILER_ROM_DIR}/data/gkk/episode/episode.bin"
+)
 
 # 2.3 Binary text
 # TODO
@@ -452,6 +455,7 @@ pack_3ds_rom(
     INTERNAL_DIR "${COMPILER_ROM_INTERNAL_DIR}"
     OUTPUT "${COMPILER_OUTPUT_FILE}"
     DEPENDS
-    ImportScripts PackDarcTitle PackDarcBumper PackDarcCardlyt PackDarcMovielow
-    PackDarcNotebook PackDarcSelwin PackOfs3Subscreen
+    ImportScripts AfmImportEpisodeTitles PackDarcTitle PackDarcBumper
+    PackDarcCardlyt PackDarcMovielow PackDarcNotebook PackDarcSelwin
+    PackOfs3Subscreen
 )

@@ -96,6 +96,26 @@ namespace AttackFridayMonsters
                              .Stream.WriteTo(output);
                     DecompressLzx(output, "-evb").Stream.WriteTo(output);
                     break;
+
+                case "episode":
+                    string tempEpisode = Path.GetTempFileName();
+                    File.Copy(output, tempEpisode, true);
+                    var episodeContainer = new BinaryFormat(tempEpisode)
+                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary());
+
+                    var oldEpisode = episodeContainer.Root.Children["epsetting.dat"];
+                    var episodeConverter = new EpisodeSettingsToPo {
+                        Original = oldEpisode.GetFormatAs<BinaryFormat>().Stream
+                    };
+
+                    var newEpisode = NodeFactory.FromFile(input)
+                        .Transform<BinaryFormat, Po, Po2Binary>()
+                        .Transform<BinaryFormat>(converter: episodeConverter);
+
+                    oldEpisode.Format = newEpisode.Format;
+                    episodeContainer.ConvertWith<BinaryFormat>(new Ofs3ToBinary { Padding = 0x10 })
+                             .Stream.WriteTo(output);
+                    break;
             }
         }
 
@@ -125,7 +145,7 @@ namespace AttackFridayMonsters
                         .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary())
                         .Root.Children["epsetting.dat"].Format
                         .ConvertWith<Po>(new EpisodeSettingsToPo())
-                        .ConvertTo<BinaryFormat>().Stream.WriteTo(output);
+                        .ConvertWith<BinaryFormat>(new Po2Binary()).Stream.WriteTo(output);
                     break;
 
                 case "carddata0":
@@ -134,8 +154,8 @@ namespace AttackFridayMonsters
                         .Root;
 
                     carddata0.Children["File0.bin"].Format
-                            .ConvertWith<Po>(new CardDataToPo(0))
-                            .ConvertTo<BinaryFormat>().Stream.WriteTo(output);
+                             .ConvertWith<Po>(new CardDataToPo(0))
+                             .ConvertWith<BinaryFormat>(new Po2Binary()).Stream.WriteTo(output);
                     break;
 
                 case "carddata25":
@@ -144,8 +164,8 @@ namespace AttackFridayMonsters
                         .Root;
 
                     carddata25.Children["File25.bin"].Format
-                            .ConvertWith<Po>(new CardDataToPo(25))
-                            .ConvertTo<BinaryFormat>().Stream.WriteTo(output);
+                              .ConvertWith<Po>(new CardDataToPo(25))
+                              .ConvertWith<BinaryFormat>(new Po2Binary()).Stream.WriteTo(output);
                     break;
 
                 case "script":

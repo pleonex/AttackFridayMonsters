@@ -176,6 +176,21 @@ function(export_episodes_titles)
     )
 endfunction()
 
+function(import_episodes_titles)
+    set(options "")
+    set(oneValueArgs PO BINARY)
+    set(multiValueArgs "")
+    cmake_parse_arguments(AFM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    find_afm_tool()
+    add_custom_target(AfmImportEpisodeTitles ALL
+        COMMAND
+        ${MONO} ${AFM_TOOL} -i episode ${AFM_PO} ${AFM_BINARY}
+        COMMENT
+        "Importing episodes title"
+    )
+endfunction()
+
 function(export_scripts_text)
     set(options "")
     set(oneValueArgs OUTPUT)

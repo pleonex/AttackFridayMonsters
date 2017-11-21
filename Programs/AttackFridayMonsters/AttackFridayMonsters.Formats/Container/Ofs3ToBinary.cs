@@ -21,7 +21,6 @@
 namespace AttackFridayMonsters.Formats.Container
 {
     using System;
-    using System.Text;
     using Mono.Addins;
     using Yarhl.IO;
     using Yarhl.FileFormat;
@@ -32,6 +31,8 @@ namespace AttackFridayMonsters.Formats.Container
         IConverter<BinaryFormat, NodeContainerFormat>,
         IConverter<NodeContainerFormat, BinaryFormat>
     {
+        public short Padding { get; set; } = 0x80;
+
         public BinaryFormat Convert(NodeContainerFormat source)
         {
             if (source == null)
@@ -44,21 +45,20 @@ namespace AttackFridayMonsters.Formats.Container
             int numFiles = source.Root.Children.Count;
             int fatEntrySize = hasNames ? 0x0C : 0x08;
 
-            ushort padding = 0x80;
             uint headerSize = 0x10;
 
             // Header
             writer.Write("OFS3", false);
             writer.Write(headerSize); // header size
             writer.Write((ushort)(hasNames ? 2 : 0));
-            writer.Write(padding);
+            writer.Write(Padding);
             writer.Write(0x00); // placeholder for data size
             writer.Write(numFiles);
 
             // FAT
             // write first empty FAT to write names at the same time
             writer.WriteTimes(0x00, fatEntrySize * numFiles);
-            writer.WritePadding(0x00, padding);
+            writer.WritePadding(0x00, Padding);
 
             binary.Stream.Seek(0x14, SeekMode.Start);
             for (int i = 0; i < numFiles; i++) {
@@ -78,7 +78,7 @@ namespace AttackFridayMonsters.Formats.Container
                 // File data
                 binary.Stream.PushToPosition(0, SeekMode.End);
                 child.GetFormatAs<BinaryFormat>()?.Stream.WriteTo(binary.Stream);
-                writer.WritePadding(0x00, padding);
+                writer.WritePadding(0x00, Padding);
                 binary.Stream.PopPosition();
             }
 
@@ -98,7 +98,7 @@ namespace AttackFridayMonsters.Formats.Container
             }
 
             binary.Stream.Seek(0, SeekMode.End);
-            writer.WritePadding(0x00, padding);
+            writer.WritePadding(0x00, Padding);
             return binary;
         }
 

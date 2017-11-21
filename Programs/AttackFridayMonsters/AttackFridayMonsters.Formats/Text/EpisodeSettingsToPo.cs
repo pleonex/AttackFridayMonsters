@@ -28,8 +28,46 @@ namespace AttackFridayMonsters.Formats.Text
     using Yarhl.Media.Text;
 
     [Extension]
-    public class EpisodeSettingsToPo : IConverter<BinaryFormat, Po>
+    public class EpisodeSettingsToPo :
+        IConverter<BinaryFormat, Po>,
+        IConverter<Po, BinaryFormat>
     {
+        public DataStream Original { get; set; }
+
+        public BinaryFormat Convert(Po source)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+            if (Original == null)
+                throw new ArgumentNullException(nameof(Original));
+
+            BinaryFormat binary = new BinaryFormat();
+            DataWriter writer = new DataWriter(binary.Stream) {
+                DefaultEncoding = Encoding.GetEncoding("utf-16")
+            };
+
+            Original.Position = 0;
+            DataReader reader = new DataReader(Original) {
+                DefaultEncoding = Encoding.GetEncoding("utf-16")
+            };
+
+            foreach (var entry in source.Entries) {
+                // ID
+                writer.Write(reader.ReadUInt32());
+
+                // Text
+                reader.Stream.Seek(0x50, SeekMode.Current);
+                string text = string.IsNullOrEmpty(entry.Translated) ?
+                                    entry.Original : entry.Translated;
+                writer.Write(text, 0x50);
+
+                // Unknown
+                writer.Write(reader.ReadBytes(0x6C));
+            }
+
+            return binary;
+        }
+
         public Po Convert(BinaryFormat source)
         {
             if (source == null)
