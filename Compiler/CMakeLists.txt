@@ -67,7 +67,11 @@ import_3ds_font(
 
 # 2. Convert texts
 # 2.1. Card related texts
-
+import_card_texts(
+    CARD_INFO "${COMPILER_MOD_TEXTS_DIR}/cardinfo.po"
+    CARD_DIALOGS "${COMPILER_MOD_TEXTS_DIR}/cardgame_dialogs.po"
+    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/cardgame/carddata.bin"
+)
 
 # 2.2 Episode titles
 import_episodes_titles(
@@ -455,7 +459,7 @@ pack_3ds_rom(
     INTERNAL_DIR "${COMPILER_ROM_INTERNAL_DIR}"
     OUTPUT "${COMPILER_OUTPUT_FILE}"
     DEPENDS
-    ImportScripts AfmImportEpisodeTitles PackDarcTitle PackDarcBumper
-    PackDarcCardlyt PackDarcMovielow PackDarcNotebook PackDarcSelwin
-    PackOfs3Subscreen
+    ImportScripts AfmImportEpisodeTitles ImportAfmCardText PackDarcTitle
+    PackDarcBumper PackDarcCardlyt PackDarcMovielow PackDarcNotebook
+    PackDarcSelwin PackOfs3Subscreen
 )

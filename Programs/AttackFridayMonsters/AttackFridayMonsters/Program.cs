@@ -116,6 +116,36 @@ namespace AttackFridayMonsters
                     episodeContainer.ConvertWith<BinaryFormat>(new Ofs3ToBinary { Padding = 0x10 })
                              .Stream.WriteTo(output);
                     break;
+
+                case "carddata0":
+                    var carddata0 = new BinaryFormat();
+                    using (var outputStream = new DataStream(output, FileOpenMode.Read))
+                        outputStream.WriteTo(carddata0.Stream);
+
+                    var carddata0Container = carddata0
+                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary());
+                    carddata0Container.Root.Children["File0.bin"].Format =
+                                          new BinaryFormat(input)
+                                          .ConvertWith<Po>(new Po2Binary())
+                                          .ConvertWith<BinaryFormat>(new CardDataToPo(0));
+                    carddata0Container.ConvertWith<BinaryFormat>(new Ofs3ToBinary() { Padding = 0x10 })
+                        .Stream.WriteTo(output);
+                    break;
+
+                case "carddata25":
+                    var carddata25 = new BinaryFormat();
+                    using (var outputStream = new DataStream(output, FileOpenMode.Read))
+                        outputStream.WriteTo(carddata25.Stream);
+
+                    var carddata25Container = carddata25
+                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary());
+                    carddata25Container.Root.Children["File25.bin"].Format =
+                                          new BinaryFormat(input)
+                                          .ConvertWith<Po>(new Po2Binary())
+                                          .ConvertWith<BinaryFormat>(new CardDataToPo(25));
+                    carddata25Container.ConvertWith<BinaryFormat>(new Ofs3ToBinary { Padding = 0x10 })
+                        .Stream.WriteTo(output);
+                    break;
             }
         }
 

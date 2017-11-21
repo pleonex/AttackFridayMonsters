@@ -153,6 +153,23 @@ function(export_card_texts)
     )
 endfunction()
 
+function(import_card_texts)
+    set(options "")
+    set(oneValueArgs CARD_INFO CARD_DIALOGS OUTPUT)
+    set(multiValueArgs "")
+    cmake_parse_arguments(AFM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    find_afm_tool()
+    add_custom_target(ImportAfmCardText ALL
+        COMMAND
+        ${MONO} ${AFM_TOOL} -i carddata0 ${AFM_CARD_INFO} ${AFM_OUTPUT}
+        COMMAND
+        ${MONO} ${AFM_TOOL} -u carddata25 ${AFM_CARD_DIALOGS} ${AFM_OUTPUT}
+        COMMENT
+        "Importing cardgame texts"
+    )
+endfunction()
+
 function(export_episodes_titles)
     set(options "")
     set(oneValueArgs FILE OUTPUT)
