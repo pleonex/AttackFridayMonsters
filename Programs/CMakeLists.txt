@@ -44,3 +44,8 @@ add_csharp_target(
 # 5. CUE tool
 add_executable(lzx "${PROJECT_SOURCE_DIR}/CUETools/lzx.c")
 install(TARGETS lzx DESTINATION tools)
+
+# 6. txobtool: export/import textures
+ExternalProject_add(txobtool SOURCE_DIR "${PROJECT_SOURCE_DIR}/TextureTool")
+install(PROGRAMS TextureTool/bin/txobtool DESTINATION tools)
+install(FILES TextureTool/bin/libPVRTexLib.so DESTINATION tools)
