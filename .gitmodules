@@ -10,3 +10,9 @@
 [submodule "Programs/bclimtool"]
 	path = Programs/bclimtool
 	url = https://github.com/dnasdw/bclimtool
+[submodule "Programs/TextureTool"]
+	path = Programs/TextureTool
+	url = https://github.com/dnasdw/txobtool
+[submodule "Spanish"]
+	path = Spanish
+	url = git@gitlab.com:gradienwords/AttackFridayMonsters-Spanish.git
