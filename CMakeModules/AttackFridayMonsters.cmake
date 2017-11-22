@@ -164,7 +164,7 @@ function(import_card_texts)
         COMMAND
         ${MONO} ${AFM_TOOL} -i carddata0 ${AFM_CARD_INFO} ${AFM_OUTPUT}
         COMMAND
-        ${MONO} ${AFM_TOOL} -u carddata25 ${AFM_CARD_DIALOGS} ${AFM_OUTPUT}
+        ${MONO} ${AFM_TOOL} -i carddata25 ${AFM_CARD_DIALOGS} ${AFM_OUTPUT}
         COMMENT
         "Importing cardgame texts"
     )

@@ -68,7 +68,8 @@ namespace AttackFridayMonsters.Formats.Text
                     text = string.IsNullOrEmpty(source.Entries[i].Translated) ?
                                  source.Entries[i].Original :
                                  source.Entries[i].Translated;
-                    text = text.Replace("\n", "▼");
+                    if (FileId == 25)
+                        text = text.Replace("\n", "▼");
                 }
                 writer.Write(text ?? string.Empty, textSize);
             }
