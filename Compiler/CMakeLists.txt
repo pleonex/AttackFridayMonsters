@@ -58,7 +58,7 @@ extract_darc(
     OUTPUT "${CMAKE_BINARY_DIR}/title"
 )
 import_3ds_font(
-    NAME Afm
+    NAME Afm1
     FONT_DIR "${COMPILER_MOD_FONTS_DIR}"
     OUTPUT "${CMAKE_BINARY_DIR}/title/font/kk_KN_Font.bcfnt"
     DEPENDS ExtractDarcTitle
@@ -206,7 +206,7 @@ import_darc(
     NAME Title
     INPUT "${CMAKE_BINARY_DIR}/title"
     OUTPUT "${COMPILER_ROM_DIR}/data/gkk/lyt/title.arc"
-    DEPENDS ImportFontAfm ImportBclimTitle
+    DEPENDS ImportFontAfm1 ImportBclimTitle
 )
 
 # bumper
@@ -354,6 +354,12 @@ extract_darc(
     OUTPUT "${CMAKE_BINARY_DIR}/sub_screen0"
     DEPENDS ExtractOfs3Subscreen
 )
+import_3ds_font(
+    NAME Afm2
+    FONT_DIR "${COMPILER_MOD_FONTS_DIR}"
+    OUTPUT "${CMAKE_BINARY_DIR}/sub_screen0/font/kk_KN_Font.bcfnt"
+    DEPENDS ExtractDarcSubscreen
+)
 import_image_bclim(
     NAME Subscreen
     OUTPUT "${CMAKE_BINARY_DIR}/sub_screen0/timg"
@@ -444,7 +450,7 @@ import_darc(
     NAME Subscreen
     INPUT "${CMAKE_BINARY_DIR}/sub_screen0"
     OUTPUT "${CMAKE_BINARY_DIR}/sub_screen/File0.bin"
-    DEPENDS ImportBclimSubscreen
+    DEPENDS ImportFontAfm2 ImportBclimSubscreen
 )
 import_ofs3(
     NAME Subscreen
