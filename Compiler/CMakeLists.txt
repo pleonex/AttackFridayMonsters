@@ -20,7 +20,7 @@ set(COMPILER_OUTPUT_FILE "${PROJECT_SOURCE_DIR}/../GameData/patched.3ds" CACHE S
 set(COMPILER_TOOLS_DIR "${PROJECT_SOURCE_DIR}/../GameData/tools" CACHE STRING "Compilation tools")
 set(COMPILER_PREFIX "${PROJECT_SOURCE_DIR}/../Decompiler" CACHE STRING "Root directory for compilation")
 set(COMPILER_ROM_DIR "${COMPILER_PREFIX}/rom" CACHE STRING "Directory to read ROM files")
-set(COMPILER_MOD_DIR "${COMPILER_PREFIX}/mod" CACHE STRING "Directory to read modification files")
+set(COMPILER_MOD_DIR "${PROJECT_SOURCE_DIR}/../Spanish/es" CACHE STRING "Directory to read modification files")
 set(COMPILER_ROM_INTERNAL_DIR "${COMPILER_ROM_DIR}/internal" CACHE STRING "Directory to read ROM internal data")
 
 # Validation checks
@@ -41,6 +41,7 @@ message(STATUS "##############################")
 set(COMPILER_MOD_FONTS_DIR "${COMPILER_MOD_DIR}/Fonts")
 set(COMPILER_MOD_TEXTS_DIR "${COMPILER_MOD_DIR}/Texts")
 set(COMPILER_MOD_SCRIPTS_DIR "${COMPILER_MOD_TEXTS_DIR}/Scripts")
+set(COMPILER_MOD_LAYOUT_DIR "${COMPILER_MOD_TEXTS_DIR}/Layouts")
 set(COMPILER_MOD_IMGS_DIR "${COMPILER_MOD_DIR}/Images")
 
 # Find dependencies
@@ -202,12 +203,6 @@ import_image_bclim(
     "${COMPILER_MOD_IMGS_DIR}/title/title_rogo.png"
 
 )
-import_darc(
-    NAME Title
-    INPUT "${CMAKE_BINARY_DIR}/title"
-    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/lyt/title.arc"
-    DEPENDS ImportFontAfm1 ImportBclimTitle
-)
 
 # bumper
 extract_darc(
@@ -225,12 +220,6 @@ import_image_bclim(
     "${COMPILER_MOD_IMGS_DIR}/bumper/ex_msg_C.png"
     "${COMPILER_MOD_IMGS_DIR}/bumper/stereo_ji.png"
 
-)
-import_darc(
-    NAME Bumper
-    INPUT "${CMAKE_BINARY_DIR}/bumper"
-    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/lyt/bumper.arc"
-    DEPENDS ImportBclimBumper
 )
 
 # cardly_d
@@ -255,12 +244,6 @@ import_image_bclim(
     "${COMPILER_MOD_IMGS_DIR}/cardlyt/mai_4.png"
     "${COMPILER_MOD_IMGS_DIR}/cardlyt/mai_5.png"
 )
-import_darc(
-    NAME Cardlyt
-    INPUT "${CMAKE_BINARY_DIR}/cardlyt"
-    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/cardgame/cardlyt_d.arc"
-    DEPENDS ImportBclimCardlyt
-)
 
 # movie_low
 extract_darc(
@@ -274,12 +257,6 @@ import_image_bclim(
     DEPENDS ExtractDarcMovielow
     PNG_FILES
     "${COMPILER_MOD_IMGS_DIR}/movie_low/skip_ji.png"
-)
-import_darc(
-    NAME Movielow
-    INPUT "${CMAKE_BINARY_DIR}/movie_low"
-    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/lyt/movie_low.arc"
-    DEPENDS ImportBclimMovielow
 )
 
 # notebook
@@ -314,12 +291,6 @@ import_image_bclim(
     "${COMPILER_MOD_IMGS_DIR}/notebook/page_13.png"
     "${COMPILER_MOD_IMGS_DIR}/notebook/page_14.png"
 )
-import_darc(
-    NAME Notebook
-    INPUT "${CMAKE_BINARY_DIR}/notebook"
-    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/lyt/notebook.arc"
-    DEPENDS ImportBclimNotebook
-)
 
 # selwin
 extract_darc(
@@ -334,12 +305,6 @@ import_image_bclim(
     PNG_FILES
     "${COMPILER_MOD_IMGS_DIR}/selwin/butji_n.png"
     "${COMPILER_MOD_IMGS_DIR}/selwin/butji_y.png"
-)
-import_darc(
-    NAME Selwin
-    INPUT "${CMAKE_BINARY_DIR}/selwin"
-    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/lyt/selwin.arc"
-    DEPENDS ImportBclimSelwin
 )
 
 # subscreen
@@ -446,11 +411,95 @@ import_image_bclim(
     "${COMPILER_MOD_IMGS_DIR}/sub_screen/tub_tool.png"
     "${COMPILER_MOD_IMGS_DIR}/sub_screen/zenz_mk_a.png"
 )
+
+# 4. Import bclyt texts
+import_bclyt_texts(
+    TARGET ImportBclytTitle
+    OUTPUT "${CMAKE_BINARY_DIR}/title/blyt"
+    DEPENDS ExtractDarcTitle
+    PO_FILES
+        "${COMPILER_MOD_LAYOUT_DIR}/title/save_load.po"
+        "${COMPILER_MOD_LAYOUT_DIR}/title/sta_menu.po"
+)
+import_bclyt_texts(
+    TARGET ImportBclytCardlyt
+    OUTPUT "${CMAKE_BINARY_DIR}/cardlyt/blyt"
+    DEPENDS ExtractDarcCardlyt
+    PO_FILES "${COMPILER_MOD_LAYOUT_DIR}/cardlyt/kbattle_sita.po"
+)
+import_bclyt_texts(
+    TARGET ImportBclytNotebook
+    OUTPUT "${CMAKE_BINARY_DIR}/notebook/blyt"
+    DEPENDS ExtractDarcNotebook
+    PO_FILES
+        "${COMPILER_MOD_LAYOUT_DIR}/notebook/techo_sita.po"
+        "${COMPILER_MOD_LAYOUT_DIR}/notebook/techo_ue.po"
+)
+import_bclyt_texts(
+    TARGET ImportBclytSubscreen
+    OUTPUT "${CMAKE_BINARY_DIR}/sub_screen0/blyt"
+    DEPENDS ExtractDarcSubscreen
+    PO_FILES
+        "${COMPILER_MOD_LAYOUT_DIR}/subscreen/auto_save.po"
+        "${COMPILER_MOD_LAYOUT_DIR}/subscreen/epi_titile.po"
+        "${COMPILER_MOD_LAYOUT_DIR}/subscreen/msgWin_and_cardBattle.po"
+        "${COMPILER_MOD_LAYOUT_DIR}/subscreen/piece_get.po"
+        "${COMPILER_MOD_LAYOUT_DIR}/subscreen/sub_card_sita.po"
+        "${COMPILER_MOD_LAYOUT_DIR}/subscreen/sub_card_ue.po"
+        "${COMPILER_MOD_LAYOUT_DIR}/subscreen/sub_epi.po"
+        "${COMPILER_MOD_LAYOUT_DIR}/subscreen/sub_piece.po"
+        "${COMPILER_MOD_LAYOUT_DIR}/subscreen/sub_tool.po"
+        "${COMPILER_MOD_LAYOUT_DIR}/subscreen/tool_save.po"
+)
+
+# Pack everything
+import_darc(
+    NAME Title
+    INPUT "${CMAKE_BINARY_DIR}/title"
+    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/lyt/title.arc"
+    DEPENDS ImportBclytTitle ImportFontAfm1 ImportBclimTitle
+)
+
+import_darc(
+    NAME Bumper
+    INPUT "${CMAKE_BINARY_DIR}/bumper"
+    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/lyt/bumper.arc"
+    DEPENDS ImportBclimBumper
+)
+
+import_darc(
+    NAME Cardlyt
+    INPUT "${CMAKE_BINARY_DIR}/cardlyt"
+    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/cardgame/cardlyt_d.arc"
+    DEPENDS ImportBclytCardlyt ImportBclimCardlyt
+)
+
+import_darc(
+    NAME Movielow
+    INPUT "${CMAKE_BINARY_DIR}/movie_low"
+    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/lyt/movie_low.arc"
+    DEPENDS ImportBclimMovielow
+)
+
+import_darc(
+    NAME Notebook
+    INPUT "${CMAKE_BINARY_DIR}/notebook"
+    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/lyt/notebook.arc"
+    DEPENDS ImportBclytNotebook ImportBclimNotebook
+)
+
+import_darc(
+    NAME Selwin
+    INPUT "${CMAKE_BINARY_DIR}/selwin"
+    OUTPUT "${COMPILER_ROM_DIR}/data/gkk/lyt/selwin.arc"
+    DEPENDS ImportBclimSelwin
+)
+
 import_darc(
     NAME Subscreen
     INPUT "${CMAKE_BINARY_DIR}/sub_screen0"
     OUTPUT "${CMAKE_BINARY_DIR}/sub_screen/File0.bin"
-    DEPENDS ImportFontAfm2 ImportBclimSubscreen
+    DEPENDS ImportBclytSubscreen ImportFontAfm2 ImportBclimSubscreen
 )
 import_ofs3(
     NAME Subscreen
@@ -459,7 +508,7 @@ import_ofs3(
     DEPENDS PackDarcSubscreen
 )
 
-# 4. Create ROM
+# 5. Create ROM
 pack_3ds_rom(
     ROM_DIR "${COMPILER_ROM_DIR}"
     INTERNAL_DIR "${COMPILER_ROM_INTERNAL_DIR}"

@@ -45,6 +45,7 @@ message(STATUS "##############################")
 set(DECOMPILER_MOD_FONTS_DIR "${DECOMPILER_MOD_DIR}/Fonts")
 set(DECOMPILER_MOD_TEXTS_DIR "${DECOMPILER_MOD_DIR}/Texts")
 set(DECOMPILER_MOD_SCRIPTS_DIR "${DECOMPILER_MOD_TEXTS_DIR}/Scripts")
+set(DECOMPILER_MOD_LAYOUT_DIR "${DECOMPILER_MOD_TEXTS_DIR}/Layouts")
 set(DECOMPILER_MOD_IMGS_DIR "${DECOMPILER_MOD_DIR}/Images")
 file(MAKE_DIRECTORY "${DECOMPILER_ROM_DIR}")
 file(MAKE_DIRECTORY "${DECOMPILER_ROM_INTERNAL_DIR}")
@@ -52,6 +53,7 @@ file(MAKE_DIRECTORY "${DECOMPILER_MOD_DIR}")
 file(MAKE_DIRECTORY "${DECOMPILER_MOD_FONTS_DIR}")
 file(MAKE_DIRECTORY "${DECOMPILER_MOD_TEXTS_DIR}")
 file(MAKE_DIRECTORY "${DECOMPILER_MOD_SCRIPTS_DIR}")
+file(MAKE_DIRECTORY "${DECOMPILER_MOD_LAYOUT_DIR}")
 
 # Find dependencies
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../CMakeModules")
@@ -425,5 +427,45 @@ export_image_bclim(
     "${CMAKE_BINARY_DIR}/sub_screen0/timg/zenz_mk_a.bclim"
 )
 
-# 5. Extract 3D textures
+# 5. Extract bclyt texts
+export_bclyt_texts(
+    TARGET ExportBclytTitle
+    OUTPUT "${DECOMPILER_MOD_LAYOUT_DIR}/title"
+    DEPENDS ExtractDarcTitle
+    BCLYT_FILES
+        "${CMAKE_BINARY_DIR}/title/blyt/save_load.bclyt"
+        "${CMAKE_BINARY_DIR}/title/blyt/sta_menu.bclyt"
+)
+export_bclyt_texts(
+    TARGET ExportBclytCardlyt
+    OUTPUT "${DECOMPILER_MOD_LAYOUT_DIR}/cardlyt"
+    DEPENDS ExtractDarcCardlyt
+    BCLYT_FILES "${CMAKE_BINARY_DIR}/cardlyt/blyt/kbattle_sita.bclyt"
+)
+export_bclyt_texts(
+    TARGET ExportBclytNotebook
+    OUTPUT "${DECOMPILER_MOD_LAYOUT_DIR}/notebook"
+    DEPENDS ExtractDarcNotebook
+    BCLYT_FILES
+        "${CMAKE_BINARY_DIR}/notebook/blyt/techo_sita.bclyt"
+        "${CMAKE_BINARY_DIR}/notebook/blyt/techo_ue.bclyt"
+)
+export_bclyt_texts(
+    TARGET ExportBclytSubscreen
+    OUTPUT "${DECOMPILER_MOD_LAYOUT_DIR}/subscreen"
+    DEPENDS ExtractDarcSubscreen
+    BCLYT_FILES
+        "${CMAKE_BINARY_DIR}/sub_screen0/blyt/auto_save.bclyt"
+        "${CMAKE_BINARY_DIR}/sub_screen0/blyt/epi_titile.bclyt"
+        "${CMAKE_BINARY_DIR}/sub_screen0/blyt/msgWin_and_cardBattle.bclyt"
+        "${CMAKE_BINARY_DIR}/sub_screen0/blyt/piece_get.bclyt"
+        "${CMAKE_BINARY_DIR}/sub_screen0/blyt/sub_card_sita.bclyt"
+        "${CMAKE_BINARY_DIR}/sub_screen0/blyt/sub_card_ue.bclyt"
+        "${CMAKE_BINARY_DIR}/sub_screen0/blyt/sub_epi.bclyt"
+        "${CMAKE_BINARY_DIR}/sub_screen0/blyt/sub_piece.bclyt"
+        "${CMAKE_BINARY_DIR}/sub_screen0/blyt/sub_tool.bclyt"
+        "${CMAKE_BINARY_DIR}/sub_screen0/blyt/tool_save.bclyt"
+)
+
+# 6. Extract 3D textures
 # TODO: cardtex: result_make, result_kachi, result_aiko

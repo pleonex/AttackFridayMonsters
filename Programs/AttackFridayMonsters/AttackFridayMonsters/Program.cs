@@ -146,6 +146,23 @@ namespace AttackFridayMonsters
                     carddata25Container.ConvertWith<BinaryFormat>(new Ofs3ToBinary { Padding = 0x10 })
                         .Stream.WriteTo(output);
                     break;
+
+                case "bclyt":
+                    using (var original = new DataStream()) {
+                        BclytToPo bclytConv = new BclytToPo { Original = original };
+
+                        // Dump input to memory
+                        using (var outputStream = new DataStream(output, FileOpenMode.Read))
+                            outputStream.WriteTo(original);
+
+                        // input -> binary -> po + original -> bclyt -> output
+                        var newBclyt = NodeFactory.FromFile(input)
+                                   .Transform<BinaryFormat, Po, Po2Binary>()
+                            .Transform<BinaryFormat>(converter: bclytConv);
+                        newBclyt.GetFormatAs<BinaryFormat>().Stream.WriteTo(output);
+                        newBclyt.Dispose();
+                    }
+                    break;
             }
         }
 
@@ -231,6 +248,12 @@ namespace AttackFridayMonsters
                             Directory.CreateDirectory(outputDir);
                         child.GetFormatAs<BinaryFormat>()?.Stream.WriteTo(outputFile);
                     }
+                    break;
+
+                case "bclyt":
+                    inputFormat.ConvertWith<Po>(new BclytToPo())
+                               .ConvertWith<BinaryFormat>(new Po2Binary())
+                               .Stream.WriteTo(output);
                     break;
 
                 default:

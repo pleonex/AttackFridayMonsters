@@ -275,3 +275,47 @@ function(import_scripts_text)
     # Link all the script custom commands into a single target
     add_custom_target(ImportScripts ALL DEPENDS ${AFM_TEXT_SCRIPTS})
 endfunction()
+
+function(export_bclyt_texts)
+    set(options "")
+    set(oneValueArgs TARGET OUTPUT)
+    set(multiValueArgs BCLYT_FILES DEPENDS)
+    cmake_parse_arguments(AFM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    find_afm_tool()
+    make_directory("${AFM_OUTPUT}")
+    foreach(AFM_BCLYT ${AFM_BCLYT_FILES})
+        get_filename_component(AFM_BCLYT_NAME "${AFM_BCLYT}" NAME_WE)
+        set(AFM_PO "${AFM_OUTPUT}/${AFM_BCLYT_NAME}.po")
+        list(APPEND AFM_OUTPUT_TARGETS "${AFM_PO}")
+
+        add_custom_command(
+            OUTPUT "${AFM_PO}"
+            COMMAND ${MONO} ${AFM_TOOL} -e bclyt ${AFM_BCLYT} ${AFM_PO}
+            COMMENT "Exporting bclyt text for ${AFM_BCLYT_NAME}"
+            DEPENDS ${AFM_DEPENDS}
+        )
+    endforeach()
+    add_custom_target(${AFM_TARGET} ALL DEPENDS ${AFM_OUTPUT_TARGETS})
+endfunction()
+
+function(import_bclyt_texts)
+    set(options "")
+    set(oneValueArgs TARGET OUTPUT)
+    set(multiValueArgs PO_FILES DEPENDS)
+    cmake_parse_arguments(AFM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    find_afm_tool()
+    foreach(AFM_PO ${AFM_PO_FILES})
+        get_filename_component(AFM_NAME "${AFM_PO}" NAME_WE)
+        set(AFM_BCLYT "${AFM_OUTPUT}/${AFM_NAME}.bclyt")
+        list(APPEND AFM_OUTPUT_TARGETS "ImportBclyt${AFM_NAME}")
+
+        add_custom_target(ImportBclyt${AFM_NAME}
+            COMMAND ${MONO} ${AFM_TOOL} -i bclyt ${AFM_PO} ${AFM_BCLYT}
+            COMMENT "Importing bclyt text for ${AFM_NAME}"
+            DEPENDS ${AFM_DEPENDS}
+        )
+    endforeach()
+    add_custom_target(${AFM_TARGET} ALL DEPENDS ${AFM_OUTPUT_TARGETS})
+endfunction()
