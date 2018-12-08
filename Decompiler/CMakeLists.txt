@@ -427,6 +427,24 @@ export_image_bclim(
     "${CMAKE_BINARY_DIR}/sub_screen0/timg/zenz_mk_a.bclim"
 )
 
+# cardtex
+extract_ofs3(
+    NAME CardTex
+    FILE "${DECOMPILER_ROM_DIR}/data/gkk/cardgame/cardtex.bin"
+    OUTPUT "${CMAKE_BINARY_DIR}/cardtex"
+    DEPENDS Extract3DSROM
+)
+export_image_cgfx(
+    TARGET ExportCgfxCardTex
+    OUTPUT "${DECOMPILER_MOD_IMGS_DIR}/cardtex"
+    DEPENDS ExtractOfs3CardTex
+    NO_EXTRA_DIR
+    CGFX_FILES
+        "${CMAKE_BINARY_DIR}/cardtex/File66.bin"
+        "${CMAKE_BINARY_DIR}/cardtex/File68.bin"
+        "${CMAKE_BINARY_DIR}/cardtex/File69.bin"
+)
+
 # 5. Extract bclyt texts
 export_bclyt_texts(
     TARGET ExportBclytTitle

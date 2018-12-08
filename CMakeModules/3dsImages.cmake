@@ -86,3 +86,40 @@ function(import_image_bclim)
     # Link all the images to single target
     add_custom_target(ImportBclim${3DS_IMG_NAME} ALL DEPENDS ${3DS_IMG_OUTPUT_IMAGES})
 endfunction()
+
+function(export_image_cgfx)
+    set(options NO_EXTRA_DIR)
+    set(oneValueArgs OUTPUT TARGET)
+    set(multiValueArgs CGFX_FILES DEPENDS)
+    cmake_parse_arguments(3DS_IMG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    # Find tools
+    find_program(3DS_IMG_TOOL2 txobtool)
+    if(NOT 3DS_IMG_TOOL2)
+        message(FATAL_ERROR "Missing txobtool for images")
+    endif()
+    get_filename_component(3DS_IMG_TOOLS_DIR "${3DS_IMG_TOOL2}" DIRECTORY)
+
+    file(MAKE_DIRECTORY "${3DS_IMG_OUTPUT}")
+    foreach(3DS_IMG_CGFX ${3DS_IMG_CGFX_FILES})
+        # Get output png file and append to images list
+        get_filename_component(3DS_IMG_CGFX_NAME "${3DS_IMG_CGFX}" NAME_WE)
+        if(3DS_IMG_NO_EXTRA_DIR)
+            set(3DS_IMG_OUTPUT_DIR "${3DS_IMG_OUTPUT}")
+        else()
+            set(3DS_IMG_OUTPUT_DIR "${3DS_IMG_OUTPUT}/${3DS_IMG_CGFX_NAME}")
+        endif()
+        list(APPEND 3DS_IMG_OUTPUT_IMAGES "${3DS_IMG_OUTPUT_DIR}/${3DS_IMG_CGFX_NAME}")
+
+        add_custom_command(
+            OUTPUT "${3DS_IMG_OUTPUT_DIR}/${3DS_IMG_CGFX_NAME}"
+            COMMAND ${3DS_IMG_TOOL2} -efd ${3DS_IMG_CGFX} ${3DS_IMG_OUTPUT_DIR}
+            COMMENT "Exporting CGFX images for ${3DS_IMG_TARGET}: ${3DS_IMG_CGFX_NAME}"
+            WORKING_DIRECTORY "${3DS_IMG_TOOLS_DIR}"
+            DEPENDS ${3DS_IMG_DEPENDS}
+        )
+    endforeach()
+
+    # Link all the images to single target
+    add_custom_target(${3DS_IMG_TARGET} ALL DEPENDS ${3DS_IMG_OUTPUT_IMAGES})
+endfunction()
