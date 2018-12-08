@@ -148,19 +148,19 @@ namespace AttackFridayMonsters
                     break;
 
                 case "bclyt":
-                    using (var original = new DataStream()) {
-                        BclytToPo bclytConv = new BclytToPo { Original = original };
-
+                    using (var original = new BinaryFormat()) {
                         // Dump input to memory
                         using (var outputStream = new DataStream(output, FileOpenMode.Read))
-                            outputStream.WriteTo(original);
+                            outputStream.WriteTo(original.Stream);
 
                         // input -> binary -> po + original -> bclyt -> output
-                        var newBclyt = NodeFactory.FromFile(input)
-                                   .Transform<BinaryFormat, Po, Po2Binary>()
-                            .Transform<BinaryFormat>(converter: bclytConv);
-                        newBclyt.GetFormatAs<BinaryFormat>().Stream.WriteTo(output);
-                        newBclyt.Dispose();
+                        var bclytPo = NodeFactory.FromFile(input)
+                            .Transform<BinaryFormat, Po, Po2Binary>()
+                            .GetFormatAs<Po>();
+                        Format.ConvertWith<BinaryFormat>(
+                            new Tuple<BinaryFormat, Po>(original, bclytPo),
+                            new BclytToPo())
+                              .Stream.WriteTo(output);
                     }
                     break;
             }

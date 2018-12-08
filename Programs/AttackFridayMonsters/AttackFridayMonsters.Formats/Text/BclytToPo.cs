@@ -29,23 +29,22 @@ namespace AttackFridayMonsters.Formats.Text
 
     public class BclytToPo :
         IConverter<BinaryFormat, Po>,
-        IConverter<Po, BinaryFormat>
+        IConverter<Tuple<BinaryFormat, Po>, BinaryFormat>
     {
-
-        public DataStream Original { get; set; }
-
-        public BinaryFormat Convert(Po source)
+        public BinaryFormat Convert(Tuple<BinaryFormat, Po> source)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
-            if (Original == null)
-                throw new ArgumentNullException(nameof(Original));
+            if (source.Item1 == null)
+                throw new ArgumentNullException(nameof(BinaryFormat));
+            if (source.Item2 == null)
+                throw new ArgumentNullException(nameof(Po));
 
             BinaryFormat binary = new BinaryFormat();
             DataWriter writer = new DataWriter(binary.Stream);
 
-            Original.Position = 0;
-            DataReader reader = new DataReader(Original);
+            DataReader reader = new DataReader(source.Item1.Stream);
+            reader.Stream.Position = 0;
 
             // Header
             writer.Write(reader.ReadString(4), false); // magic stamp
@@ -62,7 +61,7 @@ namespace AttackFridayMonsters.Formats.Text
             writer.Write(numSections);
 
             Encoding encoding = Encoding.GetEncoding("utf-16");
-            Queue<PoEntry> entries = new Queue<PoEntry>(source.Entries);
+            Queue<PoEntry> entries = new Queue<PoEntry>(source.Item2.Entries);
             for (int i = 0; i < numSections; i++) {
                 string section = reader.ReadString(4);
                 int size = reader.ReadInt32();
@@ -134,15 +133,25 @@ namespace AttackFridayMonsters.Formats.Text
                     continue;
                 }
 
-                reader.Stream.Position += 0x6C;
-                if (size > 0x74) {
-                    Encoding encoding = Encoding.GetEncoding("utf-16");
-                    string text = reader.ReadString(encoding);
-                    po.Add(new PoEntry(text) { Context = $"s:{i}" });
+                uint unk1 = reader.ReadUInt32();
+                string font = reader.ReadString(0x18).Replace("\0", "");
+                Single[] unk2 = new Single[10];
+                for (int j = 0; j < 10; j++)
+                    unk2[j] = BitConverter.ToSingle(reader.ReadBytes(4), 0);
 
-                    while (reader.Stream.Position % 4 != 0)
-                        reader.ReadByte();
-                }
+                byte[] data = reader.ReadBytes(0x6C - 0x18 - 4 - 10 * 4);
+
+                Encoding encoding = Encoding.GetEncoding("utf-16");
+                string text = "";
+                if (size > 0x74)
+                    text = reader.ReadString(encoding);
+                var entry = new PoEntry(text);
+                entry.Context = $"s:{i}";
+                entry.ExtractedComments = $"1:{unk1:X8},font:{font},points:{unk2[0]},{unk2[1]},{unk2[2]},{unk2[3]},{unk2[4]},{unk2[5]},{unk2[6]},{unk2[7]},{unk2[8]},{unk2[9]},data:{BitConverter.ToString(data)}";
+                po.Add(entry);
+
+                while (reader.Stream.Position % 4 != 0)
+                    reader.ReadByte();
             }
 
             return po;
