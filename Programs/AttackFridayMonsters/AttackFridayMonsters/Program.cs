@@ -1,5 +1,4 @@
-﻿//
-//  Program.cs
+﻿//  Program.cs
 //
 //  Author:
 //       Benito Palacios Sanchez <benito356@gmail.com>
@@ -23,11 +22,11 @@ namespace AttackFridayMonsters
     using System;
     using System.Diagnostics;
     using System.IO;
-    using Formats.Container;
-    using Formats.Text;
-    using Yarhl.IO;
+    using AttackFridayMonsters.Formats.Container;
+    using AttackFridayMonsters.Formats.Text;
     using Yarhl.FileFormat;
     using Yarhl.FileSystem;
+    using Yarhl.IO;
     using Yarhl.Media.Text;
 
     class Program
@@ -35,7 +34,7 @@ namespace AttackFridayMonsters
         public static void Main(string[] args)
         {
             if (args.Length != 4) {
-                Console.WriteLine("USAGE: AttackFridayMonsters -e format input output");
+                Console.WriteLine("USAGE: AttackFridayMonsters [-e|-i] format input output");
                 return;
             }
 
@@ -46,7 +45,7 @@ namespace AttackFridayMonsters
 
             if (operation == "-e") {
                 Export(format, input, output);
-            } else if (operation =="-i") {
+            } else if (operation == "-i") {
                 Import(format, input, output);
             } else {
                 Console.WriteLine("Unknown operation");
@@ -61,11 +60,12 @@ namespace AttackFridayMonsters
                     var darcRoot = NodeFactory.CreateContainer("root");
                     foreach (string filePath in Directory.GetFiles(input, "*", SearchOption.AllDirectories)) {
                         string parent = Path.GetDirectoryName(filePath);
-                        NodeFactory.CreateContainersForChild(darcRoot, parent.Replace(input, ""), NodeFactory.FromFile(filePath));
+                        NodeFactory.CreateContainersForChild(darcRoot, parent.Replace(input, string.Empty), NodeFactory.FromFile(filePath));
                     }
+
                     var darcFormat = new NodeContainerFormat();
                     darcFormat.Root.Add(darcRoot.Children);
-                    darcFormat.ConvertWith<BinaryFormat>(new DarcToBinary())
+                    darcFormat.ConvertWith<DarcToBinary, NodeContainerFormat, BinaryFormat>()
                               .Stream.WriteTo(output);
                     break;
 
@@ -73,26 +73,27 @@ namespace AttackFridayMonsters
                     var ofs3Root = NodeFactory.FromDirectory(input);
                     var ofs3Format = new NodeContainerFormat();
                     ofs3Format.Root.Add(ofs3Root.Children);
-                    ofs3Format.ConvertWith<BinaryFormat>(new Ofs3ToBinary())
+                    ofs3Format.ConvertWith<Ofs3ToBinary, NodeContainerFormat, BinaryFormat>()
                               .Stream.WriteTo(output);
                     break;
 
                 case "script":
                     var container = DecompressLzx(output, "-d")
-                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary());
+                        .ConvertWith<Ofs3ToBinary, BinaryFormat, NodeContainerFormat>();
                     var oldBinScript = container.Root.Children["File1.bin"];
                     var converter = new ScriptToPo {
-                        OriginalScript = oldBinScript.GetFormatAs<BinaryFormat>().Stream };
+                        OriginalScript = oldBinScript.GetFormatAs<BinaryFormat>().Stream,
+                    };
 
                     var newBinScript = NodeFactory.FromFile(input)
-                        .Transform<BinaryFormat, Po, Po2Binary>()
-                        .Transform<BinaryFormat>(converter: converter);
+                        .Transform<Po2Binary, BinaryFormat, Po>()
+                        .Transform<BinaryFormat, Po>(converter);
 
                     oldBinScript.GetFormatAs<BinaryFormat>().Stream.Dispose();
                     oldBinScript.Format.Dispose();
                     oldBinScript.Format = newBinScript.Format;
 
-                    container.ConvertWith<BinaryFormat>(new Ofs3ToBinary())
+                    container.ConvertWith<Ofs3ToBinary, NodeContainerFormat, BinaryFormat>()
                              .Stream.WriteTo(output);
                     DecompressLzx(output, "-evb").Stream.WriteTo(output);
                     break;
@@ -101,19 +102,19 @@ namespace AttackFridayMonsters
                     string tempEpisode = Path.GetTempFileName();
                     File.Copy(output, tempEpisode, true);
                     var episodeContainer = new BinaryFormat(tempEpisode)
-                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary());
+                        .ConvertWith<Ofs3ToBinary, BinaryFormat, NodeContainerFormat>();
 
                     var oldEpisode = episodeContainer.Root.Children["epsetting.dat"];
                     var episodeConverter = new EpisodeSettingsToPo {
-                        Original = oldEpisode.GetFormatAs<BinaryFormat>().Stream
+                        Original = oldEpisode.GetFormatAs<BinaryFormat>().Stream,
                     };
 
                     var newEpisode = NodeFactory.FromFile(input)
-                        .Transform<BinaryFormat, Po, Po2Binary>()
-                        .Transform<BinaryFormat>(converter: episodeConverter);
+                        .Transform<Po2Binary, BinaryFormat, Po>()
+                        .Transform<Po, BinaryFormat>(converter: episodeConverter);
 
                     oldEpisode.Format = newEpisode.Format;
-                    episodeContainer.ConvertWith<BinaryFormat>(new Ofs3ToBinary { Padding = 0x10 })
+                    episodeContainer.ConvertWith<NodeContainerFormat, BinaryFormat>(new Ofs3ToBinary { Padding = 0x10 })
                              .Stream.WriteTo(output);
                     break;
 
@@ -123,12 +124,12 @@ namespace AttackFridayMonsters
                         outputStream.WriteTo(carddata0.Stream);
 
                     var carddata0Container = carddata0
-                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary());
+                        .ConvertWith<Ofs3ToBinary, BinaryFormat, NodeContainerFormat>();
                     carddata0Container.Root.Children["File0.bin"].Format =
                                           new BinaryFormat(input)
-                                          .ConvertWith<Po>(new Po2Binary())
-                                          .ConvertWith<BinaryFormat>(new CardDataToPo(0));
-                    carddata0Container.ConvertWith<BinaryFormat>(new Ofs3ToBinary() { Padding = 0x10 })
+                                          .ConvertWith<Po2Binary, BinaryFormat, Po>()
+                                          .ConvertWith<Po, BinaryFormat>(new CardDataToPo(0));
+                    carddata0Container.ConvertWith<NodeContainerFormat, BinaryFormat>(new Ofs3ToBinary() { Padding = 0x10 })
                         .Stream.WriteTo(output);
                     break;
 
@@ -138,12 +139,12 @@ namespace AttackFridayMonsters
                         outputStream.WriteTo(carddata25.Stream);
 
                     var carddata25Container = carddata25
-                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary());
+                        .ConvertWith<Ofs3ToBinary, BinaryFormat, NodeContainerFormat>();
                     carddata25Container.Root.Children["File25.bin"].Format =
                                           new BinaryFormat(input)
-                                          .ConvertWith<Po>(new Po2Binary())
-                                          .ConvertWith<BinaryFormat>(new CardDataToPo(25));
-                    carddata25Container.ConvertWith<BinaryFormat>(new Ofs3ToBinary { Padding = 0x10 })
+                                          .ConvertWith<Po2Binary, BinaryFormat, Po>()
+                                          .ConvertWith<Po, BinaryFormat>(new CardDataToPo(25));
+                    carddata25Container.ConvertWith<NodeContainerFormat, BinaryFormat>(new Ofs3ToBinary { Padding = 0x10 })
                         .Stream.WriteTo(output);
                     break;
 
@@ -155,13 +156,13 @@ namespace AttackFridayMonsters
 
                         // input -> binary -> po + original -> bclyt -> output
                         var bclytPo = NodeFactory.FromFile(input)
-                            .Transform<BinaryFormat, Po, Po2Binary>()
+                            .Transform<Po2Binary, BinaryFormat, Po>()
                             .GetFormatAs<Po>();
-                        Format.ConvertWith<BinaryFormat>(
-                            new Tuple<BinaryFormat, Po>(original, bclytPo),
-                            new BclytToPo())
+                        Format.ConvertWith<BclytToPo, Tuple<BinaryFormat, Po>, BinaryFormat>(
+                            new Tuple<BinaryFormat, Po>(original, bclytPo))
                               .Stream.WriteTo(output);
                     }
+
                     break;
             }
         }
@@ -177,7 +178,7 @@ namespace AttackFridayMonsters
 
                 case "ofs3":
                     var folder = inputFormat
-                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary())
+                        .ConvertWith<Ofs3ToBinary, BinaryFormat, NodeContainerFormat>()
                         .Root;
 
                     Directory.CreateDirectory(output);
@@ -185,34 +186,37 @@ namespace AttackFridayMonsters
                         string outputFile = Path.Combine(output, child.Name);
                         child.GetFormatAs<BinaryFormat>().Stream.WriteTo(outputFile);
                     }
+
                     break;
 
                 case "episode":
                     inputFormat
-                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary())
+                        .ConvertWith<Ofs3ToBinary, BinaryFormat, NodeContainerFormat>()
                         .Root.Children["epsetting.dat"].Format
-                        .ConvertWith<Po>(new EpisodeSettingsToPo())
-                        .ConvertWith<BinaryFormat>(new Po2Binary()).Stream.WriteTo(output);
+                        .ConvertWith<EpisodeSettingsToPo, BinaryFormat, Po>()
+                        .ConvertWith<Po2Binary, Po, BinaryFormat>()
+                        .Stream.WriteTo(output);
                     break;
 
                 case "carddata0":
                     var carddata0 = inputFormat
-                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary())
+                        .ConvertWith<Ofs3ToBinary, BinaryFormat, NodeContainerFormat>()
                         .Root;
 
                     carddata0.Children["File0.bin"].Format
-                             .ConvertWith<Po>(new CardDataToPo(0))
-                             .ConvertWith<BinaryFormat>(new Po2Binary()).Stream.WriteTo(output);
+                             .ConvertWith<BinaryFormat, Po>(new CardDataToPo(0))
+                             .ConvertWith<Po2Binary, Po, BinaryFormat>()
+                             .Stream.WriteTo(output);
                     break;
 
                 case "carddata25":
                     var carddata25 = inputFormat
-                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary())
+                        .ConvertWith<Ofs3ToBinary, BinaryFormat, NodeContainerFormat>()
                         .Root;
 
                     carddata25.Children["File25.bin"].Format
-                              .ConvertWith<Po>(new CardDataToPo(25))
-                              .ConvertWith<BinaryFormat>(new Po2Binary()).Stream.WriteTo(output);
+                              .ConvertWith<BinaryFormat, Po>(new CardDataToPo(25))
+                              .ConvertWith<Po2Binary, Po, BinaryFormat>().Stream.WriteTo(output);
                     break;
 
                 case "script":
@@ -220,39 +224,42 @@ namespace AttackFridayMonsters
                     inputFormat = DecompressLzx(input, "-d");
 
                     var binScript = inputFormat
-                        .ConvertWith<NodeContainerFormat>(new Ofs3ToBinary())
+                        .ConvertWith<Ofs3ToBinary, BinaryFormat, NodeContainerFormat>()
                         .Root.Children["File1.bin"].GetFormatAs<BinaryFormat>();
 
                     // Ignore empty scripts
-                    if (binScript.Stream.Length > 0)
-                        binScript.ConvertWith<Po>(new ScriptToPo())
-                                 .ConvertWith<BinaryFormat>(new Po2Binary())
+                    if (binScript.Stream.Length > 0) {
+                        binScript.ConvertWith<ScriptToPo, BinaryFormat, Po>()
+                                 .ConvertWith<Po2Binary, Po, BinaryFormat>()
                                  .Stream.WriteTo(output);
-                    else
+                    } else {
                         Console.WriteLine("No script for " + input);
+                    }
+
                     break;
 
                 case "darc":
                     var darcRoot = inputFormat
-                        .ConvertWith<NodeContainerFormat>(new DarcToBinary()).Root;
+                        .ConvertWith<DarcToBinary, BinaryFormat, NodeContainerFormat>().Root;
 
                     string basePath = darcRoot.Children[0].Path; // root darc
                     foreach (var child in Navigator.IterateNodes(darcRoot)) {
                         if (!(child.Format is BinaryFormat))
                             continue;
 
-                        string path = child.Parent.Path.Replace(basePath, "").TrimStart('/');
+                        string path = child.Parent.Path.Replace(basePath, string.Empty).TrimStart('/');
                         string outputDir = Path.Combine(output, path);
                         string outputFile = Path.Combine(outputDir, child.Name);
                         if (!Directory.Exists(outputDir))
                             Directory.CreateDirectory(outputDir);
                         child.GetFormatAs<BinaryFormat>()?.Stream.WriteTo(outputFile);
                     }
+
                     break;
 
                 case "bclyt":
-                    inputFormat.ConvertWith<Po>(new BclytToPo())
-                               .ConvertWith<BinaryFormat>(new Po2Binary())
+                    inputFormat.ConvertWith<BclytToPo, BinaryFormat, Po>()
+                               .ConvertWith<Po2Binary, Po, BinaryFormat>()
                                .Stream.WriteTo(output);
                     break;
 

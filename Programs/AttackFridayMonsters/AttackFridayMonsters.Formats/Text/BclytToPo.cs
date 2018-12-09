@@ -1,5 +1,4 @@
-﻿//
-//  BclytToPo.cs
+﻿//  BclytToPo.cs
 //
 //  Author:
 //       Benito Palacios Sanchez <benito356@gmail.com>
@@ -23,8 +22,8 @@ namespace AttackFridayMonsters.Formats.Text
     using System;
     using System.Collections.Generic;
     using System.Text;
-    using Yarhl.IO;
     using Yarhl.FileFormat;
+    using Yarhl.IO;
     using Yarhl.Media.Text;
 
     public class BclytToPo :
@@ -113,7 +112,8 @@ namespace AttackFridayMonsters.Formats.Text
             Po po = new Po {
                 Header = new PoHeader(
                     "Attack of the Friday Monsters Translation",
-                    "benito356@gmail.com")
+                    "benito356@gmail.com",
+                    "es-ES"),
             };
 
             if (reader.ReadString(4) != "CLYT")
@@ -134,15 +134,15 @@ namespace AttackFridayMonsters.Formats.Text
                 }
 
                 uint unk1 = reader.ReadUInt32();
-                string font = reader.ReadString(0x18).Replace("\0", "");
-                Single[] unk2 = new Single[10];
+                string font = reader.ReadString(0x18).Replace("\0", string.Empty);
+                float[] unk2 = new float[10];
                 for (int j = 0; j < 10; j++)
                     unk2[j] = BitConverter.ToSingle(reader.ReadBytes(4), 0);
 
-                byte[] data = reader.ReadBytes(0x6C - 0x18 - 4 - 10 * 4);
+                byte[] data = reader.ReadBytes(0x6C - 0x18 - 4 - (10 * 4));
 
                 Encoding encoding = Encoding.GetEncoding("utf-16");
-                string text = "";
+                string text = string.Empty;
                 if (size > 0x74)
                     text = reader.ReadString(encoding);
                 var entry = new PoEntry(text);

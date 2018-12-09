@@ -1,5 +1,4 @@
-﻿//
-//  ScriptToPo.cs
+﻿//  ScriptToPo.cs
 //
 //  Author:
 //       Benito Palacios Sanchez <benito356@gmail.com>
@@ -48,7 +47,7 @@ namespace AttackFridayMonsters.Formats.Text
             { 0x00C, "Bad Kid" }, { 0x10C, "Nanafushi" },
             { 0x00D, "Bad Kid's Servant" }, { 0x10D, "Billboard" },
             { 0x00E, "Boy with Glasses" }, { 0x10E, "A Plus" },
-            { 0x014, "Probably an Alien" }
+            { 0x014, "Probably an Alien" },
         };
 
         public DataStream OriginalScript { get; set; }
@@ -78,13 +77,10 @@ namespace AttackFridayMonsters.Formats.Text
 
             for (int b = 0; b < numBlocks; b++) {
                 // Write current block FAT entry
-                // ... event ID
-                writer.Write(reader.ReadUInt32());
-                // ... size
-                int origBlockSize = reader.ReadInt32();
+                writer.Write(reader.ReadUInt32()); // ... event ID
+                int origBlockSize = reader.ReadInt32(); // ... size
                 writer.Write(0x00);  // placeholder
-                // ... offset
-                uint origBlockOffset = reader.ReadUInt32();
+                uint origBlockOffset = reader.ReadUInt32(); // ... offset
                 int blockOffset = (int)writer.Stream.Length;
                 writer.Write(blockOffset);
 
@@ -111,7 +107,72 @@ namespace AttackFridayMonsters.Formats.Text
             return binary;
         }
 
-        void WriteBlock(DataWriter writer, DataReader reader, int blockSize, Queue<PoEntry> entries)
+        public Po Convert(BinaryFormat source)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+
+            source.Stream.Seek(0, SeekMode.Start);
+            DataReader reader = new DataReader(source.Stream);
+            Po po = new Po {
+                Header = new PoHeader(
+                    "Attack of the Friday Monsters Translatation",
+                    "benito356@gmail.com",
+                    "es-ES"),
+            };
+
+            uint numBlocks = reader.ReadUInt32();
+            for (int b = 0; b < numBlocks; b++) {
+                // Block info
+                reader.ReadUInt32(); // unknown
+                reader.ReadUInt32(); // block size
+                uint blockOffset = reader.ReadUInt32();
+
+                // Sections
+                source.Stream.PushToPosition(blockOffset, SeekMode.Start);
+                uint numSections = reader.ReadUInt32();
+                if (numSections < 3)
+                    throw new FormatException($"Missing sections in block {b}");
+
+                // We skip the first 3 sections with unknown content
+                reader.ReadBytes(3 * 4);
+                bool firstSection = true;
+                for (int s = 3; s < numSections; s++) {
+                    uint sectionOffset = reader.ReadUInt32();
+                    if (sectionOffset == 0)
+                        continue;
+
+                    source.Stream.PushToPosition(blockOffset + sectionOffset, SeekMode.Start);
+                    ushort charId = reader.ReadUInt16();
+                    if (charId == 0x4D30) {
+                        source.Stream.PopPosition();
+                        continue;
+                    }
+
+                    if (!Characters.ContainsKey(charId))
+                        throw new FormatException("Unknown char: " + charId);
+
+                    PoEntry entry = new PoEntry {
+                        Original = ReadTokenizedString(reader),
+                        Context = $"b:{b}|s:{s}",
+                        ExtractedComments = Characters[charId],
+                    };
+
+                    if (firstSection)
+                        entry.ExtractedComments = "[Start] " + entry.ExtractedComments;
+
+                    po.Add(entry);
+                    firstSection = false;
+                    source.Stream.PopPosition();
+                }
+
+                source.Stream.PopPosition();
+            }
+
+            return po;
+        }
+
+        static void WriteBlock(DataWriter writer, DataReader reader, int blockSize, Queue<PoEntry> entries)
         {
             long blockOffset = writer.Stream.Position;
             long origBlockOffset = reader.Stream.Position;
@@ -119,7 +180,7 @@ namespace AttackFridayMonsters.Formats.Text
             // Process each section
             int numSections = reader.ReadInt32();
             writer.Write(numSections);
-            int endFatPos = 4 + 4 * numSections;
+            int endFatPos = 4 + (4 * numSections);
 
             // Write empty offset list
             writer.Stream.PushCurrentPosition();
@@ -131,13 +192,16 @@ namespace AttackFridayMonsters.Formats.Text
             writer.Write(reader.ReadBytes(3 * 4));
             writer.Stream.PushCurrentPosition();
             reader.Stream.PushCurrentPosition();
+
             // ... Data -- get the next offset
             int nextOffset = -1;
             for (int i = 3; i < numSections && nextOffset <= 0; i++)
                 nextOffset = reader.ReadInt32();
+
             // ... if there isn't more offsets, then copy block size and that is
             if (nextOffset == -1)
                 nextOffset = blockSize;
+
             // ... copy!
             writer.Stream.PushToPosition(0, SeekMode.End);
             reader.Stream.PushToPosition(origBlockOffset + endFatPos, SeekMode.Start);
@@ -182,71 +246,7 @@ namespace AttackFridayMonsters.Formats.Text
             }
         }
 
-        public Po Convert(BinaryFormat source)
-        {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            source.Stream.Seek(0, SeekMode.Start);
-            DataReader reader = new DataReader(source.Stream);
-            Po po = new Po {
-                Header = new PoHeader(
-                    "Attack of the Friday Monsters Translatation",
-                    "benito356@gmail.com")
-            };
-
-            uint numBlocks = reader.ReadUInt32();
-            for (int b = 0; b < numBlocks; b++) {
-                // Block info
-                reader.ReadUInt32(); // unknown
-                reader.ReadUInt32(); // block size
-                uint blockOffset = reader.ReadUInt32();
-
-                // Sections
-                source.Stream.PushToPosition(blockOffset, SeekMode.Start);
-                uint numSections = reader.ReadUInt32();
-                if (numSections < 3)
-                    throw new FormatException($"Missing sections in block {b}");
-
-                // We skip the first 3 sections with unknown content
-                reader.ReadBytes(3 * 4);
-                bool firstSection = true;
-                for (int s = 3; s < numSections; s++) {
-                    uint sectionOffset = reader.ReadUInt32();
-                    if (sectionOffset == 0)
-                        continue;
-
-                    source.Stream.PushToPosition(blockOffset + sectionOffset, SeekMode.Start);
-                    ushort charId = reader.ReadUInt16();
-                    if (charId == 0x4D30) {
-                        source.Stream.PopPosition();
-                        continue;
-                    }
-
-                    if (!Characters.ContainsKey(charId))
-                        throw new FormatException("Unknown char: " + charId);
-
-                    PoEntry entry = new PoEntry {
-                        Original = ReadTokenizedString(reader),
-                        Context = $"b:{b}|s:{s}",
-                        ExtractedComments = Characters[charId]
-                    };
-
-                    if (firstSection)
-                        entry.ExtractedComments = "[Start] " + entry.ExtractedComments;
-
-                    po.Add(entry);
-                    firstSection = false;
-                    source.Stream.PopPosition();
-                }
-
-                source.Stream.PopPosition();
-            }
-
-            return po;
-        }
-
-        string ReadTokenizedString(DataReader reader)
+        static string ReadTokenizedString(DataReader reader)
         {
             StringBuilder text = new StringBuilder();
             Encoding encoding = Encoding.GetEncoding("utf-16");
@@ -280,7 +280,7 @@ namespace AttackFridayMonsters.Formats.Text
             return text.ToString();
         }
 
-        void WriteTokenizedString(string text, DataWriter writer)
+        static void WriteTokenizedString(string text, DataWriter writer)
         {
             for (int i = 0; i < text.Length; i++) {
                 if (text[i] == '<') {

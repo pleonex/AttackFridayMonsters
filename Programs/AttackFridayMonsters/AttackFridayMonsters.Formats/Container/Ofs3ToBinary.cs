@@ -1,5 +1,4 @@
-﻿//
-//  Ofs3.cs
+﻿//  Ofs3.cs
 //
 //  Author:
 //       Benito Palacios Sanchez <benito356@gmail.com>
@@ -21,12 +20,10 @@
 namespace AttackFridayMonsters.Formats.Container
 {
     using System;
-    using Mono.Addins;
-    using Yarhl.IO;
     using Yarhl.FileFormat;
     using Yarhl.FileSystem;
+    using Yarhl.IO;
 
-    [Extension]
     public class Ofs3ToBinary :
         IConverter<BinaryFormat, NodeContainerFormat>,
         IConverter<NodeContainerFormat, BinaryFormat>
@@ -90,7 +87,7 @@ namespace AttackFridayMonsters.Formats.Container
             for (int i = 0; hasNames && i < numFiles; i++) {
                 Node child = source.Root.Children[i];
 
-                binary.Stream.Seek(0x14 + i * fatEntrySize + 0x08, SeekMode.Start);
+                binary.Stream.Seek(0x14 + (i * fatEntrySize) + 0x08, SeekMode.Start);
                 writer.Write((uint)(binary.Stream.Length - headerSize));
 
                 binary.Stream.Seek(0x00, SeekMode.End);

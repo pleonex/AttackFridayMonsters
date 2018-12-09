@@ -1,5 +1,4 @@
-﻿//
-//  CardDataToPo.cs
+﻿//  CardDataToPo.cs
 //
 //  Author:
 //       Benito Palacios Sanchez <benito356@gmail.com>
@@ -22,12 +21,10 @@ namespace AttackFridayMonsters.Formats.Text
 {
     using System;
     using System.Text;
-    using Mono.Addins;
+    using Yarhl.FileFormat;
     using Yarhl.IO;
     using Yarhl.Media.Text;
-    using Yarhl.FileFormat;
 
-    [Extension]
     public class CardDataToPo :
         IConverter<BinaryFormat, Po>,
         IConverter<Po, BinaryFormat>
@@ -49,7 +46,7 @@ namespace AttackFridayMonsters.Formats.Text
 
             BinaryFormat binary = new BinaryFormat();
             DataWriter writer = new DataWriter(binary.Stream) {
-                DefaultEncoding = Encoding.GetEncoding("utf-16")
+                DefaultEncoding = Encoding.GetEncoding("utf-16"),
             };
 
             int textSize = FileId == 0 ? 0x140 : 0x280;
@@ -71,6 +68,7 @@ namespace AttackFridayMonsters.Formats.Text
                     if (FileId == 25)
                         text = text.Replace("\n", "▼");
                 }
+
                 writer.Write(text ?? string.Empty, textSize);
             }
 
@@ -89,13 +87,14 @@ namespace AttackFridayMonsters.Formats.Text
                 throw new NotSupportedException("File ID not supported");
 
             DataReader reader = new DataReader(source.Stream) {
-                DefaultEncoding = Encoding.GetEncoding("utf-16")
+                DefaultEncoding = Encoding.GetEncoding("utf-16"),
             };
 
             Po po = new Po {
                 Header = new PoHeader(
                     "Attack of Friday Monsters translation",
-                    "benito356@gmail.com")
+                    "benito356@gmail.com",
+                    "es-ES"),
             };
 
             int textSize = FileId == 0 ? 0x140 : 0x280;
@@ -116,11 +115,14 @@ namespace AttackFridayMonsters.Formats.Text
                 }
 
                 string text = reader.ReadString(textSize)
-                                    .Replace("\0", "").Replace("▼", "\n");
+                                    .Replace("\0", string.Empty)
+                                    .Replace("▼", "\n");
                 if (!string.IsNullOrEmpty(text)) {
                     int subblock = textId % numBlocks;
                     PoEntry entry = new PoEntry(text) {
-                        Context = $"b:{blockId}|s:{subblock}"};
+                        Context = $"b:{blockId}|s:{subblock}",
+                    };
+
                     if (FileId == 0)
                         entry.ExtractedComments = $"[{blockId}] {cardInfo[subblock]}";
                     po.Add(entry);

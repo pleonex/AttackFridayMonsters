@@ -1,49 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\AttackFridayMonsters.Formats\AttackFridayMonsters.Formats.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.1-beta.61">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{21F7C83B-92FA-4C4F-AD04-09D7D265E311}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>AttackFridayMonsters</RootNamespace>
     <AssemblyName>AttackFridayMonsters</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <Product>AoFM</Product>
+    <Version>1.0-alpha01</Version>
+    <Description>Command line tool to update files from Attack of the Friday Monsters.</Description>
+
+    <Authors>pleonex</Authors>
+    <Company>GradienWords</Company>
+    <Copyright>Copyright (c) 2017 GradienWords</Copyright>
+    <RepositoryUrl>https://gitlab.com/gradienwords/AttackFridayMonsters/</RepositoryUrl>
+    <License>GPL-3.0-or-later</License>
+    <PackageProjectUrl>https://gitlab.com/gradienwords/AttackFridayMonsters/</PackageProjectUrl>
+    <PackageTags>translation;localization;romhacking;fan-translation</PackageTags>
+
+    <TargetFrameworks>net462;netcoreapp2.1</TargetFrameworks>
+    <RootNamespace>AttackFridayMonsters</RootNamespace>
+    <CodeAnalysisRuleSet>..\StyleCop.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ExternalConsole>true</ExternalConsole>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release</OutputPath>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ExternalConsole>true</ExternalConsole>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="yarhl">
-      <HintPath>..\..\Yarhl\yarhl.Media\bin\Debug\yarhl.dll</HintPath>
-    </Reference>
-    <Reference Include="yarhl.Media">
-      <HintPath>..\..\Yarhl\yarhl.Media\bin\Debug\yarhl.Media.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AttackFridayMonsters.Formats\AttackFridayMonsters.Formats.csproj">
-      <Project>{87A571DE-963B-4235-834F-0129D4E5A85A}</Project>
-      <Name>AttackFridayMonsters.Formats</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

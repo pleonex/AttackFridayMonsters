@@ -1,5 +1,4 @@
-﻿//
-//  AssemblyInfo.cs
+﻿//  AssemblyInfo.cs
 //
 //  Author:
 //       Benito Palacios Sanchez <benito356@gmail.com>
@@ -22,24 +21,6 @@
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Mono.Addins;
 
-[assembly: AssemblyTitle("AttackFridayMonsters.Formats")]
-[assembly: AssemblyDescription("Formats from Attack of Friday Monsters 3DS game")]
-[assembly: AssemblyCompany("GradienWords")]
-[assembly: AssemblyProduct("Attack Friday Monsters Fan-Translation")]
-[assembly: AssemblyCopyright("Copyright (c) 2017 Benito Palacios (aka pleonex)")]
-[assembly: AssemblyVersion("1.0.0.*")]
-[assembly: AssemblyFileVersion("1.0.0")]
 [assembly: CLSCompliant(true)]
 [assembly: ComVisible(true)]
-
-#if DEBUG
-[assembly: AssemblyConfiguration("Debug")]
-#elif RELEASE
-[assembly: AssemblyConfiguration("Release")]
-#endif
-
-// Mono.Addins
-[assembly: Addin("attackfridaymonsters", "1.0")]
-[assembly: AddinDependency("yarhl", "1.0")]

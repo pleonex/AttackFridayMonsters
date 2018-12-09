@@ -1,5 +1,4 @@
-﻿//
-//  DarcToBinaryConverter.cs
+﻿//  DarcToBinaryConverter.cs
 //
 //  Author:
 //       Benito Palacios Sanchez <benito356@gmail.com>
@@ -24,9 +23,9 @@ namespace AttackFridayMonsters.Formats.Container
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using Yarhl.IO;
     using Yarhl.FileFormat;
     using Yarhl.FileSystem;
+    using Yarhl.IO;
 
     public class DarcToBinary :
         IConverter<BinaryFormat, NodeContainerFormat>,
@@ -38,8 +37,10 @@ namespace AttackFridayMonsters.Formats.Container
                 throw new ArgumentNullException(nameof(source));
 
             NodeContainerFormat container = new NodeContainerFormat();
+
+            source.Stream.Position = 0;
             DataReader reader = new DataReader(source.Stream) {
-                DefaultEncoding = Encoding.GetEncoding("utf-16")
+                DefaultEncoding = Encoding.GetEncoding("utf-16"),
             };
 
             // Header
@@ -53,14 +54,17 @@ namespace AttackFridayMonsters.Formats.Container
             reader.ReadUInt32(); // file size
 
             uint fatOffset = reader.ReadUInt32();
+
             // we are skipping "fat size" and "data offset"
             source.Stream.Position = fatOffset;
 
             // We expect that the first node is a root node
             // we get the lastId from the root to get the nameTableOffset
-            source.Stream.PushToPosition(8, SeekMode.Current);
-            uint nameTableOffset = fatOffset + (reader.ReadUInt32() * 0x0C);
-            source.Stream.PopPosition();
+            uint nameTableOffset = 0;
+            source.Stream.RunInPosition(
+                () => nameTableOffset = fatOffset + (reader.ReadUInt32() * 0x0C),
+                8,
+                SeekMode.Current);
 
             Node current = container.Root;
             current.Tags["darc.lastId"] = 1;  // only one entry / root
@@ -73,7 +77,7 @@ namespace AttackFridayMonsters.Formats.Container
                 }
 
                 // Read the entry
-                source.Stream.PushToPosition(nameTableOffset + reader.ReadInt24(), SeekMode.Start);
+                source.Stream.PushToPosition(nameTableOffset + reader.ReadInt24());
                 string name = reader.ReadString();
                 if (string.IsNullOrEmpty(name))
                     name = "Entry" + currentId;
@@ -132,12 +136,12 @@ namespace AttackFridayMonsters.Formats.Container
                 var nameBin = utf16.GetBytes(name + "\0");
                 nameWriter.Write(nameBin);
 
-                node.Tags["darc_name"] = nameBin.Length;
+                node.Tags["darc.name"] = nameBin.Length;
                 currentId++;
 
                 Node t = node;
                 while (t.Parent != null) {
-                    t.Parent.Tags["darc_lastId"] = currentId;
+                    t.Parent.Tags["darc.lastId"] = currentId;
                     t = t.Parent;
                 }
 
@@ -160,12 +164,12 @@ namespace AttackFridayMonsters.Formats.Container
             stack.Clear();
             stack.Push(source.Root);
             ushort nameOffset = 0;
-            while(stack.Any()) {
+            while (stack.Any()) {
                 var node = stack.Pop();
-                DataStream fileStream = node.GetFormatAs<BinaryFormat>()?.Stream;
+                DataStream fileStream = node.Stream;
 
                 writer.Write(nameOffset);
-                nameOffset += (ushort)node.Tags["darc_name"];
+                nameOffset += (ushort)node.Tags["darc.name"];
 
                 if (fileStream != null) {
                     writer.Write((ushort)0);
@@ -181,7 +185,7 @@ namespace AttackFridayMonsters.Formats.Container
                 } else {
                     writer.Write((ushort)0x100);
                     writer.Write(0);
-                    writer.Write(node.Tags["darc_lastId"]);
+                    writer.Write(node.Tags["darc.lastId"]);
                 }
 
                 foreach (var child in node.Children.Reverse())

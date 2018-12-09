@@ -1,5 +1,4 @@
-﻿//
-//  EpisodeSettingsToPo.cs
+﻿//  EpisodeSettingsToPo.cs
 //
 //  Author:
 //       Benito Palacios Sanchez <benito356@gmail.com>
@@ -22,12 +21,10 @@ namespace AttackFridayMonsters.Formats.Text
 {
     using System;
     using System.Text;
-    using Mono.Addins;
-    using Yarhl.IO;
     using Yarhl.FileFormat;
+    using Yarhl.IO;
     using Yarhl.Media.Text;
 
-    [Extension]
     public class EpisodeSettingsToPo :
         IConverter<BinaryFormat, Po>,
         IConverter<Po, BinaryFormat>
@@ -43,12 +40,12 @@ namespace AttackFridayMonsters.Formats.Text
 
             BinaryFormat binary = new BinaryFormat();
             DataWriter writer = new DataWriter(binary.Stream) {
-                DefaultEncoding = Encoding.GetEncoding("utf-16")
+                DefaultEncoding = Encoding.GetEncoding("utf-16"),
             };
 
             Original.Position = 0;
             DataReader reader = new DataReader(Original) {
-                DefaultEncoding = Encoding.GetEncoding("utf-16")
+                DefaultEncoding = Encoding.GetEncoding("utf-16"),
             };
 
             foreach (var entry in source.Entries) {
@@ -74,18 +71,21 @@ namespace AttackFridayMonsters.Formats.Text
                 throw new ArgumentNullException(nameof(source));
 
             DataReader reader = new DataReader(source.Stream) {
-                DefaultEncoding = Encoding.GetEncoding("utf-16")
+                DefaultEncoding = Encoding.GetEncoding("utf-16"),
             };
 
             Po po = new Po {
-                Header = new PoHeader("AttackFridayMonster Translation", "benito356@gmail.com")
+                Header = new PoHeader(
+                    "AttackFridayMonster Translation",
+                    "benito356@gmail.com",
+                    "es-ES"),
             };
 
             while (!source.Stream.EndOfStream) {
                 uint id = reader.ReadUInt32();
 
                 // Japanese version has 0x38 bytes of text and 0x74 of unknown
-                string text = reader.ReadString(0x50).Replace("\0", "");
+                string text = reader.ReadString(0x50).Replace("\0", string.Empty);
                 source.Stream.Seek(0x6C, SeekMode.Current); // Unknown
 
                 po.Add(new PoEntry(text) { Context = "id:" + id });
