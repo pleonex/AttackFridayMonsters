@@ -21,13 +21,11 @@ include(CSharpProject)
 
 # 1. 3dstool: create ROMs
 ExternalProject_add(3dstools SOURCE_DIR "${PROJECT_SOURCE_DIR}/ROMTool")
-install(PROGRAMS ROMTool/bin/3dstool DESTINATION tools)
-install(FILES ROMTool/bin/ignore_3dstool.txt DESTINATION tools)
+install(DIRECTORY ROMTool/bin/ DESTINATION tools PATTERN "Debug" EXCLUDE)
 
 # 2. bclimtool: export/import images
 ExternalProject_add(bclimtool SOURCE_DIR "${PROJECT_SOURCE_DIR}/bclimtool")
-install(PROGRAMS bclimtool/bin/bclimtool DESTINATION tools)
-install(FILES bclimtool/bin/libPVRTexLib.so DESTINATION tools)
+install(DIRECTORY bclimtool/bin/ DESTINATION tools PATTERN "Debug" EXCLUDE)
 
 # 3. Font converter
 install(PROGRAMS FontTool/bcfnt.py DESTINATION tools)
@@ -47,5 +45,4 @@ install(TARGETS lzx DESTINATION tools)
 
 # 6. txobtool: export/import textures
 ExternalProject_add(txobtool SOURCE_DIR "${PROJECT_SOURCE_DIR}/TextureTool")
-install(PROGRAMS TextureTool/bin/txobtool DESTINATION tools)
-install(FILES TextureTool/bin/libPVRTexLib.so DESTINATION tools)
+install(DIRECTORY TextureTool/bin/ DESTINATION tools PATTERN "Debug" EXCLUDE)

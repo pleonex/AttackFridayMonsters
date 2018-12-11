@@ -123,7 +123,6 @@ namespace AttackFridayMonsters.Formats.Container
             for (int i = 0; i < numFiles; i++) {
                 uint offset = headerSize + reader.ReadUInt32();
                 uint size = reader.ReadUInt32();
-                DataStream fileStream = new DataStream(source.Stream, offset, size);
 
                 string filename = string.Empty;
                 if (fatType == 2) {
@@ -138,7 +137,8 @@ namespace AttackFridayMonsters.Formats.Container
                     throw new FormatException("Unkown FAT type: " + fatType);
                 }
 
-                container.Root.Add(new Node(filename, new BinaryFormat(fileStream)));
+                var format = new BinaryFormat(source.Stream, offset, size);
+                container.Root.Add(new Node(filename, format));
             }
 
             return container;

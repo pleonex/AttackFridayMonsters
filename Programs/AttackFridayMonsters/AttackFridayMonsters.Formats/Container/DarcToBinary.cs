@@ -59,17 +59,15 @@ namespace AttackFridayMonsters.Formats.Container
             source.Stream.Position = fatOffset;
 
             // We expect that the first node is a root node
-            // we get the lastId from the root to get the nameTableOffset
-            uint nameTableOffset = 0;
-            source.Stream.RunInPosition(
-                () => nameTableOffset = fatOffset + (reader.ReadUInt32() * 0x0C),
-                8,
-                SeekMode.Current);
-
+            source.Stream.Position += 8; // skip empty name ptr and offset
             Node current = container.Root;
-            current.Tags["darc.lastId"] = 1;  // only one entry / root
+            uint lastId = reader.ReadUInt32();
+            current.Tags["darc.lastId"] = lastId;
 
-            int currentId = 0;
+            // From the last ID we can get the name table offset.
+            uint nameTableOffset = fatOffset + (lastId * 0x0C);
+
+            int currentId = 1;
             do {
                 if (currentId >= current.Tags["darc.lastId"]) {
                     current = current.Parent;
@@ -77,11 +75,10 @@ namespace AttackFridayMonsters.Formats.Container
                 }
 
                 // Read the entry
-                source.Stream.PushToPosition(nameTableOffset + reader.ReadInt24());
-                string name = reader.ReadString();
-                if (string.IsNullOrEmpty(name))
-                    name = "Entry" + currentId;
-                source.Stream.PopPosition();
+                string name = string.Empty;
+                source.Stream.RunInPosition(
+                    () => name = reader.ReadString(),
+                    nameTableOffset + reader.ReadInt24());
 
                 bool isFolder = reader.ReadByte() == 1;
                 uint offset = reader.ReadUInt32();
@@ -98,7 +95,7 @@ namespace AttackFridayMonsters.Formats.Container
                 }
 
                 currentId++;
-            } while (current != container.Root);
+            } while (current != null);
 
             return container;
         }

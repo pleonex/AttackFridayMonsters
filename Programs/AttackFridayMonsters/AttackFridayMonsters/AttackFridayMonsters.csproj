@@ -28,7 +28,7 @@
     <PackageProjectUrl>https://gitlab.com/gradienwords/AttackFridayMonsters/</PackageProjectUrl>
     <PackageTags>translation;localization;romhacking;fan-translation</PackageTags>
 
-    <TargetFrameworks>net462;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net47;netcoreapp2.1</TargetFrameworks>
     <RootNamespace>AttackFridayMonsters</RootNamespace>
     <CodeAnalysisRuleSet>..\StyleCop.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
