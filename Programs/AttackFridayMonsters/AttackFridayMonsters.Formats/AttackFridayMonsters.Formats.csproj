@@ -28,7 +28,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Yarhl" Version="2.0.0-alpha.2" />
-    <PackageReference Include="Yarhl.Media" Version="2.0.0-alpha.2" />
+    <PackageReference Include="Yarhl" Version="2.0.0" />
+    <PackageReference Include="Yarhl.Media" Version="2.0.0" />
   </ItemGroup>
 </Project>

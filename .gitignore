@@ -4,6 +4,8 @@ Compiler/temp
 build/
 Decompiler/*
 !Decompiler/CMakeLists.txt
+!Decompiler/build.cake
+.pyenv
 
 
 # C# Projects
