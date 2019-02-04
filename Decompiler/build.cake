@@ -15,11 +15,13 @@
 #addin nuget:?package=Yarhl&version=2.0.0
 #addin nuget:?package=Yarhl.Media&version=2.0.0
 #r "../Programs/AttackFridayMonsters/AttackFridayMonsters.Formats/bin/Debug/netstandard2.0/AttackFridayMonsters.Formats.dll"
+#r "../../Lemon/src/Lemon/bin/Debug/netstandard2.0/Lemon.dll"
 
 using System.Collections.Generic;
 using AttackFridayMonsters.Formats;
 using AttackFridayMonsters.Formats.Container;
 using AttackFridayMonsters.Formats.Text;
+using Lemon.Containers;
 using Yarhl.FileFormat;
 using Yarhl.FileSystem;
 using Yarhl.Media.Text;
@@ -48,7 +50,7 @@ public class BuildData
 
     public Node GetNode(string path)
     {
-        return Navigator.SearchNode(Root, $"/root/data/{path}");
+        return Navigator.SearchNode(Root, $"/root/program/rom/{path}");
     }
 }
 
@@ -58,44 +60,19 @@ Setup<BuildData>(setupContext => {
         ToolsDirectory = Argument("tools", "tools"),
         OutputDirectory = Argument("output", "extracted"),
     };
-});
+});-
 
 Task("Extract-Game")
     .Does<BuildData>(data =>
 {
-    Node game = NodeFactory.FromFile(data.Game);
-
-    Information("Extracting main ROM container");
-    var containerConverter = new ExternalProgramConverter {
-        Program = $"{data.ToolsDirectory}/3dstool",
-        Arguments = "-xt0f cci <out> <in>",
-    };
-    game.Transform<BinaryFormat, BinaryFormat>(containerConverter);
-
-    Information("Extracting ROM data file system");
-    var fsConverter = new ExternalProgramConverter {
-        Program = $"{data.ToolsDirectory}/3dstool",
-        Arguments = "-xtf cxi <in> --romfs <out> ",
-    };
-    game.Transform<BinaryFormat, BinaryFormat>(fsConverter);
-
-    Information("Unpacking ROM file system");
-    var unpackConverter = new ExternalProgramNodeConverter {
-        Program = $"{data.ToolsDirectory}/3dstool",
-        Arguments = $"-xtf romfs <in> --romfs-dir ./",
-        WorkingDirectory = $"{data.OutputDirectory}\\rom\\data",
-        WorkingDirectoryAsOutput = true,
-    };
-    game.Transform<BinaryFormat, NodeContainerFormat>(unpackConverter);
-    game.Dispose();
-
-    Warning("TODO: Extract manual");
-    Warning("TODO: Extract system files");
-
-    data.Root = NodeFactory.FromDirectory($"{data.OutputDirectory}\\rom", "*", "root", true);
+    data.Root = NodeFactory.FromFile(data.Game, "root")
+        .Transform<Binary2Ncsd, BinaryFormat, Ncsd>();
     if (data.Root.Children.Count == 0) {
         throw new Exception("Game folder is empty!");
     }
+
+    Warning("TODO: Extract manual");
+    Warning("TODO: Extract system files");
 });
 
 Task("Unpack")
