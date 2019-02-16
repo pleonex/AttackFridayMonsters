@@ -60,19 +60,22 @@ Setup<BuildData>(setupContext => {
         ToolsDirectory = Argument("tools", "tools"),
         OutputDirectory = Argument("output", "extracted"),
     };
-});-
+});
 
 Task("Extract-Game")
     .Does<BuildData>(data =>
 {
-    data.Root = NodeFactory.FromFile(data.Game, "root")
-        .Transform<Binary2Ncsd, BinaryFormat, Ncsd>();
+    data.Root = NodeFactory.FromFile(data.Game, "root");
+    ContainerManager.Unpack3DSNode(data.Root);
     if (data.Root.Children.Count == 0) {
         throw new Exception("Game folder is empty!");
     }
 
     Warning("TODO: Extract manual");
-    Warning("TODO: Extract system files");
+
+    Navigator.SearchNode(data.Root, "/root/program/system/.code")
+        .Stream.WriteTo($"{data.InternalDirectory}/code.bin");
+    Waring("TODO: Extract logo and game names");
 });
 
 Task("Unpack")
