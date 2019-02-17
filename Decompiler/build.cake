@@ -56,8 +56,8 @@ public class BuildData
 
 Setup<BuildData>(setupContext => {
     return new BuildData {
-        Game = Argument("game", "game.3ds"),
-        ToolsDirectory = Argument("tools", "tools"),
+        Game = Argument("game", "../GameData/game.3ds"),
+        ToolsDirectory = Argument("tools", "../GameData/tools"),
         OutputDirectory = Argument("output", "extracted"),
     };
 });
@@ -75,7 +75,7 @@ Task("Extract-Game")
 
     Navigator.SearchNode(data.Root, "/root/program/system/.code")
         .Stream.WriteTo($"{data.InternalDirectory}/code.bin");
-    Waring("TODO: Extract logo and game names");
+    Warning("TODO: Extract logo and game names");
 });
 
 Task("Unpack")

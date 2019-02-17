@@ -4,7 +4,7 @@
     <OutputType>Library</OutputType>
     <AssemblyName>AttackFridayMonsters.Formats</AssemblyName>
     <Product>AoFM</Product>
-    <Version>1.0-alpha01</Version>
+    <Version>1.0-alpha02</Version>
     <Description>Library to translate the game Attack of the Friday Monsters.</Description>
 
     <Authors>pleonex</Authors>
