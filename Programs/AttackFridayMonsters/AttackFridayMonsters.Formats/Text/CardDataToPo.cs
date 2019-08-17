@@ -29,6 +29,10 @@ namespace AttackFridayMonsters.Formats.Text
         IConverter<BinaryFormat, Po>,
         IConverter<Po, BinaryFormat>
     {
+        public CardDataToPo()
+        {
+        }
+
         CardDataToPo(int fileId)
         {
             FileId = fileId;

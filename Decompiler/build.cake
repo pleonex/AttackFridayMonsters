@@ -134,11 +134,6 @@ Task("Export-Texts")
         .Stream.WriteTo($"{data.TextDirectory}/episodes_title.po");
 
     Information("Scripts");
-    var compressionConverter = new ExternalProgramConverter {
-        Program = $"{data.ToolsDirectory}/lzx",
-        Arguments = "-d <inout>",
-    };
-
     var maps = data.GetNode("gkk/map_gz").Children
         .Where(n => n.Name[0] == 'A' || n.Name[0] == 'B');
 
@@ -147,7 +142,7 @@ Task("Export-Texts")
         string scriptFile = $"{data.ScriptDirectory}/{mapName}.po";
 
         Node script = map
-            .Transform<BinaryFormat, BinaryFormat>(compressionConverter)
+            .Transform<Lz11Decompression, BinaryFormat, BinaryFormat>()
             .Transform<Ofs3ToBinary, BinaryFormat, NodeContainerFormat>()
             .Children["File1.bin"];
         if (script.Stream.Length > 0) {
