@@ -19,6 +19,7 @@
 
 using System.Collections.Generic;
 using AttackFridayMonsters.Formats;
+using AttackFridayMonsters.Formats.Compression;
 using AttackFridayMonsters.Formats.Container;
 using AttackFridayMonsters.Formats.Text;
 using Lemon.Containers;
@@ -83,6 +84,9 @@ Task("Unpack")
     .Does<BuildData>(data =>
 {
     data.GetNode("gkk/lyt/title.arc").Transform<DarcToBinary, BinaryFormat, NodeContainerFormat>();
+    // var clyt = data.GetNode("gkk/lyt/title.arc/blyt/save_load.bclyt")
+    //     .Transform<Binary2Clyt, BinaryFormat, Clyt>()
+    //     .GetFormatAs<Clyt>();
     data.GetNode("gkk/lyt/bumper.arc").Transform<DarcToBinary, BinaryFormat, NodeContainerFormat>();
     data.GetNode("gkk/lyt/movie_low.arc").Transform<DarcToBinary, BinaryFormat, NodeContainerFormat>();
     data.GetNode("gkk/lyt/notebook.arc").Transform<DarcToBinary, BinaryFormat, NodeContainerFormat>();
