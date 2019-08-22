@@ -26,26 +26,15 @@ namespace AttackFridayMonsters.Formats.Text
     using Yarhl.Media.Text;
 
     public class CardDataToPo :
+        IInitializer<int>,
         IConverter<BinaryFormat, Po>,
         IConverter<Po, BinaryFormat>
     {
-        public CardDataToPo()
-        {
-        }
+        int fileId;
 
-        CardDataToPo(int fileId)
+        public void Initialize(int fileId)
         {
-            FileId = fileId;
-        }
-
-        public int FileId {
-            get;
-            private set;
-        }
-
-        public static CardDataToPo CreateForId(int fileId)
-        {
-            return new CardDataToPo(fileId);
+            this.fileId = fileId;
         }
 
         public BinaryFormat Convert(Po source)
@@ -58,10 +47,10 @@ namespace AttackFridayMonsters.Formats.Text
                 DefaultEncoding = Encoding.GetEncoding("utf-16"),
             };
 
-            int textSize = FileId == 0 ? 0x140 : 0x280;
-            int numBlocks = FileId == 0 ? 80 : source.Entries.Count;
-            int entriesPerBlock = FileId == 0 ? 5 : 6;
-            bool hasId = FileId == 25;
+            int textSize = fileId == 0 ? 0x140 : 0x280;
+            int numBlocks = fileId == 0 ? 80 : source.Entries.Count;
+            int entriesPerBlock = fileId == 0 ? 5 : 6;
+            bool hasId = fileId == 25;
 
             for (int i = 0; i < numBlocks; i++) {
                 if (hasId && i % entriesPerBlock == 0) {
@@ -74,14 +63,14 @@ namespace AttackFridayMonsters.Formats.Text
                     text = string.IsNullOrEmpty(source.Entries[i].Translated) ?
                                  source.Entries[i].Original :
                                  source.Entries[i].Translated;
-                    if (FileId == 25)
+                    if (fileId == 25)
                         text = text.Replace("\n", "▼");
                 }
 
                 writer.Write(text ?? string.Empty, textSize);
             }
 
-            if (FileId == 0)
+            if (fileId == 0)
                 writer.Write((byte)0x00); // don't ask why...
 
             return binary;
@@ -92,7 +81,7 @@ namespace AttackFridayMonsters.Formats.Text
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            if (FileId != 0 && FileId != 25)
+            if (fileId != 0 && fileId != 25)
                 throw new NotSupportedException("File ID not supported");
 
             DataReader reader = new DataReader(source.Stream) {
@@ -106,16 +95,16 @@ namespace AttackFridayMonsters.Formats.Text
                     "es-ES"),
             };
 
-            int textSize = FileId == 0 ? 0x140 : 0x280;
-            int numBlocks = FileId == 0 ? 5 : 6;
-            bool hasId = FileId == 25;
+            int textSize = fileId == 0 ? 0x140 : 0x280;
+            int numBlocks = fileId == 0 ? 5 : 6;
+            bool hasId = fileId == 25;
             string[] cardInfo = { "Glim name", "Name", "Length", "Weight", "Description" };
 
             int textId = 0;
             int blockId = 0;
             while (source.Stream.Position + textSize <= source.Stream.Length) {
                 if (textId % numBlocks == 0) {
-                    if (FileId == 0) {
+                    if (fileId == 0) {
                         blockId++;
                     } else {
                         blockId = reader.ReadInt32();
@@ -132,7 +121,7 @@ namespace AttackFridayMonsters.Formats.Text
                         Context = $"b:{blockId}|s:{subblock}",
                     };
 
-                    if (FileId == 0)
+                    if (fileId == 0)
                         entry.ExtractedComments = $"[{blockId}] {cardInfo[subblock]}";
                     po.Add(entry);
                 }

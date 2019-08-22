@@ -16,12 +16,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace AttackFridayMonsters.Formats.Text
 {
-    using System;
     using System.Collections.Generic;
     using Yarhl.FileFormat;
-    using Yarhl.IO;
 
-    public class Clyt : Format
+    public class Clyt : IFormat
     {
         List<string> messages = new List<string>();
 

@@ -3,10 +3,9 @@ Compiler/tools
 Compiler/temp
 build/
 Decompiler/*
-!Decompiler/CMakeLists.txt
-!Decompiler/build.cake
 .pyenv
-
+tools/*
+!tools/packages.config
 
 # C# Projects
 .addins

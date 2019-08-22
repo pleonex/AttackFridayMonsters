@@ -12,14 +12,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#addin nuget:?package=Yarhl&version=3.0.0-alpha06&prerelease
-#addin nuget:?package=Yarhl.Media&version=3.0.0-alpha06&prerelease
+#addin nuget:?package=Yarhl&version=3.0.0-alpha07&prerelease
+#addin nuget:?package=Yarhl.Media&version=3.0.0-alpha07&prerelease
 #addin nuget:?package=Serilog&version=2.8.0
 #addin nuget:?package=Serilog.Sinks.Console&version=3.0.1
 #addin nuget:?package=Serilog.Sinks.ColoredConsole&version=3.0.1
 
-#r "../Programs/AttackFridayMonsters/AttackFridayMonsters.Formats/bin/Debug/netstandard2.0/AttackFridayMonsters.Formats.dll"
-#r "../../Lemon/src/Lemon/bin/Debug/netstandard2.0/Lemon.dll"
+#r "Programs/AttackFridayMonsters/AttackFridayMonsters.Formats/bin/Debug/netstandard2.0/AttackFridayMonsters.Formats.dll"
+#r "../Lemon/src/Lemon/bin/Debug/netstandard2.0/Lemon.dll"
 
 using System.Collections.Generic;
 using AttackFridayMonsters.Formats;
@@ -67,9 +67,9 @@ Setup<BuildData>(setupContext => {
     Log.Logger = log;
 
     return new BuildData {
-        Game = Argument("game", "../GameData/game.3ds"),
-        ToolsDirectory = Argument("tools", "../GameData/tools"),
-        OutputDirectory = Argument("output", "extracted"),
+        Game = Argument("game", "GameData/game.3ds"),
+        ToolsDirectory = Argument("tools", "GameData/tools"),
+        OutputDirectory = Argument("output", "GameData/extracted"),
     };
 });
 
@@ -134,12 +134,12 @@ Task("Export-Texts")
 {
     Information("Card texts");
     data.GetNode("gkk/cardgame/carddata.bin/File0.bin")
-        .TransformWith<BinaryFormat, Po>(CardDataToPo.CreateForId(0))
+        .TransformWith<CardDataToPo, int>(0)
         .TransformWith<Po2Binary>()
         .Stream.WriteTo($"{data.TextDirectory}/cardinfo.po");
 
     data.GetNode("gkk/cardgame/carddata.bin/File25.bin")
-        .TransformWith<BinaryFormat, Po>(CardDataToPo.CreateForId(25))
+        .TransformWith<CardDataToPo, int>(25)
         .TransformWith<Po2Binary>()
         .Stream.WriteTo($"{data.TextDirectory}/cardgame_dialogs.po");
 
@@ -170,6 +170,21 @@ Task("Export-Texts")
 
     Warning("TODO: Text from code");
     Warning("TODO: Text from bclyt");
+    // "/title/blyt/save_load.bclyt"
+    // "/title/blyt/sta_menu.bclyt"
+    // "/cardlyt/blyt/kbattle_sita.bclyt"
+    // "/notebook/blyt/techo_sita.bclyt"
+    // "/notebook/blyt/techo_ue.bclyt"
+    // "/sub_screen0/blyt/auto_save.bclyt"
+    // "/sub_screen0/blyt/epi_titile.bclyt"
+    // "/sub_screen0/blyt/msgWin_and_cardBattle.bclyt"
+    // "/sub_screen0/blyt/piece_get.bclyt"
+    // "/sub_screen0/blyt/sub_card_sita.bclyt"
+    // "/sub_screen0/blyt/sub_card_ue.bclyt"
+    // "/sub_screen0/blyt/sub_epi.bclyt"
+    // "/sub_screen0/blyt/sub_piece.bclyt"
+    // "/sub_screen0/blyt/sub_tool.bclyt"
+    // "/sub_screen0/blyt/tool_save.bclyt"
 });
 
 Task("Export-Images")
@@ -336,7 +351,7 @@ Task("Export-Images")
     };
     ExtractCgfxImages(data, "gkk/cardgame/cardtex.bin", cardtexImages);
 
-    Warning("TODO: 3D textures");
+    Warning("TODO: 3D textures (result_make, result_kachi, result_aiko");
 });
 
 void ExtractBclimImages(BuildData data, string rootPath, params string[] children)
