@@ -12,8 +12,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#addin nuget:?package=Yarhl&version=2.0.0
-#addin nuget:?package=Yarhl.Media&version=2.0.0
+#addin nuget:?package=Yarhl&version=3.0.0-alpha06&prerelease
+#addin nuget:?package=Yarhl.Media&version=3.0.0-alpha06&prerelease
+#addin nuget:?package=Serilog&version=2.8.0
+#addin nuget:?package=Serilog.Sinks.Console&version=3.0.1
+#addin nuget:?package=Serilog.Sinks.ColoredConsole&version=3.0.1
+
 #r "../Programs/AttackFridayMonsters/AttackFridayMonsters.Formats/bin/Debug/netstandard2.0/AttackFridayMonsters.Formats.dll"
 #r "../../Lemon/src/Lemon/bin/Debug/netstandard2.0/Lemon.dll"
 
@@ -23,9 +27,10 @@ using AttackFridayMonsters.Formats.Compression;
 using AttackFridayMonsters.Formats.Container;
 using AttackFridayMonsters.Formats.Text;
 using Lemon.Containers;
-using Yarhl.FileFormat;
+using Yarhl.IO;
 using Yarhl.FileSystem;
 using Yarhl.Media.Text;
+using Serilog;
 
 var target = Argument("target", "Default");
 
@@ -56,6 +61,11 @@ public class BuildData
 }
 
 Setup<BuildData>(setupContext => {
+    var log = new LoggerConfiguration()
+        .WriteTo.ColoredConsole(outputTemplate: "{Timestamp:HH:mm} [{SourceContext:l}] {Level}: {Message}{NewLine}{Exception}")
+        .CreateLogger();
+    Log.Logger = log;
+
     return new BuildData {
         Game = Argument("game", "../GameData/game.3ds"),
         ToolsDirectory = Argument("tools", "../GameData/tools"),
@@ -63,7 +73,7 @@ Setup<BuildData>(setupContext => {
     };
 });
 
-Task("Extract-Game")
+Task("Open-Game")
     .Does<BuildData>(data =>
 {
     data.Root = NodeFactory.FromFile(data.Game, "root");
@@ -71,7 +81,12 @@ Task("Extract-Game")
     if (data.Root.Children.Count == 0) {
         throw new Exception("Game folder is empty!");
     }
+});
 
+Task("Extract-System")
+    .IsDependentOn("Open-Game")
+    .Does<BuildData>(data =>
+{
     Warning("TODO: Extract manual");
 
     Navigator.SearchNode(data.Root, "/root/program/system/.code")
@@ -80,25 +95,22 @@ Task("Extract-Game")
 });
 
 Task("Unpack")
-    .IsDependentOn("Extract-Game")
+    .IsDependentOn("Open-Game")
     .Does<BuildData>(data =>
 {
-    data.GetNode("gkk/lyt/title.arc").Transform<DarcToBinary, BinaryFormat, NodeContainerFormat>();
-    // var clyt = data.GetNode("gkk/lyt/title.arc/blyt/save_load.bclyt")
-    //     .Transform<Binary2Clyt, BinaryFormat, Clyt>()
-    //     .GetFormatAs<Clyt>();
-    data.GetNode("gkk/lyt/bumper.arc").Transform<DarcToBinary, BinaryFormat, NodeContainerFormat>();
-    data.GetNode("gkk/lyt/movie_low.arc").Transform<DarcToBinary, BinaryFormat, NodeContainerFormat>();
-    data.GetNode("gkk/lyt/notebook.arc").Transform<DarcToBinary, BinaryFormat, NodeContainerFormat>();
-    data.GetNode("gkk/lyt/selwin.arc").Transform<DarcToBinary, BinaryFormat, NodeContainerFormat>();
-    data.GetNode("gkk/lyt/sub_screen.bin").Transform<Ofs3ToBinary, BinaryFormat, NodeContainerFormat>()
-        .Children["File0.bin"].Transform<DarcToBinary, BinaryFormat, NodeContainerFormat>();
+    data.GetNode("gkk/lyt/title.arc").TransformWith<DarcToBinary>();
+    data.GetNode("gkk/lyt/bumper.arc").TransformWith<DarcToBinary>();
+    data.GetNode("gkk/lyt/movie_low.arc").TransformWith<DarcToBinary>();
+    data.GetNode("gkk/lyt/notebook.arc").TransformWith<DarcToBinary>();
+    data.GetNode("gkk/lyt/selwin.arc").TransformWith<DarcToBinary>();
+    data.GetNode("gkk/lyt/sub_screen.bin").TransformWith<Ofs3ToBinary>()
+        .Children["File0.bin"].TransformWith<DarcToBinary>();
 
-    data.GetNode("gkk/cardgame/carddata.bin").Transform<Ofs3ToBinary, BinaryFormat, NodeContainerFormat>();
-    data.GetNode("gkk/cardgame/cardlyt_d.arc").Transform<DarcToBinary, BinaryFormat, NodeContainerFormat>();
-    data.GetNode("gkk/cardgame/cardtex.bin").Transform<Ofs3ToBinary, BinaryFormat, NodeContainerFormat>();
+    data.GetNode("gkk/cardgame/carddata.bin").TransformWith<Ofs3ToBinary>();
+    data.GetNode("gkk/cardgame/cardlyt_d.arc").TransformWith<DarcToBinary>();
+    data.GetNode("gkk/cardgame/cardtex.bin").TransformWith<Ofs3ToBinary>();
 
-    data.GetNode("gkk/episode/episode.bin").Transform<Ofs3ToBinary, BinaryFormat, NodeContainerFormat>();
+    data.GetNode("gkk/episode/episode.bin").TransformWith<Ofs3ToBinary>();
 });
 
 Task("Export-Fonts")
@@ -113,7 +125,7 @@ Task("Export-Fonts")
     };
 
     data.GetNode("gkk/lyt/title.arc/font/kk_KN_Font.bcfnt")
-        .Transform<BinaryFormat, NodeContainerFormat>(fontConverter);
+        .TransformWith(fontConverter);
 });
 
 Task("Export-Texts")
@@ -122,19 +134,19 @@ Task("Export-Texts")
 {
     Information("Card texts");
     data.GetNode("gkk/cardgame/carddata.bin/File0.bin")
-        .Transform<BinaryFormat, Po>(CardDataToPo.CreateForId(0))
-        .Transform<Po2Binary, Po, BinaryFormat>()
+        .TransformWith<BinaryFormat, Po>(CardDataToPo.CreateForId(0))
+        .TransformWith<Po2Binary>()
         .Stream.WriteTo($"{data.TextDirectory}/cardinfo.po");
 
     data.GetNode("gkk/cardgame/carddata.bin/File25.bin")
-        .Transform<BinaryFormat, Po>(CardDataToPo.CreateForId(25))
-        .Transform<Po2Binary, Po, BinaryFormat>()
+        .TransformWith<BinaryFormat, Po>(CardDataToPo.CreateForId(25))
+        .TransformWith<Po2Binary>()
         .Stream.WriteTo($"{data.TextDirectory}/cardgame_dialogs.po");
 
     Information("Story chapters");
     data.GetNode("gkk/episode/episode.bin/epsetting.dat")
-        .Transform<EpisodeSettingsToPo, BinaryFormat, Po>()
-        .Transform<Po2Binary, Po, BinaryFormat>()
+        .TransformWith<EpisodeSettingsToPo>()
+        .TransformWith<Po2Binary>()
         .Stream.WriteTo($"{data.TextDirectory}/episodes_title.po");
 
     Information("Scripts");
@@ -146,12 +158,12 @@ Task("Export-Texts")
         string scriptFile = $"{data.ScriptDirectory}/{mapName}.po";
 
         Node script = map
-            .Transform<Lz11Decompression, BinaryFormat, BinaryFormat>()
-            .Transform<Ofs3ToBinary, BinaryFormat, NodeContainerFormat>()
+            .TransformWith<Lz11Decompression>()
+            .TransformWith<Ofs3ToBinary>()
             .Children["File1.bin"];
         if (script.Stream.Length > 0) {
-            script.Transform<ScriptToPo, BinaryFormat, Po>()
-                .Transform<Po2Binary, Po, BinaryFormat>()
+            script.TransformWith<ScriptToPo>()
+                .TransformWith<Po2Binary>()
                 .Stream.WriteTo(scriptFile);
         }
     }
@@ -340,7 +352,7 @@ void ExtractBclimImages(BuildData data, string rootPath, params string[] childre
         Node childNode = data.GetNode($"{rootPath}/{child}");
         string pngPath = $"{outDir}/{childNode.Name}.png";
 
-        childNode.Transform<BinaryFormat, BinaryFormat>(converter)
+        childNode.TransformWith(converter)
             .Stream.WriteTo(pngPath);
     }
 }
@@ -357,11 +369,12 @@ void ExtractCgfxImages(BuildData data, string rootPath, params string[] children
     foreach (var child in children) {
         Node childNode = data.GetNode($"{rootPath}/{child}");
         converter.OutputDirectory = $"{outDir}/{childNode.Name}";
-        childNode.Transform<BinaryFormat, NodeContainerFormat>(converter);
+        childNode.TransformWith(converter);
     }
 }
 
 Task("Default")
+    .IsDependentOn("Extract-System")
     .IsDependentOn("Export-Fonts")
     .IsDependentOn("Export-Texts")
     .IsDependentOn("Export-Images");

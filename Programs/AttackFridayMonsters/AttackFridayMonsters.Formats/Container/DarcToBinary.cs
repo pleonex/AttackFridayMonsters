@@ -91,7 +91,7 @@ namespace AttackFridayMonsters.Formats.Container
                     node.Tags["darc.lastId"] = size;
                     current = node;
                 } else {
-                    node.Format = new BinaryFormat(source.Stream, offset, size);
+                    node.ChangeFormat(new BinaryFormat(source.Stream, offset, size));
                 }
 
                 currentId++;
