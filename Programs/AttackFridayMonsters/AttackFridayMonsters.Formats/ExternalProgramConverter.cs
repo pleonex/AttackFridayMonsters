@@ -87,7 +87,7 @@ namespace AttackFridayMonsters.Formats
 
             // Read the file into memory so we can delete it.
             var convertedStream = new BinaryFormat();
-            using (var tempStream = new DataStream(tempOutputFile, FileOpenMode.Read)) {
+            using (var tempStream = DataStreamFactory.FromFile(tempOutputFile, FileOpenMode.Read)) {
                 tempStream.WriteTo(convertedStream.Stream);
             }
 

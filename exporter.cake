@@ -12,8 +12,8 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#addin nuget:?package=Yarhl&version=3.0.0-alpha07&prerelease
-#addin nuget:?package=Yarhl.Media&version=3.0.0-alpha07&prerelease
+#addin nuget:?package=Yarhl&version=3.0.0-alpha07&loaddependencies=true&prerelease
+#addin nuget:?package=Yarhl.Media&version=3.0.0-alpha07&loaddependencies=true&prerelease
 #addin nuget:?package=Serilog&version=2.8.0
 #addin nuget:?package=Serilog.Sinks.Console&version=3.0.1
 #addin nuget:?package=Serilog.Sinks.ColoredConsole&version=3.0.1
@@ -117,9 +117,10 @@ Task("Export-Fonts")
     .IsDependentOn("Unpack")
     .Does<BuildData>(data =>
 {
+    var scriptPath = MakeAbsolute(File($"{data.ToolsDirectory}/bcfnt.py"));
     var fontConverter = new ExternalProgramNodeConverter {
         Program = "python",
-        Arguments = $"{data.ToolsDirectory}/bcfnt.py -x -y -f <in>",
+        Arguments = $"{scriptPath} -x -y -f <in>",
         WorkingDirectory = data.FontDirectory,
         WorkingDirectoryAsOutput = true
     };

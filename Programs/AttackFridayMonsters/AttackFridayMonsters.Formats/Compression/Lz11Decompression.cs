@@ -18,8 +18,8 @@
 namespace AttackFridayMonsters.Formats.Compression
 {
     using System;
-    using Yarhl.IO;
     using Yarhl.FileFormat;
+    using Yarhl.IO;
 
     /// <summary>
     /// Decompress a stream with the LZ11 algorithm.
@@ -76,10 +76,8 @@ namespace AttackFridayMonsters.Formats.Compression
                 }
             }
 
-            BinaryFormat binary;
-            using (var stream = new DataStream(new System.IO.MemoryStream(output)))
-                binary = new BinaryFormat(stream);
-            return binary;
+            var stream = DataStreamFactory.FromStream(new System.IO.MemoryStream(output));
+            return new BinaryFormat(stream);
         }
 
         void ReadHeader()
@@ -87,7 +85,7 @@ namespace AttackFridayMonsters.Formats.Compression
             if (buffer[idx++] != Id)
                 throw new FormatException("Stream is not LZ11 encoded");
 
-            decompressedLength = (buffer[idx++]) | (buffer[idx++] << 8) | (buffer[idx++] << 16);
+            decompressedLength = buffer[idx++] | (buffer[idx++] << 8) | (buffer[idx++] << 16);
             mask = 0;
         }
 

@@ -3,7 +3,7 @@ Compiler/tools
 Compiler/temp
 build/
 Decompiler/*
-.pyenv
+.env
 tools/*
 !tools/packages.config
 
