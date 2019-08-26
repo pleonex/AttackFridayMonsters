@@ -6,6 +6,7 @@ Decompiler/*
 .env
 tools/*
 !tools/packages.config
+.vscode/
 
 # C# Projects
 .addins

@@ -33,6 +33,8 @@ namespace AttackFridayMonsters.Formats
 
         public string WorkingDirectory { get; set; }
 
+        public string FileName { get; set; }
+
         public BinaryFormat Convert(BinaryFormat source)
         {
             if (source == null)
@@ -42,7 +44,11 @@ namespace AttackFridayMonsters.Formats
                 throw new FormatException("Missing input in arguments");
 
             // Save stream into temporal file
-            string tempInputFile = Path.GetTempFileName();
+            string tempInputFolder = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(tempInputFolder);
+
+            string tempInputName = string.IsNullOrEmpty(FileName) ? "input.bin" : FileName;
+            string tempInputFile = Path.Combine(tempInputFolder, tempInputName);
             source.Stream.WriteTo(tempInputFile);
 
             // Get or create the output file
@@ -66,7 +72,8 @@ namespace AttackFridayMonsters.Formats
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.ErrorDialog = false;
-            process.StartInfo.RedirectStandardOutput = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
 
             if (!string.IsNullOrEmpty(WorkingDirectory)) {
                 if (!Directory.Exists(WorkingDirectory)) {
@@ -80,9 +87,9 @@ namespace AttackFridayMonsters.Formats
             process.WaitForExit();
 
             if (process.ExitCode != 0) {
-                DeleteIfExists(tempInputFile);
+                Directory.Delete(tempInputFolder, true);
                 DeleteIfExists(tempOutputFile);
-                throw new Exception($"Error running: {Program} {args}");
+                throw new Exception($"Error running: {Program} {args} {process.StandardError.ReadToEnd()} {process.StandardOutput.ReadToEnd()}");
             }
 
             // Read the file into memory so we can delete it.
@@ -91,7 +98,7 @@ namespace AttackFridayMonsters.Formats
                 tempStream.WriteTo(convertedStream.Stream);
             }
 
-            DeleteIfExists(tempInputFile);
+            Directory.Delete(tempInputFolder, true);
             DeleteIfExists(tempOutputFile);
             return convertedStream;
         }

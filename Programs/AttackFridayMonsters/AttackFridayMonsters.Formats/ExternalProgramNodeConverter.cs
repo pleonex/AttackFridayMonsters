@@ -35,6 +35,8 @@ namespace AttackFridayMonsters.Formats
 
         public string OutputDirectory { get; set; }
 
+        public string FileName { get; set; }
+
         public string WorkingDirectory { get; set; }
 
         public bool WorkingDirectoryAsOutput { get; set; }
@@ -50,7 +52,11 @@ namespace AttackFridayMonsters.Formats
                 throw new FormatException("Missing output in arguments");
 
             // Save stream into temporal file
-            string tempInputFile = Path.GetTempFileName();
+            string tempInputFolder = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(tempInputFolder);
+
+            string tempInputName = string.IsNullOrEmpty(FileName) ? "input.bin" : FileName;
+            string tempInputFile = Path.Combine(tempInputFolder, tempInputName);
             source.Stream.WriteTo(tempInputFile);
 
             // Get or create the output file
@@ -78,7 +84,8 @@ namespace AttackFridayMonsters.Formats
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.ErrorDialog = false;
-            process.StartInfo.RedirectStandardOutput = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
 
             if (!string.IsNullOrEmpty(WorkingDirectory)) {
                 if (!Directory.Exists(WorkingDirectory)) {
@@ -92,12 +99,12 @@ namespace AttackFridayMonsters.Formats
             process.WaitForExit();
 
             if (process.ExitCode != 0) {
-                DeleteIfExists(tempInputFile);
+                Directory.Delete(tempInputFolder, true);
                 DeleteIfExists(tempOutputPath);
-                throw new Exception($"Error running: {Program} {args}");
+                throw new Exception($"Error running: {Program} {args} {process.StandardOutput.ReadToEnd()} {process.StandardError.ReadToEnd()}");
             }
 
-            DeleteIfExists(tempInputFile);
+            Directory.Delete(tempInputFolder, true);
             return NodeFactory.FromDirectory(tempOutputPath)
                 .GetFormatAs<NodeContainerFormat>();
         }

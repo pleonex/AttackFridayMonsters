@@ -1,4 +1,4 @@
-//  Copyright (c) 2018 Benito Palacios Sanchez
+//  Copyright (c) 2019 Benito Palacios Sanchez
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -27,36 +27,60 @@ using AttackFridayMonsters.Formats.Compression;
 using AttackFridayMonsters.Formats.Container;
 using AttackFridayMonsters.Formats.Text;
 using Lemon.Containers;
+using Lemon.Containers.Converters;
 using Yarhl.IO;
 using Yarhl.FileSystem;
 using Yarhl.Media.Text;
 using Serilog;
 
+const string TitleId = "00040000000E7500";
 var target = Argument("target", "Default");
 
 public class BuildData
 {
+    List<string> modifiedNodes = new List<string>();
+
     public string Game { get; set; }
 
     public string ToolsDirectory { get; set; }
 
+    public string TranslationDirectory { get; set; }
+
     public string OutputDirectory { get; set; }
 
-    public string InternalDirectory { get { return $"{OutputDirectory}/internal"; } }
+    public string LumaDirectory { get; set; }
 
-    public string ImageDirectory { get { return $"{OutputDirectory}/images"; } }
+    public string InternalDirectory { get { return $"{TranslationDirectory}/Internal"; } }
 
-    public string FontDirectory { get { return $"{OutputDirectory}/fonts"; } }
+    public string ImageDirectory { get { return $"{TranslationDirectory}/Images"; } }
 
-    public string TextDirectory { get { return $"{OutputDirectory}/texts"; } }
+    public string FontDirectory { get { return $"{TranslationDirectory}/Fonts"; } }
 
-    public string ScriptDirectory { get { return $"{TextDirectory}/scripts"; } }
+    public string TextDirectory { get { return $"{TranslationDirectory}/Texts"; } }
+
+    public string ScriptDirectory { get { return $"{TranslationDirectory}/Scripts"; } }
 
     public Node Root { get; set; }
 
     public Node GetNode(string path)
     {
+        if (!modifiedNodes.Contains(path)) {
+            modifiedNodes.Add(path);
+        }
+
         return Navigator.SearchNode(Root, $"/root/program/rom/{path}");
+    }
+
+    public void ExportToLuma()
+    {
+        foreach (var path in modifiedNodes) {
+            var node = Navigator.SearchNode(Root, $"/root/program/rom/{path}");
+            if (node == null) {
+                continue;
+            }
+
+            node.Stream.WriteTo($"{LumaDirectory}/romfs/{path}");
+        }
     }
 }
 
@@ -69,7 +93,9 @@ Setup<BuildData>(setupContext => {
     return new BuildData {
         Game = Argument("game", "GameData/game.3ds"),
         ToolsDirectory = Argument("tools", "GameData/tools"),
-        OutputDirectory = Argument("output", "GameData/extracted"),
+        OutputDirectory = Argument("output", "GameData/output"),
+        LumaDirectory = Argument("luma", $"GameData/luma/titles/{TitleId}"),
+        TranslationDirectory = Argument("translation", "Spanish/es"),
     };
 });
 
@@ -83,17 +109,11 @@ Task("Open-Game")
     }
 });
 
-Task("Extract-System")
+Task("Import-System")
     .IsDependentOn("Open-Game")
     .Does<BuildData>(data =>
 {
-    Warning("TODO: Extract manual");
-
-    Navigator.SearchNode(data.Root, "/root/program/system/.code")
-        .Stream.WriteTo($"{data.InternalDirectory}/code.bin");
-
-    Warning("TODO: Text from code");
-    Warning("TODO: Extract logo and game names");
+    Warning("TODO: Import text into code.bin");
 });
 
 Task("Unpack")
@@ -115,81 +135,62 @@ Task("Unpack")
     data.GetNode("gkk/episode/episode.bin").TransformWith<Ofs3ToBinary>();
 });
 
-Task("Export-Fonts")
+Task("Import-Font")
     .IsDependentOn("Unpack")
     .Does<BuildData>(data =>
 {
     var scriptPath = MakeAbsolute(File($"{data.ToolsDirectory}/bcfnt.py"));
-    var fontConverter = new ExternalProgramNodeConverter {
+    var fontConverter = new ExternalProgramConverter {
         Program = "python",
-        Arguments = $"{scriptPath} -x -y -f <in>",
+        Arguments = $"{scriptPath} -c -y -f <inout>",
         WorkingDirectory = data.FontDirectory,
-        WorkingDirectoryAsOutput = true
+        FileName = "kk_KN_Font.bcfnt",
     };
 
     data.GetNode("gkk/lyt/title.arc/font/kk_KN_Font.bcfnt")
         .TransformWith(fontConverter);
 });
 
-Task("Export-Texts")
+Node ChangeStream(BuildData data, string nodePath, string filePath)
+{
+    var node = data.GetNode(nodePath);
+    var newStream = DataStreamFactory.FromFile(filePath, FileOpenMode.Read);
+    node.ChangeFormat(new BinaryFormat(newStream));
+
+    return node;
+}
+
+Task("Import-Texts")
     .IsDependentOn("Unpack")
     .Does<BuildData>(data =>
 {
     Information("Card texts");
-    data.GetNode("gkk/cardgame/carddata.bin/File0.bin")
-        .TransformWith<CardDataToPo, int>(0)
+    ChangeStream(data, "gkk/cardgame/carddata.bin/File0.bin", $"{data.TextDirectory}/cardinfo.po")
         .TransformWith<Po2Binary>()
-        .Stream.WriteTo($"{data.TextDirectory}/cardinfo.po");
+        .TransformWith<CardDataToPo, int>(0);
 
-    data.GetNode("gkk/cardgame/carddata.bin/File25.bin")
-        .TransformWith<CardDataToPo, int>(25)
+    ChangeStream(data, "gkk/cardgame/carddata.bin/File25.bin", $"{data.TextDirectory}/cardgame_dialogs.po")
         .TransformWith<Po2Binary>()
-        .Stream.WriteTo($"{data.TextDirectory}/cardgame_dialogs.po");
+        .TransformWith<CardDataToPo, int>(25);
 
     Information("Story chapters");
-    data.GetNode("gkk/episode/episode.bin/epsetting.dat")
-        .TransformWith<EpisodeSettingsToPo>()
+    Node episodes = data.GetNode("gkk/episode/episode.bin/epsetting.dat");
+    DataStream episodesOrig = episodes.Stream;
+    DataStream episodesNew = DataStreamFactory.FromFile(
+        $"{data.TextDirectory}/episodes_title.po",
+        FileOpenMode.Read);
+
+    episodes.ChangeFormat(new BinaryFormat(episodesNew), disposePreviousFormat: false);
+    episodes
         .TransformWith<Po2Binary>()
-        .Stream.WriteTo($"{data.TextDirectory}/episodes_title.po");
+        .TransformWith<EpisodeSettingsToPo, DataStream>(episodesOrig);
+    episodesOrig.Dispose();
 
-    Information("Scripts");
-    var maps = data.GetNode("gkk/map_gz").Children
-        .Where(n => n.Name[0] == 'A' || n.Name[0] == 'B');
-
-    foreach (var map in maps) {
-        string mapName = map.Name.Substring(0, map.Name.IndexOf("."));
-        string scriptFile = $"{data.ScriptDirectory}/{mapName}.po";
-
-        Node script = map
-            .TransformWith<Lz11Decompression>()
-            .TransformWith<Ofs3ToBinary>()
-            .Children["File1.bin"];
-        if (script.Stream.Length > 0) {
-            script.TransformWith<ScriptToPo>()
-                .TransformWith<Po2Binary>()
-                .Stream.WriteTo(scriptFile);
-        }
-    }
-
-    Warning("TODO: Text from bclyt");
-    // "/title/blyt/save_load.bclyt"
-    // "/title/blyt/sta_menu.bclyt"
-    // "/cardlyt/blyt/kbattle_sita.bclyt"
-    // "/notebook/blyt/techo_sita.bclyt"
-    // "/notebook/blyt/techo_ue.bclyt"
-    // "/sub_screen0/blyt/auto_save.bclyt"
-    // "/sub_screen0/blyt/epi_titile.bclyt"
-    // "/sub_screen0/blyt/msgWin_and_cardBattle.bclyt"
-    // "/sub_screen0/blyt/piece_get.bclyt"
-    // "/sub_screen0/blyt/sub_card_sita.bclyt"
-    // "/sub_screen0/blyt/sub_card_ue.bclyt"
-    // "/sub_screen0/blyt/sub_epi.bclyt"
-    // "/sub_screen0/blyt/sub_piece.bclyt"
-    // "/sub_screen0/blyt/sub_tool.bclyt"
-    // "/sub_screen0/blyt/tool_save.bclyt"
+    Warning("TODO: Import scripts");
+    Warning("TODO: Import bclyt");
 });
 
-Task("Export-Images")
+Task("Import-Images")
     .IsDependentOn("Unpack")
     .Does<BuildData>(data =>
 {
@@ -203,7 +204,7 @@ Task("Export-Images")
         "timg/head_save.bclim",
         "timg/title_rogo.bclim"
     };
-    ExtractBclimImages(data, "gkk/lyt/title.arc", titleImages);
+    ImportBclimImages(data, "gkk/lyt/title.arc", titleImages);
 
     var bumperImages = new[] {
         "timg/ex_msg_A.bclim",
@@ -211,7 +212,7 @@ Task("Export-Images")
         "timg/ex_msg_C.bclim",
         "timg/stereo_ji.bclim",
     };
-    ExtractBclimImages(data, "gkk/lyt/bumper.arc", bumperImages);
+    ImportBclimImages(data, "gkk/lyt/bumper.arc", bumperImages);
 
     var cardlytImages = new[] {
         "timg/butji_mdr.bclim",
@@ -225,12 +226,12 @@ Task("Export-Images")
         "timg/mai_4.bclim",
         "timg/mai_5.bclim",
     };
-    ExtractBclimImages(data, "gkk/cardgame/cardlyt_d.arc", cardlytImages);
+    ImportBclimImages(data, "cardlyt", "gkk/cardgame/cardlyt_d.arc", cardlytImages);
 
     var moviewLowImages = new[] {
         "timg/skip_ji.bclim",
     };
-    ExtractBclimImages(data, "gkk/lyt/movie_low.arc", moviewLowImages);
+    ImportBclimImages(data, "gkk/lyt/movie_low.arc", moviewLowImages);
 
     var notebookImages = new[] {
         "timg/auto_moji.bclim",
@@ -254,13 +255,13 @@ Task("Export-Images")
         "timg/page_13.bclim",
         "timg/page_14.bclim",
     };
-    ExtractBclimImages(data, "gkk/lyt/notebook.arc", notebookImages);
+    ImportBclimImages(data, "gkk/lyt/notebook.arc", notebookImages);
 
     var selwinImages = new[] {
         "timg/butji_n.bclim",
         "timg/butji_y.bclim",
     };
-    ExtractBclimImages(data, "gkk/lyt/selwin.arc", selwinImages);
+    ImportBclimImages(data, "gkk/lyt/selwin.arc", selwinImages);
 
     var subscreen0Images = new[] {
         "timg/A_moji.bclim",
@@ -344,54 +345,106 @@ Task("Export-Images")
         "timg/tub_tool.bclim",
         "timg/zenz_mk_a.bclim",
     };
-    ExtractBclimImages(data, "gkk/lyt/sub_screen.bin/File0.bin", subscreen0Images);
+    ImportBclimImages(data, "sub_screen", "gkk/lyt/sub_screen.bin/File0.bin", subscreen0Images);
 
-    var cardtexImages = new[] {
-        "File66.bin",
-        "File68.bin",
-        "File69.bin",
-    };
-    ExtractCgfxImages(data, "gkk/cardgame/cardtex.bin", cardtexImages);
+    ImportCgfxImages(data, "gkk/cardgame/cardtex.bin/File66.bin", "cardtex", "result_aiko.png");
+    ImportCgfxImages(data, "gkk/cardgame/cardtex.bin/File68.bin", "cardtex", "result_kachi.png");
+    ImportCgfxImages(data, "gkk/cardgame/cardtex.bin/File69.bin", "cardtex", "result_make.png");
 });
 
-void ExtractBclimImages(BuildData data, string rootPath, params string[] children)
+void ImportBclimImages(BuildData data, string rootPath, params string[] children)
 {
     Node root = data.GetNode(rootPath);
-    string outDir = $"{data.ImageDirectory}/{root.Name}";
-    var converter = new ExternalProgramConverter {
-        Program = $"{data.ToolsDirectory}/bclimtool",
-        Arguments = "-dfp <in> <out>",
-    };
+    string rootName = System.IO.Path.GetFileNameWithoutExtension(root.Name);
 
-    foreach (var child in children) {
-        Node childNode = data.GetNode($"{rootPath}/{child}");
-        string pngPath = $"{outDir}/{childNode.Name}.png";
-
-        childNode.TransformWith(converter)
-            .Stream.WriteTo(pngPath);
-    }
+    ImportBclimImages(data, rootName, rootPath, children);
 }
 
-void ExtractCgfxImages(BuildData data, string rootPath, params string[] children)
+void ImportBclimImages(BuildData data, string rootName, string rootPath, params string[] children)
 {
-    Node root = data.GetNode(rootPath);
-    string outDir = $"{data.ImageDirectory}/{root.Name}";
-    var converter = new ExternalProgramNodeConverter {
-        Program = $"{data.ToolsDirectory}/txobtool",
-        Arguments = "-efd <in> <out>",
-    };
+    string outDir = $"{data.ImageDirectory}/{rootName}";
 
     foreach (var child in children) {
         Node childNode = data.GetNode($"{rootPath}/{child}");
-        converter.OutputDirectory = $"{outDir}/{childNode.Name}";
+        string name = System.IO.Path.GetFileNameWithoutExtension(childNode.Name);
+        string pngPath = System.IO.Path.GetFullPath($"{outDir}/{name}.png");
+        var converter = new ExternalProgramConverter {
+            Program = $"{data.ToolsDirectory}/bclimtool",
+            Arguments = $"-efp <inout> {pngPath}",
+        };
+
         childNode.TransformWith(converter);
     }
 }
 
+void ImportCgfxImages(BuildData data, string node, string dirName, string fileName)
+{
+    string tempInputFolder = System.IO.Path.Combine(
+        System.IO.Path.GetTempPath(),
+        System.IO.Path.GetRandomFileName());
+    System.IO.Directory.CreateDirectory(tempInputFolder);
+
+    string imagePath = System.IO.Path.GetFullPath($"{data.ImageDirectory}/{dirName}/{fileName}");
+    string outputPath = System.IO.Path.Combine(tempInputFolder, fileName);
+    System.IO.File.Copy(imagePath, outputPath);
+
+    var converter = new ExternalProgramConverter {
+        Program = $"{data.ToolsDirectory}/txobtool",
+        Arguments = $"-ifd <inout> {tempInputFolder}",
+    };
+
+    data.GetNode(node).TransformWith(converter);
+    System.IO.Directory.Delete(tempInputFolder, true);
+}
+
+Task("Pack")
+    .IsDependentOn("Unpack")
+    .Does<BuildData>(data =>
+{
+    data.GetNode("gkk/lyt/title.arc").TransformWith<DarcToBinary>();
+    data.GetNode("gkk/lyt/bumper.arc").TransformWith<DarcToBinary>();
+    data.GetNode("gkk/lyt/movie_low.arc").TransformWith<DarcToBinary>();
+    data.GetNode("gkk/lyt/notebook.arc").TransformWith<DarcToBinary>();
+    data.GetNode("gkk/lyt/selwin.arc").TransformWith<DarcToBinary>();
+
+    data.GetNode("gkk/lyt/sub_screen.bin/File0.bin").TransformWith<DarcToBinary>();
+    data.GetNode("gkk/lyt/sub_screen.bin").TransformWith<Ofs3ToBinary>();
+    data.GetNode("gkk/cardgame/carddata.bin").TransformWith<Ofs3ToBinary>();
+
+    data.GetNode("gkk/cardgame/cardlyt_d.arc").TransformWith<DarcToBinary>();
+    data.GetNode("gkk/cardgame/cardtex.bin").TransformWith<Ofs3ToBinary>();
+
+    data.GetNode("gkk/episode/episode.bin").TransformWith<Ofs3ToBinary>();
+});
+
+Task("Save-Game")
+    .IsDependentOn("Open-Game")
+    .Does<BuildData>(data =>
+{
+    // Generate the luma folder
+    data.ExportToLuma();
+
+    // Generate ExeFS and RomFS files because most emulators / CFW support
+    // this kind "layered FS". In the future, Lemon may implement NCSD / CIA
+    // generation so we could generate them too.
+    // Citra is not stable yet to read the files.
+    // var program = data.Root.Children["program"];
+    // program.Children["system"]
+    //     .TransformWith<BinaryExeFs2NodeContainer>()
+    //     .Stream.WriteTo($"{data.OutputDirectory}/game.3ds.exefs");
+    // program.Children["rom"]
+    //     .TransformWith<NodeContainer2BinaryIvfc>()
+    //     .Stream.WriteTo($"{data.OutputDirectory}/game.3ds.romfs");
+});
+
 Task("Default")
-    .IsDependentOn("Extract-System")
-    .IsDependentOn("Export-Fonts")
-    .IsDependentOn("Export-Texts")
-    .IsDependentOn("Export-Images");
+    .IsDependentOn("Open-Game")
+    .IsDependentOn("Import-System")
+    .IsDependentOn("Unpack")
+    .IsDependentOn("Import-Font")
+    .IsDependentOn("Import-Texts")
+    .IsDependentOn("Import-Images")
+    .IsDependentOn("Pack")
+    .IsDependentOn("Save-Game");
 
 RunTarget(target);

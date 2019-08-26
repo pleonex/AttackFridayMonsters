@@ -26,10 +26,16 @@ namespace AttackFridayMonsters.Formats.Text
     using Yarhl.Media.Text;
 
     public class EpisodeSettingsToPo :
+        IInitializer<DataStream>,
         IConverter<BinaryFormat, Po>,
         IConverter<Po, BinaryFormat>
     {
-        public DataStream Original { get; set; }
+        public DataStream Original { get; private set; }
+
+        public void Initialize(DataStream original)
+        {
+            Original = original;
+        }
 
         public BinaryFormat Convert(Po source)
         {
