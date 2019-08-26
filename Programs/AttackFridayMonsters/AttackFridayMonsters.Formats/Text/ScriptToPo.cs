@@ -27,6 +27,7 @@ namespace AttackFridayMonsters.Formats.Text
     using Yarhl.Media.Text;
 
     public class ScriptToPo :
+        IInitializer<DataStream>,
         IConverter<BinaryFormat, Po>,
         IConverter<Po, BinaryFormat>
     {
@@ -50,7 +51,12 @@ namespace AttackFridayMonsters.Formats.Text
             { 0x014, "Probably an Alien" },
         };
 
-        public DataStream OriginalScript { get; set; }
+        public DataStream OriginalScript { get; private set; }
+
+        public void Initialize(DataStream original)
+        {
+            OriginalScript = original;
+        }
 
         public BinaryFormat Convert(Po source)
         {

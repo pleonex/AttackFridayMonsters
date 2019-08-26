@@ -58,7 +58,7 @@ public class BuildData
 
     public string TextDirectory { get { return $"{TranslationDirectory}/Texts"; } }
 
-    public string ScriptDirectory { get { return $"{TranslationDirectory}/Scripts"; } }
+    public string ScriptDirectory { get { return $"{TranslationDirectory}/Texts/Scripts"; } }
 
     public Node Root { get; set; }
 
@@ -79,7 +79,13 @@ public class BuildData
                 continue;
             }
 
-            node.Stream.WriteTo($"{LumaDirectory}/romfs/{path}");
+            if (node.IsContainer) {
+                foreach (var child in node.Children) {
+                    child.Stream.WriteTo($"{LumaDirectory}/romfs/{path}/{child.Name}");
+                }
+            } else {
+                node.Stream.WriteTo($"{LumaDirectory}/romfs/{path}");
+            }
         }
     }
 }
@@ -149,6 +155,8 @@ Task("Import-Font")
 
     data.GetNode("gkk/lyt/title.arc/font/kk_KN_Font.bcfnt")
         .TransformWith(fontConverter);
+    data.GetNode("gkk/lyt/sub_screen.bin/File0.bin/font/kk_KN_Font.bcfnt")
+        .TransformWith(fontConverter);
 });
 
 Node ChangeStream(BuildData data, string nodePath, string filePath)
@@ -186,7 +194,37 @@ Task("Import-Texts")
         .TransformWith<EpisodeSettingsToPo, DataStream>(episodesOrig);
     episodesOrig.Dispose();
 
-    Warning("TODO: Import scripts");
+    Information("Scripts");
+    var compressionConverter = new ExternalProgramConverter {
+        Program = $"{data.ToolsDirectory}/lzx",
+        Arguments = "-evb <inout>",
+    };
+    var maps = data.GetNode("gkk/map_gz").Children
+        .Where(n => n.Name[0] == 'A' || n.Name[0] == 'B');
+
+    foreach (var map in maps) {
+        string mapName = map.Name.Substring(0, map.Name.IndexOf("."));
+        string scriptFile = $"{data.ScriptDirectory}/{mapName}.po";
+
+        Node script = map
+            .TransformWith<Lz11Decompression>()
+            .TransformWith<Ofs3ToBinary>()
+            .Children["File1.bin"];
+
+        if (script.Stream.Length > 0) {
+            var original = script.Stream;
+            var modified = DataStreamFactory.FromFile(scriptFile, FileOpenMode.Read);
+
+            Information(scriptFile);
+            script.ChangeFormat(new BinaryFormat(modified), false);
+            script.TransformWith<Po2Binary>()
+                .TransformWith<ScriptToPo, DataStream>(original);
+            original.Dispose();
+        }
+
+        map.TransformWith<Ofs3ToBinary>().TransformWith(compressionConverter);
+    }
+
     Warning("TODO: Import bclyt");
 });
 
