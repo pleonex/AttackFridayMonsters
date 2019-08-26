@@ -28,21 +28,27 @@ namespace AttackFridayMonsters.Formats.Text
 
     public class BclytToPo :
         IConverter<BinaryFormat, Po>,
-        IConverter<Tuple<BinaryFormat, Po>, BinaryFormat>
+        IInitializer<DataStream>,
+        IConverter<Po, BinaryFormat>
     {
-        public BinaryFormat Convert(Tuple<BinaryFormat, Po> source)
+        public DataStream Original { get; private set; }
+
+        public void Initialize(DataStream original)
+        {
+            Original = original;
+        }
+
+        public BinaryFormat Convert(Po source)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
-            if (source.Item1 == null)
-                throw new ArgumentNullException(nameof(BinaryFormat));
-            if (source.Item2 == null)
-                throw new ArgumentNullException(nameof(Po));
+            if (Original == null)
+                throw new ArgumentNullException(nameof(Original));
 
             BinaryFormat binary = new BinaryFormat();
             DataWriter writer = new DataWriter(binary.Stream);
 
-            DataReader reader = new DataReader(source.Item1.Stream);
+            DataReader reader = new DataReader(Original);
             reader.Stream.Position = 0;
 
             // Header
@@ -60,7 +66,7 @@ namespace AttackFridayMonsters.Formats.Text
             writer.Write(numSections);
 
             Encoding encoding = Encoding.GetEncoding("utf-16");
-            Queue<PoEntry> entries = new Queue<PoEntry>(source.Item2.Entries);
+            Queue<PoEntry> entries = new Queue<PoEntry>(source.Entries);
             for (int i = 0; i < numSections; i++) {
                 string section = reader.ReadString(4);
                 int size = reader.ReadInt32();

@@ -60,6 +60,8 @@ public class BuildData
 
     public string ScriptDirectory { get { return $"{TranslationDirectory}/Texts/Scripts"; } }
 
+    public string LayoutDirectory { get { return $"{TranslationDirectory}/Texts/Layouts"; } }
+
     public Node Root { get; set; }
 
     public Node GetNode(string path)
@@ -194,6 +196,43 @@ Task("Import-Texts")
         .TransformWith<EpisodeSettingsToPo, DataStream>(episodesOrig);
     episodesOrig.Dispose();
 
+    Information("Layout");
+    ImportBclyt(data, "gkk/lyt/title.arc/blyt/save_load.bclyt", "title/save_load.po");
+    ImportBclyt(data, "gkk/lyt/title.arc/blyt/sta_menu.bclyt", "title/sta_menu.po");
+    ImportBclyt(data, "gkk/cardgame/cardlyt_d.arc/blyt/kbattle_sita.bclyt", "cardlyt/kbattle_sita.po");
+    ImportBclyt(data, "gkk/lyt/notebook.arc/blyt/techo_sita.bclyt", "notebook/techo_sita.po");
+    ImportBclyt(data, "gkk/lyt/notebook.arc/blyt/techo_ue.bclyt", "notebook/techo_ue.po");
+    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/auto_save.bclyt", "subscreen/auto_save.po");
+    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/epi_titile.bclyt", "subscreen/epi_titile.po");
+    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/msgWin_and_cardBattle.bclyt", "subscreen/msgWin_and_cardBattle.po");
+    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/piece_get.bclyt", "subscreen/piece_get.po");
+    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_card_sita.bclyt", "subscreen/sub_card_sita.po");
+    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_card_ue.bclyt", "subscreen/sub_card_ue.po");
+    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_epi.bclyt", "subscreen/sub_epi.po");
+    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_piece.bclyt", "subscreen/sub_piece.po");
+    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_tool.bclyt", "subscreen/sub_tool.po");
+    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/tool_save.bclyt", "subscreen/tool_save.po");
+});
+
+void ImportBclyt(BuildData data, string node, string poPath)
+{
+    Node bclyt = data.GetNode(node);
+    DataStream bclytOrig = bclyt.Stream;
+    DataStream bclytNew = DataStreamFactory.FromFile(
+        $"{data.LayoutDirectory}/{poPath}",
+        FileOpenMode.Read);
+
+    bclyt.ChangeFormat(new BinaryFormat(bclytNew), disposePreviousFormat: false);
+    bclyt
+        .TransformWith<Po2Binary>()
+        .TransformWith<BclytToPo, DataStream>(bclytOrig);
+    bclytOrig.Dispose();
+}
+
+Task("Import-Scripts")
+    .IsDependentOn("Unpack")
+    .Does<BuildData>(data =>
+{
     Information("Scripts");
     var compressionConverter = new ExternalProgramConverter {
         Program = $"{data.ToolsDirectory}/lzx",
@@ -224,8 +263,6 @@ Task("Import-Texts")
 
         map.TransformWith<Ofs3ToBinary>().TransformWith(compressionConverter);
     }
-
-    Warning("TODO: Import bclyt");
 });
 
 Task("Import-Images")
@@ -481,6 +518,7 @@ Task("Default")
     .IsDependentOn("Unpack")
     .IsDependentOn("Import-Font")
     .IsDependentOn("Import-Texts")
+    .IsDependentOn("Import-Scripts")
     .IsDependentOn("Import-Images")
     .IsDependentOn("Pack")
     .IsDependentOn("Save-Game");
