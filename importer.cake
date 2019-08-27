@@ -502,14 +502,14 @@ Task("Save-Game")
     // Generate ExeFS and RomFS files because most emulators / CFW support
     // this kind "layered FS". In the future, Lemon may implement NCSD / CIA
     // generation so we could generate them too.
-    // Citra is not stable yet to read the files.
-    // var program = data.Root.Children["program"];
-    // program.Children["system"]
-    //     .TransformWith<BinaryExeFs2NodeContainer>()
-    //     .Stream.WriteTo($"{data.OutputDirectory}/game.3ds.exefs");
-    // program.Children["rom"]
-    //     .TransformWith<NodeContainer2BinaryIvfc>()
-    //     .Stream.WriteTo($"{data.OutputDirectory}/game.3ds.romfs");
+    // Note that Citra is not stable yet to read the files.
+    var program = data.Root.Children["program"];
+    program.Children["system"]
+        .TransformWith<BinaryExeFs2NodeContainer>()
+        .Stream.WriteTo($"{data.OutputDirectory}/game.3ds.exefs");
+    program.Children["rom"]
+        .TransformWith<NodeContainer2BinaryIvfc>()
+        .Stream.WriteTo($"{data.OutputDirectory}/game.3ds.romfs");
 });
 
 Task("Default")
