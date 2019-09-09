@@ -1,17 +1,23 @@
-# Attack of the Friday Monsters! Spanish Translation
-Tools for the Spanish fan-translation of the 3DS video-game: *Attack of the Friday Monsters! A Tokyo Tale*. By [GradienWords](http://gradienwords.es).
+# `Attack of the Friday Monsters!` Spanish Translation Tools
 
-## Dependencies
+Tools for the Spanish fan-translation of the 3DS video-game: *Attack of the Friday Monsters! A Tokyo Tale*. By [GradienWords](https://gradienwords.github.io).
+
+## Tools
+
+### Dependencies
+
 These tools use different languages like C, C# and Python. To compile and use them you need the following prorams:
+
 * CMake: >= 3.0
 * [*Windows*] .NET Framework 4.6.1
 * [*Linux/Mac OS X*] Mono 5.4
-* Python: 2.7 / 3.x
+* Python: 3.7
 * gcc / clang / Visual Studio
 
+### Compile
 
-## Generate tools
 You can use CMake to compile the tools as follows:
+
 ```cmake
 cd Programs
 mkdir build; cd build
@@ -21,25 +27,29 @@ cmake --build . --target install
 
 The tools will be under *GameData/tools*.
 
-## Decompile
-You can get the files to translate using CMake as follows:
-```cmake
-cd Decompiler
-mkdir build; cd build
-cmake ..
-cmake --build .
-```
+## Export files
 
-The files will be under *Decompiler/mod*. CMake variables to change:
-* `DECOMPILER_ROM_FILE`: ROM file to decompile
-* `DECOMPILER_TOOLS_DIR`: Decompilation tools
-* `DECOMPILER_PREFIX`: Root directory for decompilation
-* `DECOMPILER_ROM_DIR`: Directory to store ROM files
-* `DECOMPILER_MOD_DIR`: Directory to store modification files
-* `DECOMPILER_ROM_INTERNAL_DIR`: Directory to store ROM internal data for compilation
+Run `build.ps1` on Windows or `build.sh` on Linux / Mac OS with the argument
+`-script exporter.cake`.
 
-## Compile
-You can generate a new ROM using CMake as follows:
-```cmake
-NOT IMPLEMENTED YET
-```
+The script expects to find the game under `GameData/game.3ds` but you can specify
+another location with the `--game=<path>` argument.
+
+The files will be exported into `GameData/extracted` or any other location specified
+in the `--output` argument.
+
+## Import files
+
+Run `build.ps1` on Windows or `build.sh` on Linux / Mac OS with the argument
+`-script importer.cake`.
+
+The script expects to find the game under `GameData/game.3ds` but you can specify
+another location with the `--game=<path>` argument.
+
+The script expects to find the translated files under `Spanish/es` but you can specify
+another location with the `--translation=<path>` argument.
+
+The patched files will be exported into `GameData/luma` or any other location specified
+in the `--luma` argument. This folder can be copied & pasted directly into your
+SD card. Alternatively, you can find the generated RomFS and ExeFs in the output
+directory.
