@@ -53,3 +53,20 @@ The patched files will be exported into `GameData/luma` or any other location sp
 in the `--luma` argument. This folder can be copied & pasted directly into your
 SD card. Alternatively, you can find the generated RomFS and ExeFs in the output
 directory.
+
+## Credits
+
+* pleonex:
+  * [Yarhl](https://github.com/SceneGate/yarhl)
+  * [Lemon](https://github.com/SceneGate/Lemon)
+  * Custom game converter and formats.
+* CUE:
+  * [blz (de)compressor](https://www.romhacking.net/utilities/826/).
+* ObsidianX:
+  * [Font tool](https://github.com/ObsidianX/3dstools)
+* dnasdw:
+  * [3DS generator](https://github.com/dnasdw/3dstool)
+  * [bclim image tool](https://github.com/dnasdw/bclimtool)
+  * [texture image tool](https://github.com/dnasdw/txobtool)
+* jmacd:
+  * [xdelta](https://github.com/jmacd/xdelta-gpl)
