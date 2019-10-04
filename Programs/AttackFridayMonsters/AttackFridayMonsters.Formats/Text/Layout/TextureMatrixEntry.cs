@@ -1,5 +1,3 @@
-//  BclytToPo.cs
-//
 //  Copyright (c) 2019 SceneGate Team
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -14,17 +12,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-namespace AttackFridayMonsters.Formats.Text
+namespace AttackFridayMonsters.Formats.Text.Layout
 {
-    using System.Collections.Generic;
-    using Yarhl.FileFormat;
-
-    public class Clyt : IFormat
+    public class TextureMatrixEntry
     {
-        List<string> messages = new List<string>();
+        public Vector2 Translation { get; set; }
 
-        public List<string> Messages {
-            get { return messages; }
-        }
+        public float Rotation { get; set; }
+
+        public Vector2 Scale { get; set; }
     }
 }
