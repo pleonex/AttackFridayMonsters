@@ -23,43 +23,43 @@ namespace AttackFridayMonsters.Formats.Text
     using Yarhl.FileFormat;
     using Yarhl.IO;
 
-    public class Clyt2Yml : IConverter<Clyt, BinaryFormat>
+    public class Yml2Clyt : IConverter<Clyt, Clyt>, IInitializer<BinaryFormat>
     {
-        public BinaryFormat Convert(Clyt source)
+        string importedYml;
+
+        public void Initialize(BinaryFormat yml)
+        {
+            importedYml = new TextReader(yml.Stream).ReadToEnd();
+        }
+
+        public Clyt Convert(Clyt source)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            ClytYml ymlClyt = new ClytYml { Layout = source.Layout.Size };
+            ClytYml yml = new DeserializerBuilder()
+                .WithNamingConvention(new UnderscoredNamingConvention())
+                .Build()
+                .Deserialize<ClytYml>(importedYml);
 
             Stack<Panel> stack = new Stack<Panel>();
             stack.Push(source.RootPanel);
             while (stack.Count > 0) {
                 Panel panelClyt = stack.Pop();
-                var ymlPanel = new PanelYml {
-                    Name = panelClyt.Name,
-                    Type = panelClyt.GetType().Name,
-                    Position = panelClyt.Translation,
-                    Scale = panelClyt.Scale,
-                    Size = panelClyt.Size,
-                };
-                ymlClyt.Panels.Add(ymlPanel);
-
                 foreach (var child in panelClyt.Children.Reverse()) {
                     stack.Push(child);
                 }
+
+                // Search and replace content
+                PanelYml panelYml = yml.Panels
+                    .First(x => x.Name == panelClyt.Name);
+
+                panelClyt.Translation = panelYml.Position;
+                panelClyt.Scale = panelYml.Scale;
+                panelClyt.Size = panelYml.Size;
             }
 
-            string yamlText = new SerializerBuilder()
-                .WithNamingConvention(new UnderscoredNamingConvention())
-                .EmitDefaults()
-                .Build()
-                .Serialize(ymlClyt);
-
-            BinaryFormat binary = new BinaryFormat();
-            new TextWriter(binary.Stream).Write(yamlText);
-
-            return binary;
+            return source;
         }
     }
 }

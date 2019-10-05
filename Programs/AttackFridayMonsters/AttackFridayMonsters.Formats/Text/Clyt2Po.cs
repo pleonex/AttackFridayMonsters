@@ -39,13 +39,12 @@ namespace AttackFridayMonsters.Formats.Text
             stack.Push(source.RootPanel);
             while (stack.Count > 0) {
                 Panel panel = stack.Pop();
-                if (panel is TextSection text) {
-                    string original = string.IsNullOrEmpty(text.Text) ? "<empty>" : text.Text;
-
+                if (panel is TextSection text && !string.IsNullOrEmpty(text.Text)) {
                     PoEntry entry = new PoEntry {
                         Context = text.Name,
-                        Original = original,
+                        Original = text.Text,
                     };
+
                     po.Add(entry);
                 }
 

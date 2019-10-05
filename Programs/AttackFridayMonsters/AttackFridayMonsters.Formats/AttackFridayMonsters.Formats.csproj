@@ -28,8 +28,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Yarhl" Version="3.0.0-alpha07" />
-    <PackageReference Include="Yarhl.Media" Version="3.0.0-alpha07" />
+    <PackageReference Include="Yarhl" Version="3.0.0-alpha10" />
+    <PackageReference Include="Yarhl.Media" Version="3.0.0-alpha10" />
     <PackageReference Include="YamlDotNet" Version="6.1.2" />
   </ItemGroup>
 </Project>
