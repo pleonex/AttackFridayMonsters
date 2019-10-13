@@ -34,7 +34,7 @@ namespace AttackFridayMonsters.Formats.Text.Layout
 
         public Vector2 Scale { get; set; }
 
-        public Vector2 Size { get; set; }
+        public Size Size { get; set; }
 
         public Panel Parent { get; set; }
 

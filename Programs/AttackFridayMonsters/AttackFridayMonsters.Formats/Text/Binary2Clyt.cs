@@ -188,6 +188,8 @@ namespace AttackFridayMonsters.Formats.Text
                     material.TextureCoordGen.Add(reader.ReadSingle());
                 }
 
+                // TODO: Find a bclyt with the rest of sections
+
                 clyt.Materials.Add(material);
                 reader.Stream.PopPosition();
                 numMaterials--;
@@ -249,9 +251,9 @@ namespace AttackFridayMonsters.Formats.Text
                 Y = reader.ReadSingle(),
             };
 
-            panel.Size = new Vector2 {
-                X = reader.ReadSingle(),
-                Y = reader.ReadSingle(),
+            panel.Size = new Size {
+                Width = reader.ReadSingle(),
+                Height = reader.ReadSingle(),
             };
         }
 
@@ -297,6 +299,7 @@ namespace AttackFridayMonsters.Formats.Text
             currentPanel.Children.Add(window);
 
             // TODO: Parse rest of the section
+            window.Unknown = reader.ReadBytes(0x38);
         }
 
         void ReadPicture()
@@ -306,7 +309,31 @@ namespace AttackFridayMonsters.Formats.Text
             picture.Parent = currentPanel;
             currentPanel.Children.Add(picture);
 
-            // TODO: Parse rest of the section
+            picture.TopLeftVertexColor = reader.ReadUInt32();
+            picture.TopRightVertexColor = reader.ReadUInt32();
+            picture.BottomLeftVertexColor = reader.ReadUInt32();
+            picture.BottomRightVertexColor = reader.ReadUInt32();
+            picture.MaterialIndex = reader.ReadUInt16();
+
+            int numCoords = reader.ReadInt16();
+            picture.TopLeftVertexCoords = new Vector2[numCoords];
+            picture.TopRightVertexCoords = new Vector2[numCoords];
+            picture.BottomLeftVertexCoords = new Vector2[numCoords];
+            picture.BottomRightVertexCoords = new Vector2[numCoords];
+            for (int i = 0; i < numCoords; i++) {
+                picture.TopLeftVertexCoords[i] = new Vector2(
+                    reader.ReadSingle(),
+                    reader.ReadSingle());
+                picture.TopRightVertexCoords[i] = new Vector2(
+                    reader.ReadSingle(),
+                    reader.ReadSingle());
+                picture.BottomLeftVertexCoords[i] = new Vector2(
+                    reader.ReadSingle(),
+                    reader.ReadSingle());
+                picture.BottomRightVertexCoords[i] = new Vector2(
+                    reader.ReadSingle(),
+                    reader.ReadSingle());
+            }
         }
 
         void ReadText()
@@ -319,7 +346,6 @@ namespace AttackFridayMonsters.Formats.Text
 
             ushort textSize = reader.ReadUInt16();
             section.MaterialIndex = reader.ReadUInt16();
-
             section.FontIndex = reader.ReadUInt16();
 
             section.Unknown54 = reader.ReadByte();

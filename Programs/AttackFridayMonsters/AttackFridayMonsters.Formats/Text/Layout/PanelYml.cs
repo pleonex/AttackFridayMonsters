@@ -31,6 +31,6 @@ namespace AttackFridayMonsters.Formats.Text.Layout
         public Vector2 Scale { get; set; }
 
         [YamlMember(Order = 3)]
-        public Vector2 Size { get; set; }
+        public Size Size { get; set; }
     }
 }

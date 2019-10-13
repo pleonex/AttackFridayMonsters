@@ -51,7 +51,7 @@ namespace AttackFridayMonsters.Formats.Text
             xmlPanel.Add(Vector3ToXml("translation", panel.Translation));
             xmlPanel.Add(Vector3ToXml("rotation", panel.Rotation));
             xmlPanel.Add(Vector2ToXml("scale", panel.Scale));
-            xmlPanel.Add(Vector2ToXml("size", panel.Size));
+            xmlPanel.Add(SizeToXml("size", panel.Size));
 
             xmlPanel.Add(new XElement("children"));
             foreach (var child in panel.Children) {
@@ -92,6 +92,14 @@ namespace AttackFridayMonsters.Formats.Text
             XElement xmlVector = new XElement(name);
             xmlVector.SetAttributeValue("x", vector.X);
             xmlVector.SetAttributeValue("y", vector.Y);
+            return xmlVector;
+        }
+
+        static XElement SizeToXml(string name, Size vector)
+        {
+            XElement xmlVector = new XElement(name);
+            xmlVector.SetAttributeValue("width", vector.Width);
+            xmlVector.SetAttributeValue("height", vector.Height);
             return xmlVector;
         }
     }

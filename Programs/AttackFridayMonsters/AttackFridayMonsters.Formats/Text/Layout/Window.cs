@@ -16,5 +16,6 @@ namespace AttackFridayMonsters.Formats.Text.Layout
 {
     public class Window : Panel
     {
+        public byte[] Unknown { get; set; }
     }
 }
