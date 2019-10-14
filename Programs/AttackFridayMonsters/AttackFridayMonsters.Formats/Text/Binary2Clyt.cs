@@ -42,6 +42,7 @@ namespace AttackFridayMonsters.Formats.Text
         DataReader reader;
         Clyt clyt;
         Panel currentPanel;
+        uint sectionSize;
 
         public Binary2Clyt()
         {
@@ -103,14 +104,14 @@ namespace AttackFridayMonsters.Formats.Text
         {
             reader.Stream.PushCurrentPosition();
             string sectionId = reader.ReadString(4);
-            uint size = reader.ReadUInt32();
+            sectionSize = reader.ReadUInt32();
 
             if (sectionReadFnc.ContainsKey(sectionId)) {
                 sectionReadFnc[sectionId]?.Invoke();
             }
 
             reader.Stream.PopPosition();
-            reader.Stream.Position += size;
+            reader.Stream.Position += sectionSize;
         }
 
         void ReadLayout()
@@ -150,6 +151,11 @@ namespace AttackFridayMonsters.Formats.Text
                 uint numTevStage = (flags >> 6) & 0x7;
                 uint hasAlphaCompare = (flags >> 9) & 0x01;
                 uint hasBlendMode = (flags >> 10) & 0x01;
+                material.UseTextureOnly = ((flags >> 11) & 0x01) == 1;
+                uint separateBlendMode = (flags >> 12) & 0x01;
+                uint hasIndirectParam = (flags >> 13) & 0x01;
+                uint numProjTexGenParam = (flags >> 14) & 0x03;
+                uint hasFontShadowParam = (flags >> 16) & 0x01;
 
                 uint texMapOffset = 0x34;
                 uint texMatrixOffset = texMapOffset + (numTexMap * 4);
@@ -299,7 +305,8 @@ namespace AttackFridayMonsters.Formats.Text
             currentPanel.Children.Add(window);
 
             // TODO: Parse rest of the section
-            window.Unknown = reader.ReadBytes(0x38);
+            int unknownSize = (int)sectionSize - 0x44 - 0x08;
+            window.Unknown = reader.ReadBytes(unknownSize);
         }
 
         void ReadPicture()
@@ -364,7 +371,7 @@ namespace AttackFridayMonsters.Formats.Text
 
             section.Unknown6C = reader.ReadSingle();
 
-            section.Unknown70 = reader.ReadByte();
+            section.Unknown70 = reader.ReadSingle();
 
             reader.Stream.Position = sectionOffset + textOffset;
             section.Text = reader.ReadString(textSize, Encoding.Unicode)

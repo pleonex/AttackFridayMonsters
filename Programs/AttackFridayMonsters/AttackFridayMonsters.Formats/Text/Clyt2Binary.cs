@@ -97,31 +97,30 @@ namespace AttackFridayMonsters.Formats.Text
             WriteSection("fnl1", () => WriteFonts(source.Fonts));
             WriteSection("mat1", () => WriteMaterials(source.Materials));
 
-            Stack<Panel> stack = new Stack<Panel>();
-            stack.Push(source.RootPanel);
-            while (stack.Count > 0) {
-                Panel panel = stack.Pop();
-                if (panel is TextSection text) {
-                    WriteSection("txt1", () => WriteTextInfo(text));
-                } else if (panel is Picture picture) {
-                    WriteSection("pic1", () => WritePictureInfo(picture));
-                } else if (panel is Window window) {
-                    WriteSection("wnd1", () => WriteWindow(window));
-                } else {
-                    WriteSection("pan1", () => WritePanel(panel));
-                }
+            WritePanelGroup(source.RootPanel);
+            WriteSection("grp1", () => WriteGroup(source.Group));
+        }
 
-                if (panel.Children.Any()) {
-                    WriteSection("pas1", () => {});
-                    foreach (var child in panel.Children.Reverse()) {
-                        stack.Push(child);
-                    }
-
-                    WriteSection("pae1", () => {});
-                }
+        void WritePanelGroup(Panel panel)
+        {
+            if (panel is TextSection text) {
+                WriteSection("txt1", () => WriteTextInfo(text));
+            } else if (panel is Picture picture) {
+                WriteSection("pic1", () => WritePictureInfo(picture));
+            } else if (panel is Window window) {
+                WriteSection("wnd1", () => WriteWindow(window));
+            } else {
+                WriteSection("pan1", () => WritePanel(panel));
             }
 
-            WriteSection("grp1", () => WriteGroup(source.Group));
+            if (panel.Children.Any()) {
+                WriteSection("pas1", () => {});
+                foreach (var child in panel.Children) {
+                    WritePanelGroup(child);
+                }
+
+                WriteSection("pae1", () => {});
+            }
         }
 
         void WriteSection(string id, Action writeFnc)
@@ -137,7 +136,7 @@ namespace AttackFridayMonsters.Formats.Text
             // Update size
             uint sectionSize = (uint)(writer.Stream.Length - initialSize);
             writer.Stream.Position = initialPos + 0x04;
-            writer.Write(initialSize);
+            writer.Write(sectionSize);
 
             writer.Stream.Position = initialPos + sectionSize;
             sections++;
@@ -184,6 +183,7 @@ namespace AttackFridayMonsters.Formats.Text
 
         void WriteMaterials(Collection<Material> materials)
         {
+            long sectionStart = writer.Stream.Position - 8;
             writer.Write(materials.Count);
 
             // Pre-initialize offset table so we can write names at the same time
@@ -192,7 +192,7 @@ namespace AttackFridayMonsters.Formats.Text
 
             for (int idx = 0; idx < materials.Count; idx++) {
                 writer.Stream.RunInPosition(
-                    () => writer.Write((uint)(writer.Stream.Length - tablePos)),
+                    () => writer.Write((uint)(writer.Stream.Length - sectionStart)),
                     tablePos + (idx * 4));
 
                 Material mat = materials[idx];
@@ -206,7 +206,10 @@ namespace AttackFridayMonsters.Formats.Text
                 flag |= mat.TexMapEntries.Count;
                 flag |= (mat.TexMatrixEntries.Count << 2);
                 flag |= (mat.TextureCoordGen.Count << 4);
+                flag |= ((mat.UseTextureOnly ? 1 : 0) << 11);
                 // TODO: Find a bclyt with the rest of sections
+
+                writer.Write(flag);
 
                 foreach (var entry in mat.TexMapEntries) {
                     writer.Write((ushort)entry.Index);
@@ -266,7 +269,10 @@ namespace AttackFridayMonsters.Formats.Text
 
         void WriteTextInfo(TextSection textInfo)
         {
-            byte[] utf16Text = Encoding.Unicode.GetBytes(textInfo.Text + "\0");
+            string text = string.IsNullOrEmpty(textInfo.Text) ?
+                string.Empty :
+                textInfo.Text + "\0";
+            byte[] utf16Text = Encoding.Unicode.GetBytes(text);
 
             WritePanel(textInfo);
 
@@ -289,8 +295,6 @@ namespace AttackFridayMonsters.Formats.Text
             writer.Write(textInfo.Unknown64.Y);
             writer.Write(textInfo.Unknown6C);
             writer.Write(textInfo.Unknown70);
-            writer.Write((byte)0x00); // reserved
-            writer.Write((ushort)0x00); // reserved
 
             writer.Write(utf16Text);
         }
@@ -304,7 +308,7 @@ namespace AttackFridayMonsters.Formats.Text
             writer.Write(picInfo.BottomLeftVertexColor);
             writer.Write(picInfo.BottomRightVertexColor);
 
-            writer.Write(picInfo.MaterialIndex);
+            writer.Write((ushort)picInfo.MaterialIndex);
 
             int count = picInfo.TopLeftVertexCoords.Length;
             writer.Write((ushort)count);

@@ -42,6 +42,8 @@ namespace AttackFridayMonsters.Formats.Text
                 .Build()
                 .Deserialize<ClytYml>(importedYml);
 
+            source.Layout.Size = yml.Layout;
+
             Stack<Panel> stack = new Stack<Panel>();
             stack.Push(source.RootPanel);
             while (stack.Count > 0) {

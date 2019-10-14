@@ -22,6 +22,8 @@ namespace AttackFridayMonsters.Formats.Text.Layout
 
         public uint[] TevConstantColors { get; } = new uint[7];
 
+        public bool UseTextureOnly { get; set; }
+
         public Collection<TextureMapEntry> TexMapEntries { get; } = new Collection<TextureMapEntry>();
 
         public Collection<TextureMatrixEntry> TexMatrixEntries { get; } = new Collection<TextureMatrixEntry>();

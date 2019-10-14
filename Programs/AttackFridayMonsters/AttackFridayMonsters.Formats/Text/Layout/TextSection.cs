@@ -28,7 +28,7 @@ namespace AttackFridayMonsters.Formats.Text.Layout
 
         public float Unknown6C { get; set; }
 
-        public byte Unknown70 { get; set; }
+        public float Unknown70 { get; set; }
 
         public ushort FontIndex { get; set; }
 
