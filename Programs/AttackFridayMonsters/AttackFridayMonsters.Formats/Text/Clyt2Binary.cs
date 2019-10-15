@@ -293,7 +293,8 @@ namespace AttackFridayMonsters.Formats.Text
 
             WritePanel(textInfo);
 
-            writer.Write(textInfo.Unknown4C);
+            int additionalSize = textInfo.AdditionalChars * 2; // multiplied by UTF-16 code-point size
+            writer.Write((ushort)(utf16Text.Length + additionalSize));
             writer.Write((ushort)utf16Text.Length);
             writer.Write(textInfo.MaterialIndex);
             writer.Write(textInfo.FontIndex);

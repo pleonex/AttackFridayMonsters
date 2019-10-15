@@ -378,9 +378,10 @@ namespace AttackFridayMonsters.Formats.Text
             TextSection section = new TextSection();
             ReadPanel(section);
 
-            section.Unknown4C = reader.ReadUInt16();
-
+            ushort maxSize = reader.ReadUInt16();
             ushort textSize = reader.ReadUInt16();
+            section.AdditionalChars = (maxSize - textSize) / 2; // divded by UTF-16 code-point size
+
             section.MaterialIndex = reader.ReadUInt16();
             section.FontIndex = reader.ReadUInt16();
 

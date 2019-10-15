@@ -16,7 +16,7 @@ namespace AttackFridayMonsters.Formats.Text.Layout
 {
     public class TextSection : Panel
     {
-        public ushort Unknown4C { get; set; }
+        public int AdditionalChars { get; set; }
 
         public byte Unknown54 { get; set; }
 
