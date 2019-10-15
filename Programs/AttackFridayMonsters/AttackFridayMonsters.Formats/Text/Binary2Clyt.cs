@@ -42,6 +42,7 @@ namespace AttackFridayMonsters.Formats.Text
         DataReader reader;
         Clyt clyt;
         Panel currentPanel;
+        Group currentGroup;
         uint sectionSize;
 
         public Binary2Clyt()
@@ -58,6 +59,8 @@ namespace AttackFridayMonsters.Formats.Text
                 { "pic1", ReadPicture },
                 { "wnd1", ReadWindow },
                 { "grp1", ReadGroup },
+                { "grs1", ReadGroupStart },
+                { "gre1", ReadGroupEnd },
             };
         }
 
@@ -265,10 +268,36 @@ namespace AttackFridayMonsters.Formats.Text
 
         void ReadGroup()
         {
-            if (clyt.Group != null)
-                throw new FormatException("Duplicated group");
+            Group group = new Group();
+            group.Name = reader.ReadString(0x10);
 
-            clyt.Group = reader.ReadString();
+            int numPanels = reader.ReadInt32();
+            for (int i = 0; i < numPanels; i++) {
+                group.Panels.Add(reader.ReadString(0x10));
+            }
+
+            if (currentGroup == null) {
+                clyt.RootGroup = group;
+            } else {
+                group.Parent = currentGroup;
+                currentGroup.Children.Add(group);
+            }
+        }
+
+        private void ReadGroupStart()
+        {
+            // Nothing to read, just layout marker
+            if (currentGroup == null) {
+                currentGroup = clyt.RootGroup;
+            } else {
+                currentGroup = currentGroup.Children.Last();
+            }
+        }
+
+        private void ReadGroupEnd()
+        {
+            // Nothing to read, just layout marker
+            currentGroup = currentGroup.Parent;
         }
 
         void ReadTextureLoad()

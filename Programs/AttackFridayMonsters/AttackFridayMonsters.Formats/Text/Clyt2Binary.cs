@@ -98,7 +98,7 @@ namespace AttackFridayMonsters.Formats.Text
             WriteSection("mat1", () => WriteMaterials(source.Materials));
 
             WritePanelGroup(source.RootPanel);
-            WriteSection("grp1", () => WriteGroup(source.Group));
+            WriteGroups(source.RootGroup);
         }
 
         void WritePanelGroup(Panel panel)
@@ -120,6 +120,20 @@ namespace AttackFridayMonsters.Formats.Text
                 }
 
                 WriteSection("pae1", () => {});
+            }
+        }
+
+        void WriteGroups(Group group)
+        {
+            WriteSection("grp1", () => WriteGroup(group));
+
+            if (group.Children.Any()) {
+                WriteSection("grs1", () => { });
+                foreach (var child in group.Children) {
+                    WriteGroups(child);
+                }
+
+                WriteSection("gre1", () => { });
             }
         }
 
@@ -237,10 +251,13 @@ namespace AttackFridayMonsters.Formats.Text
             }
         }
 
-        void WriteGroup(string group)
+        void WriteGroup(Group group)
         {
-            writer.Write(group, 0x10);
-            writer.Write(0x00); // TODO: Find a bclyt with a different value
+            writer.Write(group.Name, 0x10);
+            writer.Write((uint)group.Panels.Count);
+            foreach (var panel in group.Panels) {
+                writer.Write(panel, 0x10);
+            }
         }
 
         void WritePanel(Panel panel)

@@ -26,7 +26,7 @@ namespace AttackFridayMonsters.Formats.Text.Layout
 
         public Collection<Material> Materials { get; } = new Collection<Material>();
 
-        public string Group { get; set; }
+        public Group RootGroup { get; set; }
 
         public Collection<string> Textures { get; } = new Collection<string>();
 
