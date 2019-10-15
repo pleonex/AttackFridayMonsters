@@ -220,20 +220,18 @@ Task("Import-Texts")
 void ImportBclyt(BuildData data, string group, string path)
 {
     Node node = data.GetNode(path)?.TransformWith<Binary2Clyt>();
-    Clyt clyt = node.GetFormatAs<Clyt>();
     string name = node.Name.Replace(".bclyt", string.Empty);
 
     using (Node ymlNode = NodeFactory.FromFile($"{data.LayoutDirectory}/{group}/{name}.yml")) {
-        clyt.ConvertWith<Yml2Clyt, BinaryFormat>(ymlNode.GetFormatAs<BinaryFormat>());
+        node.TransformWith<Yml2Clyt, BinaryFormat>(ymlNode.GetFormatAs<BinaryFormat>());
     }
 
     using (Node poNode = NodeFactory.FromFile($"{data.LayoutDirectory}/{group}/{name}.po")) {
         var po = poNode.TransformWith<Po2Binary>().GetFormatAs<Po>();
-        clyt.ConvertWith<Po2Clyt, Po>(po);
+        node.TransformWith<Po2Clyt, Po>(po);
     }
 
-    clyt.ConvertWith<Clyt2Binary>();
-    node.ChangeFormat(clyt);
+    node.TransformWith<Clyt2Binary>();
 }
 
 Task("Import-Scripts")
