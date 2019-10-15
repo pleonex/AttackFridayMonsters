@@ -1,5 +1,3 @@
-//  BclytToPo.cs
-//
 //  Copyright (c) 2019 SceneGate Team
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -14,17 +12,22 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-namespace AttackFridayMonsters.Formats.Text
+namespace AttackFridayMonsters.Formats.Text.Layout
 {
-    using System.Collections.Generic;
-    using Yarhl.FileFormat;
+    using System.Collections.ObjectModel;
 
-    public class Clyt : IFormat
+    public class Material
     {
-        List<string> messages = new List<string>();
+        public string Name { get; set; }
 
-        public List<string> Messages {
-            get { return messages; }
-        }
+        public uint[] TevConstantColors { get; } = new uint[7];
+
+        public bool UseTextureOnly { get; set; }
+
+        public Collection<TextureMapEntry> TexMapEntries { get; } = new Collection<TextureMapEntry>();
+
+        public Collection<TextureMatrixEntry> TexMatrixEntries { get; } = new Collection<TextureMatrixEntry>();
+
+        public Collection<float> TextureCoordGen { get; } = new Collection<float>();
     }
 }
