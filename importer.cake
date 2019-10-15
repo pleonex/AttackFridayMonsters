@@ -12,8 +12,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#addin nuget:?package=Yarhl&version=3.0.0-alpha07&loaddependencies=true&prerelease
-#addin nuget:?package=Yarhl.Media&version=3.0.0-alpha07&loaddependencies=true&prerelease
+#addin nuget:?package=Yarhl&version=3.0.0-alpha10&loaddependencies=true&prerelease
+#addin nuget:?package=Yarhl.Media&version=3.0.0-alpha10&loaddependencies=true&prerelease
+#addin nuget:?package=YamlDotNet&version=6.1.2&loaddependencies=true
 #addin nuget:?package=Serilog&version=2.8.0
 #addin nuget:?package=Serilog.Sinks.Console&version=3.0.1
 #addin nuget:?package=Serilog.Sinks.ColoredConsole&version=3.0.1
@@ -26,9 +27,11 @@ using AttackFridayMonsters.Formats;
 using AttackFridayMonsters.Formats.Compression;
 using AttackFridayMonsters.Formats.Container;
 using AttackFridayMonsters.Formats.Text;
+using AttackFridayMonsters.Formats.Text.Layout;
 using Lemon.Containers;
 using Lemon.Containers.Converters;
 using Yarhl.IO;
+using Yarhl.FileFormat;
 using Yarhl.FileSystem;
 using Yarhl.Media.Text;
 using Serilog;
@@ -58,9 +61,9 @@ public class BuildData
 
     public string TextDirectory { get { return $"{TranslationDirectory}/Texts"; } }
 
-    public string ScriptDirectory { get { return $"{TranslationDirectory}/Texts/Scripts"; } }
+    public string ScriptDirectory { get { return $"{TextDirectory}/Scripts"; } }
 
-    public string LayoutDirectory { get { return $"{TranslationDirectory}/Texts/Layouts"; } }
+    public string LayoutDirectory { get { return $"{TextDirectory}/Layouts"; } }
 
     public Node Root { get; set; }
 
@@ -196,37 +199,41 @@ Task("Import-Texts")
         .TransformWith<EpisodeSettingsToPo, DataStream>(episodesOrig);
     episodesOrig.Dispose();
 
-    Information("Layout");
-    ImportBclyt(data, "gkk/lyt/title.arc/blyt/save_load.bclyt", "title/save_load.po");
-    ImportBclyt(data, "gkk/lyt/title.arc/blyt/sta_menu.bclyt", "title/sta_menu.po");
-    ImportBclyt(data, "gkk/cardgame/cardlyt_d.arc/blyt/kbattle_sita.bclyt", "cardlyt/kbattle_sita.po");
-    ImportBclyt(data, "gkk/lyt/notebook.arc/blyt/techo_sita.bclyt", "notebook/techo_sita.po");
-    ImportBclyt(data, "gkk/lyt/notebook.arc/blyt/techo_ue.bclyt", "notebook/techo_ue.po");
-    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/auto_save.bclyt", "subscreen/auto_save.po");
-    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/epi_titile.bclyt", "subscreen/epi_titile.po");
-    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/msgWin_and_cardBattle.bclyt", "subscreen/msgWin_and_cardBattle.po");
-    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/piece_get.bclyt", "subscreen/piece_get.po");
-    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_card_sita.bclyt", "subscreen/sub_card_sita.po");
-    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_card_ue.bclyt", "subscreen/sub_card_ue.po");
-    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_epi.bclyt", "subscreen/sub_epi.po");
-    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_piece.bclyt", "subscreen/sub_piece.po");
-    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_tool.bclyt", "subscreen/sub_tool.po");
-    ImportBclyt(data, "gkk/lyt/sub_screen.bin/File0.bin/blyt/tool_save.bclyt", "subscreen/tool_save.po");
+    Information("Text from layouts");
+    ImportBclyt(data, "title", "gkk/lyt/title.arc/blyt/save_load.bclyt");
+    ImportBclyt(data, "title", "gkk/lyt/title.arc/blyt/sta_menu.bclyt");
+    ImportBclyt(data, "cardlyt", "gkk/cardgame/cardlyt_d.arc/blyt/kbattle_sita.bclyt");
+    ImportBclyt(data, "notebook", "gkk/lyt/notebook.arc/blyt/techo_sita.bclyt");
+    ImportBclyt(data, "notebook", "gkk/lyt/notebook.arc/blyt/techo_ue.bclyt");
+    ImportBclyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/auto_save.bclyt");
+    ImportBclyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/epi_titile.bclyt");
+    ImportBclyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/msgWin_and_cardBattle.bclyt");
+    ImportBclyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/piece_get.bclyt");
+    ImportBclyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_card_sita.bclyt");
+    ImportBclyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_card_ue.bclyt");
+    ImportBclyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_epi.bclyt");
+    ImportBclyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_piece.bclyt");
+    ImportBclyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_tool.bclyt");
+    ImportBclyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/tool_save.bclyt");
 });
 
-void ImportBclyt(BuildData data, string node, string poPath)
+void ImportBclyt(BuildData data, string group, string path)
 {
-    Node bclyt = data.GetNode(node);
-    DataStream bclytOrig = bclyt.Stream;
-    DataStream bclytNew = DataStreamFactory.FromFile(
-        $"{data.LayoutDirectory}/{poPath}",
-        FileOpenMode.Read);
+    Node node = data.GetNode(path)?.TransformWith<Binary2Clyt>();
+    Clyt clyt = node.GetFormatAs<Clyt>();
+    string name = node.Name.Replace(".bclyt", string.Empty);
 
-    bclyt.ChangeFormat(new BinaryFormat(bclytNew), disposePreviousFormat: false);
-    bclyt
-        .TransformWith<Po2Binary>()
-        .TransformWith<BclytToPo, DataStream>(bclytOrig);
-    bclytOrig.Dispose();
+    using (Node ymlNode = NodeFactory.FromFile($"{data.LayoutDirectory}/{group}/{name}.yml")) {
+        clyt.ConvertWith<Yml2Clyt, BinaryFormat>(ymlNode.GetFormatAs<BinaryFormat>());
+    }
+
+    using (Node poNode = NodeFactory.FromFile($"{data.LayoutDirectory}/{group}/{name}.po")) {
+        var po = poNode.TransformWith<Po2Binary>().GetFormatAs<Po>();
+        clyt.ConvertWith<Po2Clyt, Po>(po);
+    }
+
+    clyt.ConvertWith<Clyt2Binary>();
+    node.ChangeFormat(clyt);
 }
 
 Task("Import-Scripts")

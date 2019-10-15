@@ -45,17 +45,17 @@ public class BuildData
 
     public string OutputDirectory { get; set; }
 
-    public string InternalDirectory { get { return $"{OutputDirectory}/internal"; } }
+    public string InternalDirectory { get { return $"{OutputDirectory}/Internal"; } }
 
-    public string ImageDirectory { get { return $"{OutputDirectory}/images"; } }
+    public string ImageDirectory { get { return $"{OutputDirectory}/Images"; } }
 
-    public string FontDirectory { get { return $"{OutputDirectory}/fonts"; } }
+    public string FontDirectory { get { return $"{OutputDirectory}/Fonts"; } }
 
-    public string TextDirectory { get { return $"{OutputDirectory}/texts"; } }
+    public string TextDirectory { get { return $"{OutputDirectory}/Texts"; } }
 
-    public string ScriptDirectory { get { return $"{TextDirectory}/scripts"; } }
+    public string ScriptDirectory { get { return $"{TextDirectory}/Scripts"; } }
 
-    public string LayoutDirectory { get { return $"{TextDirectory}/layouts"; } }
+    public string LayoutDirectory { get { return $"{TextDirectory}/Layouts"; } }
 
     public Node Root { get; set; }
 
@@ -160,19 +160,19 @@ Task("Export-Texts")
     Information("Text from layouts");
     ExportClyt(data, "title", "gkk/lyt/title.arc/blyt/save_load.bclyt");
     ExportClyt(data, "title", "gkk/lyt/title.arc/blyt/sta_menu.bclyt");
-    ExportClyt(data, "cardgame", "gkk/cardgame/cardlyt_d.arc/blyt/kbattle_sita.bclyt");
+    ExportClyt(data, "cardlyt", "gkk/cardgame/cardlyt_d.arc/blyt/kbattle_sita.bclyt");
     ExportClyt(data, "notebook", "gkk/lyt/notebook.arc/blyt/techo_sita.bclyt");
     ExportClyt(data, "notebook", "gkk/lyt/notebook.arc/blyt/techo_ue.bclyt");
-    ExportClyt(data, "sub_screen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/auto_save.bclyt");
-    ExportClyt(data, "sub_screen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/epi_titile.bclyt");
-    ExportClyt(data, "sub_screen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/msgWin_and_cardBattle.bclyt");
-    ExportClyt(data, "sub_screen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/piece_get.bclyt");
-    ExportClyt(data, "sub_screen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_card_sita.bclyt");
-    ExportClyt(data, "sub_screen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_card_ue.bclyt");
-    ExportClyt(data, "sub_screen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_epi.bclyt");
-    ExportClyt(data, "sub_screen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_piece.bclyt");
-    ExportClyt(data, "sub_screen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_tool.bclyt");
-    ExportClyt(data, "sub_screen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/tool_save.bclyt");
+    ExportClyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/auto_save.bclyt");
+    ExportClyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/epi_titile.bclyt");
+    ExportClyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/msgWin_and_cardBattle.bclyt");
+    ExportClyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/piece_get.bclyt");
+    ExportClyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_card_sita.bclyt");
+    ExportClyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_card_ue.bclyt");
+    ExportClyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_epi.bclyt");
+    ExportClyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_piece.bclyt");
+    ExportClyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/sub_tool.bclyt");
+    ExportClyt(data, "subscreen", "gkk/lyt/sub_screen.bin/File0.bin/blyt/tool_save.bclyt");
 
     Information("Scripts");
     var maps = data.GetNode("gkk/map_gz").Children

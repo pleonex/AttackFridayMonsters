@@ -36,6 +36,8 @@ namespace AttackFridayMonsters.Formats.Text
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
+            if (string.IsNullOrEmpty(importedYml))
+                throw new InvalidOperationException("YML file doesn't exist or is empty.");
 
             ClytYml yml = new DeserializerBuilder()
                 .WithNamingConvention(new UnderscoredNamingConvention())
