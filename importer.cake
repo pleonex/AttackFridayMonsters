@@ -219,7 +219,7 @@ Task("Import-Texts")
 
 void ImportBclyt(BuildData data, string group, string path)
 {
-    Node node = data.GetNode(path)?.TransformWith<Binary2Clyt>();
+    Node node = data.GetNode(path).TransformWith<Binary2Clyt>();
     string name = node.Name.Replace(".bclyt", string.Empty);
 
     using (Node ymlNode = NodeFactory.FromFile($"{data.LayoutDirectory}/{group}/{name}.yml")) {
@@ -497,13 +497,18 @@ Task("Pack")
     data.GetNode("gkk/episode/episode.bin").TransformWith<Ofs3ToBinary>();
 });
 
-Task("Save-Game")
+Task("Generate-Luma")
     .IsDependentOn("Open-Game")
     .Does<BuildData>(data =>
 {
     // Generate the luma folder
     data.ExportToLuma();
+});
 
+Task("Generate-FileSystem")
+    .IsDependentOn("Open-Game")
+    .Does<BuildData>(data =>
+{
     // Generate ExeFS and RomFS files because most emulators / CFW support
     // this kind "layered FS". In the future, Lemon may implement NCSD / CIA
     // generation so we could generate them too.
@@ -526,6 +531,7 @@ Task("Default")
     .IsDependentOn("Import-Scripts")
     .IsDependentOn("Import-Images")
     .IsDependentOn("Pack")
-    .IsDependentOn("Save-Game");
+    .IsDependentOn("Generate-Luma")
+    .IsDependentOn("Generate-FileSystem");
 
 RunTarget(target);
