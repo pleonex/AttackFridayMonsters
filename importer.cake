@@ -105,7 +105,7 @@ Setup<BuildData>(setupContext => {
         Game = Argument("game", "GameData/game.3ds"),
         ToolsDirectory = Argument("tools", "GameData/tools"),
         OutputDirectory = Argument("output", "GameData/output"),
-        LumaDirectory = Argument("luma", $"GameData/luma/titles/{TitleId}"),
+        LumaDirectory = Argument("luma", $"GameData/output/luma/titles/{TitleId}"),
         TranslationDirectory = Argument("translation", "Spanish/es"),
     };
 });
@@ -179,11 +179,11 @@ Task("Import-Texts")
 {
     Information("Card texts");
     ChangeStream(data, "gkk/cardgame/carddata.bin/File0.bin", $"{data.TextDirectory}/cardinfo.po")
-        .TransformWith<Po2Binary>()
+        .TransformWith<Binary2Po>()
         .TransformWith<CardDataToPo, int>(0);
 
     ChangeStream(data, "gkk/cardgame/carddata.bin/File25.bin", $"{data.TextDirectory}/cardgame_dialogs.po")
-        .TransformWith<Po2Binary>()
+        .TransformWith<Binary2Po>()
         .TransformWith<CardDataToPo, int>(25);
 
     Information("Story chapters");
@@ -195,7 +195,7 @@ Task("Import-Texts")
 
     episodes.ChangeFormat(new BinaryFormat(episodesNew), disposePreviousFormat: false);
     episodes
-        .TransformWith<Po2Binary>()
+        .TransformWith<Binary2Po>()
         .TransformWith<EpisodeSettingsToPo, DataStream>(episodesOrig);
     episodesOrig.Dispose();
 
@@ -227,7 +227,7 @@ void ImportBclyt(BuildData data, string group, string path)
     }
 
     using (Node poNode = NodeFactory.FromFile($"{data.LayoutDirectory}/{group}/{name}.po")) {
-        var po = poNode.TransformWith<Po2Binary>().GetFormatAs<Po>();
+        var po = poNode.TransformWith<Binary2Po>().GetFormatAs<Po>();
         node.TransformWith<Po2Clyt, Po>(po);
     }
 
@@ -261,7 +261,7 @@ Task("Import-Scripts")
 
             Information(scriptFile);
             script.ChangeFormat(new BinaryFormat(modified), false);
-            script.TransformWith<Po2Binary>()
+            script.TransformWith<Binary2Po>()
                 .TransformWith<ScriptToPo, DataStream>(original);
             original.Dispose();
         }
