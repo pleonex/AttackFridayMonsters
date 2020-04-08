@@ -65,6 +65,8 @@ public class BuildData
 
     public string LayoutDirectory { get { return $"{TextDirectory}/Layouts"; } }
 
+    public string VideoDirectory { get { return $"{TranslationDirectory}/Videos"; } }
+
     public Node Root { get; set; }
 
     public Node GetNode(string path)
@@ -477,6 +479,13 @@ void ImportCgfxImages(BuildData data, string node, string dirName, string fileNa
     System.IO.Directory.Delete(tempInputFolder, true);
 }
 
+Task("Import-Videos")
+    .IsDependentOn("Open-Game")
+    .Does<BuildData>(data =>
+{
+    ChangeStream(data, "gkk/movie/opening.moflex", $"{data.VideoDirectory}/opening.moflex");
+});
+
 Task("Pack")
     .IsDependentOn("Unpack")
     .Does<BuildData>(data =>
@@ -530,6 +539,7 @@ Task("Default")
     .IsDependentOn("Import-Texts")
     .IsDependentOn("Import-Scripts")
     .IsDependentOn("Import-Images")
+    .IsDependentOn("Import-Videos")
     .IsDependentOn("Pack")
     .IsDependentOn("Generate-Luma")
     .IsDependentOn("Generate-FileSystem");

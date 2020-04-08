@@ -57,6 +57,8 @@ public class BuildData
 
     public string LayoutDirectory { get { return $"{TextDirectory}/Layouts"; } }
 
+    public string VideoDirectory { get { return $"{OutputDirectory}/Videos"; } }
+
     public Node Root { get; set; }
 
     public Node GetNode(string path)
@@ -200,11 +202,11 @@ void ExportClyt(BuildData data, string group, string path)
     Clyt clyt = node.GetFormatAs<Clyt>();
     string name = node.Name.Replace(".bclyt", string.Empty);
 
-    ((BinaryFormat)clyt.ConvertWith<Clyt2Yml>())
+    ((BinaryFormat)ConvertFormat.With<Clyt2Yml>(clyt))
         .Stream.WriteTo($"{data.LayoutDirectory}/{group}/{name}.yml");
 
-    ((BinaryFormat)clyt.ConvertWith<Clyt2Po>()
-        .ConvertWith<Po2Binary>())
+    Po po = (Po)ConvertFormat.With<Clyt2Po>(clyt);
+    ((BinaryFormat)ConvertFormat.With<Po2Binary>(po))
         .Stream.WriteTo($"{data.LayoutDirectory}/{group}/{name}.po");
 }
 
@@ -407,10 +409,20 @@ void ExtractCgfxImages(BuildData data, string rootPath, params string[] children
     }
 }
 
+Task("Export-Videos")
+    .IsDependentOn("Open-Game")
+    .Does<BuildData>(data =>
+{
+    Warning("TODO: Convert to MP4 with Mobius");
+    data.GetNode("gkk/movie/opening.moflex")
+        .Stream.WriteTo($"{data.VideoDirectory}/opening.moflex");
+});
+
 Task("Default")
     .IsDependentOn("Extract-System")
     .IsDependentOn("Export-Fonts")
     .IsDependentOn("Export-Texts")
-    .IsDependentOn("Export-Images");
+    .IsDependentOn("Export-Images")
+    .IsDependentOn("Export-Videos");
 
 RunTarget(target);
