@@ -59,7 +59,7 @@ namespace AttackFridayMonsters.Formats.Text
 
             DataReader reader = new DataReader(source.Stream);
             foreach (var definition in block.Definitions) {
-                source.Stream.Position = definition.Address - block.Offset;
+                source.Stream.Position = definition.Address - block.Offset[0].Ram;
                 var encoding = Encoding.GetEncoding(definition.Encoding);
                 string text = reader.ReadString(definition.Size, encoding).Replace("\0", string.Empty);
 
@@ -79,9 +79,18 @@ namespace AttackFridayMonsters.Formats.Text
 
         private sealed class StringDefinitionBlock
         {
-            public long Offset { get; set; }
+            public Collection<MemoryBlock> Offset { get; set; }
 
             public Collection<StringDefinition> Definitions { get; set; }
+        }
+
+        private sealed class MemoryBlock
+        {
+            public string Name { get; set; }
+
+            public long Ram { get; set; }
+
+            public long File { get; set; }
         }
 
         private sealed class StringDefinition
