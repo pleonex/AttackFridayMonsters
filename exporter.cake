@@ -96,10 +96,16 @@ Task("Extract-System")
 {
     Warning("TODO: Extract manual");
 
-    Navigator.SearchNode(data.Root, "/root/program/system/.code")
-        .Stream.WriteTo($"{data.InternalDirectory}/code.bin");
+    Information("Extracting text from code.bin");
+    DataStream stringDefinitions = DataStreamFactory.FromFile(
+        $"{data.ToolsDirectory}/code_text.yml",
+        FileOpenMode.Read);
+    // Navigator.SearchNode(data.Root, "/root/program/system/.code")
+    NodeFactory.FromFile($"{data.InternalDirectory}/code.bin")
+        .TransformWith<BinaryStrings2Po, DataStream>(stringDefinitions)
+        .TransformWith<Po2Binary>()
+        .Stream.WriteTo($"{data.TextDirectory}/code.po");
 
-    Warning("TODO: Text from code");
     Warning("TODO: Extract logo and game names");
 });
 
