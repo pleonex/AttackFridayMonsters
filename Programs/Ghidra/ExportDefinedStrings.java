@@ -1,4 +1,4 @@
-//  Copyright (c) 2020 Benito Palacios Sánchez
+// Copyright (c) 2020 Benito Palacios Sánchez
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,63 +19,106 @@
 // SOFTWARE.
 import java.io.IOException;
 import java.io.FileWriter;
+import java.util.List;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import ghidra.app.script.GhidraScript;
 import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.data.DataType;
 import ghidra.program.model.listing.Data;
+import ghidra.program.model.mem.MemoryBlock;
+import ghidra.program.model.mem.MemoryBlockSourceInfo;
 import ghidra.program.model.symbol.Reference;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class ExportDefinedStrings extends GhidraScript {
+    Logger logger;
+    HashMap<String, String> ghidraTypeEncoding;
+
+    public ExportDefinedStrings()
+    {
+        logger = LogManager.getLogger(ExportDefinedStrings.class);
+
+        ghidraTypeEncoding = new HashMap<String, String>();
+        ghidraTypeEncoding.put("string", "ascii");
+        ghidraTypeEncoding.put("TerminatedCString", "ascii");
+        ghidraTypeEncoding.put("unicode", "utf-16");
+        ghidraTypeEncoding.put("TerminatedUnicode", "utf-16");
+    }
 
     @Override
-    protected void run() throws Exception {
+    protected void run() throws IOException, Exception {
         String[] args = getScriptArgs();
         if (args.length != 1) {
-            System.out.println("USAGE: ExportDefinedString.java <output_file>");
+            logger.error("USAGE: ExportDefinedString.java <output_file>");
             return;
         }
 
         String outputPath = args[0];
-        System.out.println("Exporting defined strings into " + outputPath);
+        logger.info("Exporting defined strings into " + outputPath);
         FileWriter outputWriter = new FileWriter(outputPath);
-        outputWriter.Write("offset: \n");
-        outputWriter.write("definitions:\n");
 
         FlatProgramAPI api = new FlatProgramAPI(currentProgram);
+        exportMemoryMap(api.getMemoryBlocks(), outputWriter);
+        exportStringDefinitions(api, outputWriter);
+
+        outputWriter.close();
+    }
+
+    private void exportMemoryMap(MemoryBlock[] blocks, FileWriter outputWriter)
+        throws IOException
+    {
+        outputWriter.write("offset:\n");
+        for (MemoryBlock block : blocks) {
+            outputWriter.write("  - name: " + block.getName() + "\n");
+            outputWriter.write("    ram: 0x" + block.getStart().toString() + "\n");
+
+            List<MemoryBlockSourceInfo> sources = block.getSourceInfos();
+            if (sources.size() != 1) {
+                logger.error("ERROR: Block with multiple sources");
+                return;
+            }
+
+            MemoryBlockSourceInfo source = sources.get(0);
+            String address = Long.toHexString(source.getFileBytesOffset());
+            outputWriter.write("    file: 0x" + address + "\n");
+            outputWriter.write("\n");
+        }
+    }
+
+    private void exportStringDefinitions(FlatProgramAPI api, FileWriter outputWriter)
+        throws IOException
+    {
+        outputWriter.write("definitions:\n");
         Data data = api.getFirstData();
         while (data != null) {
             DataType type = data.getDataType();
-            if (type.getName() == "string" || type.getName() == "unicode") {
-                try {
-                    exportString(data, outputWriter);
-                } catch (IOException ex) {
-                }
+            if (ghidraTypeEncoding.containsKey(type.getName())) {
+                exportString(data, outputWriter);
             }
 
             data = api.getDataAfter(data);
         }
-
-        outputWriter.close();
-        System.out.println("Done!");
     }
 
-    private static void exportString(Data data, FileWriter writer)
+    private void exportString(Data data, FileWriter outputWriter)
         throws IOException
     {
-        writer.write("  # " + data.getValue().toString().replace("\n", "\\n") + "\n");
-        writer.write("  - address: 0x" + data.getAddressString(false, true) + "\n");
-        writer.write("    size: " + data.getLength() + "\n");
+        outputWriter.write("  # " + data.getValue().toString().replace("\n", "\\n") + "\n");
+        outputWriter.write("  - address: 0x" + data.getAddressString(false, true) + "\n");
+        outputWriter.write("    size: " + data.getLength() + "\n");
 
-        String encoding = (data.getDataType().getName() == "unicode") ? "utf-16" : "ascii";
-        writer.write("    encoding: " + encoding + "\n");
-        writer.write("    pointers:\n");
+        String encoding = ghidraTypeEncoding.get(data.getDataType().getName());
+        outputWriter.write("    encoding: " + encoding + "\n");
+        outputWriter.write("    pointers:\n");
 
         for (Reference ref : data.getReferenceIteratorTo()) {
-            writer.write("      - 0x" + ref.getFromAddress().toString(false, true) + "\n");
+            outputWriter.write("      - 0x" + ref.getFromAddress().toString(false, true) + "\n");
         }
 
-        writer.write("\n");
+        outputWriter.write("\n");
     }
 }
