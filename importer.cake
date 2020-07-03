@@ -484,6 +484,7 @@ Task("Import-Videos")
     .Does<BuildData>(data =>
 {
     ChangeStream(data, "gkk/movie/opening.moflex", $"{data.VideoDirectory}/opening.moflex");
+    ChangeStream(data, "gkk/movie/ending.moflex", $"{data.VideoDirectory}/ending.moflex");
 });
 
 Task("Pack")

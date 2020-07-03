@@ -422,6 +422,8 @@ Task("Export-Videos")
     Warning("TODO: Convert to MP4 with Mobius");
     data.GetNode("gkk/movie/opening.moflex")
         .Stream.WriteTo($"{data.VideoDirectory}/opening.moflex");
+    data.GetNode("gkk/movie/ending.moflex")
+        .Stream.WriteTo($"{data.VideoDirectory}/ending.moflex");
 });
 
 Task("Default")
