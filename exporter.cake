@@ -94,12 +94,12 @@ Task("Extract-System")
     .IsDependentOn("Open-Game")
     .Does<BuildData>(data =>
 {
-    Warning("TODO: Extract manual");
-
     Information("Extracting text from code.bin");
     DataStream stringDefinitions = DataStreamFactory.FromFile(
         $"{data.ToolsDirectory}/code_text.yml",
         FileOpenMode.Read);
+
+    // Decompress binary
     // Navigator.SearchNode(data.Root, "/root/program/system/.code")
     NodeFactory.FromFile($"{data.InternalDirectory}/code.bin")
         .TransformWith<BinaryStrings2Po, DataStream>(stringDefinitions)
