@@ -15,7 +15,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(AttackFridayMonstersTools VERSION 1.0 LANGUAGES C)
 
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../CMakeModules")
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules")
 include(ExternalProject)
 include(CSharpProject)
 
@@ -42,6 +42,9 @@ add_csharp_target(
 # 5. CUE tool
 add_executable(lzx "${PROJECT_SOURCE_DIR}/CUETools/lzx.c")
 install(TARGETS lzx DESTINATION tools)
+
+add_executable(blz "${PROJECT_SOURCE_DIR}/CUETools/blz.c")
+install(TARGETS blz DESTINATION tools)
 
 # 6. txobtool: export/import textures
 ExternalProject_add(txobtool SOURCE_DIR "${PROJECT_SOURCE_DIR}/TextureTool")
