@@ -204,6 +204,22 @@ Task("Export-Texts")
                 .Stream.WriteTo(scriptFile);
         }
     }
+
+    Information("sys_data");
+    var sysData = data.GetNode("gkk/sys_data/sys_data.lz")
+        .TransformWith<Lz11Decompression>()
+        .TransformWith<Ofs3ToBinary>()
+        .Children[4]
+        .TransformWith<Ofs3ToBinary>();
+
+    sysData.Children[0]
+        .TransformWith<ScriptBlock2Po>()
+        .TransformWith<Po2Binary>()
+        .Stream.WriteTo($"{data.TextDirectory}/sys_data0.po");
+    sysData.Children[1]
+        .TransformWith<ScriptBlock2Po>()
+        .TransformWith<Po2Binary>()
+        .Stream.WriteTo($"{data.TextDirectory}/sys_data1.po");
 });
 
 void ExportClyt(BuildData data, string group, string path)

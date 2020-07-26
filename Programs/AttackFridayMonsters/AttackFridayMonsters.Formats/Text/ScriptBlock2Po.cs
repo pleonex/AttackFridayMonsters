@@ -1,9 +1,9 @@
-﻿//  ScriptToPo.cs
+//  ScriptBlock2Po.cs
 //
 //  Author:
 //       Benito Palacios Sanchez <benito356@gmail.com>
 //
-//  Copyright (c) 2017 Benito Palacios Sanchez
+//  Copyright (c) 2020 Benito Palacios Sanchez
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ namespace AttackFridayMonsters.Formats.Text
     using Yarhl.IO;
     using Yarhl.Media.Text;
 
-    public class ScriptToPo :
+    public class ScriptBlock2Po :
         IInitializer<DataStream>,
         IConverter<BinaryFormat, Po>,
         IConverter<Po, BinaryFormat>
@@ -65,50 +65,14 @@ namespace AttackFridayMonsters.Formats.Text
             if (OriginalScript == null)
                 throw new FormatException("Missing original script");
 
-            Queue<PoEntry> entries = new Queue<PoEntry>(source.Entries);
-
             BinaryFormat binary = new BinaryFormat();
             DataWriter writer = new DataWriter(binary.Stream);
 
             OriginalScript.Position = 0;
             DataReader reader = new DataReader(OriginalScript);
 
-            // First thing is number of blocks / subscripts
-            uint numBlocks = reader.ReadUInt32();
-            writer.Write(numBlocks);
-
-            // write empty fat to be able to write blocks at the same time
-            writer.WriteTimes(0x00, 0x0C * numBlocks);
-            binary.Stream.Position = 4;
-
-            for (int b = 0; b < numBlocks; b++) {
-                // Write current block FAT entry
-                writer.Write(reader.ReadUInt32()); // ... event ID
-                int origBlockSize = reader.ReadInt32(); // ... size
-                writer.Write(0x00);  // placeholder
-                uint origBlockOffset = reader.ReadUInt32(); // ... offset
-                int blockOffset = (int)writer.Stream.Length;
-                writer.Write(blockOffset);
-
-                // Write it
-                reader.Stream.PushToPosition(origBlockOffset, SeekMode.Start);
-                writer.Stream.PushToPosition(0, SeekMode.End);
-                WriteBlock(writer, reader, origBlockSize, entries);
-
-                // Return to block FAT and update size
-                reader.Stream.PopPosition();
-                writer.Stream.PopPosition();
-
-                writer.Stream.PushToPosition(-0x08, SeekMode.Current);
-                writer.Write((uint)(writer.Stream.Length - blockOffset));
-                writer.Stream.PopPosition();
-
-                // Pad block (it doesn't count in block size)
-                writer.Stream.PushToPosition(0, SeekMode.End);
-                while ((writer.Stream.Position - blockOffset) % 0x10 != 0)
-                    writer.Write((byte)0x00);
-                writer.Stream.PopPosition();
-            }
+            Queue<PoEntry> entries = new Queue<PoEntry>(source.Entries);
+            WriteBlock(writer, reader, entries);
 
             return binary;
         }
@@ -127,58 +91,42 @@ namespace AttackFridayMonsters.Formats.Text
                     "es-ES"),
             };
 
-            uint numBlocks = reader.ReadUInt32();
-            for (int b = 0; b < numBlocks; b++) {
-                // Block info
-                reader.ReadUInt32(); // event ID
-                reader.ReadUInt32(); // block size
-                uint blockOffset = reader.ReadUInt32();
+            uint numSections = reader.ReadUInt32();
+            if (numSections < 3)
+                throw new FormatException($"Missing sections");
 
-                // Sections
-                source.Stream.PushToPosition(blockOffset, SeekMode.Start);
-                uint numSections = reader.ReadUInt32();
-                if (numSections < 3)
-                    throw new FormatException($"Missing sections in block {b}");
-
-                // We skip the first 3 sections with unknown content
-                reader.ReadBytes(3 * 4);
-                bool firstSection = true;
-                for (int s = 3; s < numSections; s++) {
-                    uint sectionOffset = reader.ReadUInt32();
-                    if (sectionOffset == 0)
-                        continue;
-
-                    source.Stream.PushToPosition(blockOffset + sectionOffset, SeekMode.Start);
-                    ushort charId = reader.ReadUInt16();
-                    if (charId == 0x4D30) {
-                        source.Stream.PopPosition();
-                        continue;
-                    }
-
-                    if (!Characters.ContainsKey(charId))
-                        throw new FormatException("Unknown char: " + charId);
-
-                    PoEntry entry = new PoEntry {
-                        Original = ReadTokenizedString(reader),
-                        Context = $"b:{b}|s:{s}",
-                        ExtractedComments = Characters[charId],
-                    };
-
-                    if (firstSection)
-                        entry.ExtractedComments = "[Start] " + entry.ExtractedComments;
-
-                    po.Add(entry);
-                    firstSection = false;
-                    source.Stream.PopPosition();
+            // We skip the first 3 sections with unknown content
+            reader.ReadBytes(3 * 4);
+            for (int s = 3; s < numSections; s++) {
+                uint sectionOffset = reader.ReadUInt32();
+                if (sectionOffset == 0) {
+                    continue;
                 }
 
+                source.Stream.PushToPosition(sectionOffset, SeekMode.Start);
+                ushort charId = reader.ReadUInt16();
+                if (charId == 0x4D30) {
+                    source.Stream.PopPosition();
+                    continue;
+                }
+
+                if (!Characters.ContainsKey(charId))
+                    throw new FormatException("Unknown char: " + charId);
+
+                PoEntry entry = new PoEntry {
+                    Original = ReadTokenizedString(reader),
+                    Context = $"s:{s}",
+                    ExtractedComments = Characters[charId],
+                };
+
+                po.Add(entry);
                 source.Stream.PopPosition();
             }
 
             return po;
         }
 
-        static void WriteBlock(DataWriter writer, DataReader reader, int blockSize, Queue<PoEntry> entries)
+        static void WriteBlock(DataWriter writer, DataReader reader, Queue<PoEntry> entries)
         {
             long blockOffset = writer.Stream.Position;
             long origBlockOffset = reader.Stream.Position;
@@ -203,10 +151,6 @@ namespace AttackFridayMonsters.Formats.Text
             int nextOffset = -1;
             for (int i = 3; i < numSections && nextOffset <= 0; i++)
                 nextOffset = reader.ReadInt32();
-
-            // ... if there isn't more offsets, then copy block size and that is
-            if (nextOffset == -1)
-                nextOffset = blockSize;
 
             // ... copy!
             writer.Stream.PushToPosition(0, SeekMode.End);
@@ -263,7 +207,7 @@ namespace AttackFridayMonsters.Formats.Text
                     text.Append("<emphasis>");
                 } else if (data == 0x1E) {
                     ushort waitTime = reader.ReadUInt16();
-                    text.AppendLine($"<pause:{waitTime}>");
+                    text.Append($"<pause:{waitTime}>\n");
                 } else if (data == 0x1F) {
                     text.Append("<end>");
 
@@ -277,7 +221,7 @@ namespace AttackFridayMonsters.Formats.Text
                     if (doubleEnd != 0x1F)
                         break;
                 } else if (data == 0x0D) {
-                    text.AppendLine();
+                    text.Append("\n");
                 } else {
                     text.Append(encoding.GetString(BitConverter.GetBytes(data)));
                 }

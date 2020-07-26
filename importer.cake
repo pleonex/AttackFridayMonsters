@@ -321,6 +321,36 @@ Task("Import-Scripts")
 
         map.TransformWith<Ofs3ToBinary>().TransformWith(compressionConverter);
     }
+
+    Information("sys_data");
+    var sysData = data.GetNode("gkk/sys_data/sys_data.lz")
+        .TransformWith<Lz11Decompression>()
+        .TransformWith<Ofs3ToBinary>()
+        .Children[4]
+        .TransformWith<Ofs3ToBinary>();
+
+    DataStream originalSys0 = sysData.Children[0].Stream;
+    DataStream scriptSys0 = DataStreamFactory.FromFile(
+        $"{data.TextDirectory}/sys_data0.po",
+        FileOpenMode.Read);
+    sysData.Children[0].ChangeFormat((new BinaryFormat(scriptSys0)));
+    sysData.Children[0].TransformWith<Binary2Po>()
+        .TransformWith<ScriptBlock2Po, DataStream>(originalSys0);
+    originalSys0.Dispose();
+
+    DataStream originalSys1 = sysData.Children[1].Stream;
+    DataStream scriptSys1 = DataStreamFactory.FromFile(
+        $"{data.TextDirectory}/sys_data1.po",
+        FileOpenMode.Read);
+    sysData.Children[1].ChangeFormat((new BinaryFormat(scriptSys1)));
+    sysData.Children[1].TransformWith<Binary2Po>()
+        .TransformWith<ScriptBlock2Po, DataStream>(originalSys1);
+    originalSys1.Dispose();
+
+    sysData.TransformWith<Ofs3ToBinary>();
+    data.GetNode("gkk/sys_data/sys_data.lz")
+        .TransformWith<Ofs3ToBinary>()
+        .TransformWith(compressionConverter);
 });
 
 Task("Import-Images")
