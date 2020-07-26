@@ -12,8 +12,7 @@ These tools use different languages like C, C# and Python. To compile and use
 them you need the following programs:
 
 - CMake: >= 3.0
-- [*Windows*] .NET Framework 4.6.1
-- [*Linux/Mac OS X*] Mono 5.4
+- [.NET Core SDK](https://dotnet.microsoft.com/download)
 - Python: 3.7
 - gcc / clang / Visual Studio
 
@@ -30,10 +29,15 @@ cmake --build . --target install
 
 The tools will be under _GameData/tools_.
 
+To prepare the script execution run first:
+
+```sh
+dotnet tool restore
+```
+
 ## Export files
 
-Run `build.ps1` on Windows or `build.sh` on Linux / Mac OS with the argument
-`-script exporter.cake`.
+Run `dotnet cake -script exporter.cake`.
 
 The script expects to find the game under `GameData/game.3ds` but you can
 specify another location with the `--game=<path>` argument.
@@ -67,8 +71,7 @@ Note: the file `code.bin` needs to be decompressed first.
 
 ## Import files
 
-Run `build.ps1` on Windows or `build.sh` on Linux / Mac OS with the argument
-`-script importer.cake`.
+Run `dotnet cake -script importer.cake`
 
 The script expects to find the game under `GameData/game.3ds` but you can
 specify another location with the `--game=<path>` argument.

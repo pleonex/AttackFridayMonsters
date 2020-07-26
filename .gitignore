@@ -15,3 +15,8 @@ obj/
 *.userprefs
 *.user
 packages/
+
+# Ghidra scripts
+.classpath
+.project
+org.eclipse.jdt.core.prefs
