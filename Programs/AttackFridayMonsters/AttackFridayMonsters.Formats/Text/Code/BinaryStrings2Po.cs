@@ -14,10 +14,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-namespace AttackFridayMonsters.Formats.Text
+namespace AttackFridayMonsters.Formats.Text.Code
 {
     using System;
-    using System.Collections.ObjectModel;
     using System.Linq;
     using System.Text;
     using YamlDotNet.Serialization;
@@ -75,33 +74,6 @@ namespace AttackFridayMonsters.Formats.Text
             }
 
             return po;
-        }
-
-        private sealed class StringDefinitionBlock
-        {
-            public Collection<MemoryBlock> Offset { get; set; }
-
-            public Collection<StringDefinition> Definitions { get; set; }
-        }
-
-        private sealed class MemoryBlock
-        {
-            public string Name { get; set; }
-
-            public long Ram { get; set; }
-
-            public long File { get; set; }
-        }
-
-        private sealed class StringDefinition
-        {
-            public long Address { get; set; }
-
-            public int Size { get; set; }
-
-            public string Encoding { get; set; }
-
-            public Collection<long> Pointers { get; set; }
         }
     }
 }

@@ -27,6 +27,7 @@ using AttackFridayMonsters.Formats;
 using AttackFridayMonsters.Formats.Compression;
 using AttackFridayMonsters.Formats.Container;
 using AttackFridayMonsters.Formats.Text;
+using AttackFridayMonsters.Formats.Text.Code;
 using AttackFridayMonsters.Formats.Text.Layout;
 using Lemon.Containers;
 using Yarhl.IO;
@@ -100,13 +101,16 @@ Task("Extract-System")
         FileOpenMode.Read);
 
     // Decompress binary
-    // Navigator.SearchNode(data.Root, "/root/program/system/.code")
-    NodeFactory.FromFile($"{data.InternalDirectory}/code.bin")
+    var compressionConverter = new ExternalProgramConverter {
+       Program = $"{data.ToolsDirectory}/blz",
+       Arguments = "-d <inout>",
+    };
+
+    Navigator.SearchNode(data.Root, "/root/program/system/.code")
+        .TransformWith(compressionConverter)
         .TransformWith<BinaryStrings2Po, DataStream>(stringDefinitions)
         .TransformWith<Po2Binary>()
         .Stream.WriteTo($"{data.TextDirectory}/code.po");
-
-    Warning("TODO: Extract logo and game names");
 });
 
 Task("Unpack")

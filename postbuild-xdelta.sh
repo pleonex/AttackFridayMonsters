@@ -15,7 +15,7 @@ rm -f GameData/output/program.bin
 GameData/tools/3dstool -c -t cxi -f GameData/output/program.bin \
     --exefs GameData/output/game.3ds.exefs \
     --romfs GameData/output/game.3ds.romfs \
-    --exh GameData/rom_metadata/exheader_ncch0.bin \
+    --exh GameData/output/exheader.bin \
     --plain GameData/rom_metadata/plain.bin \
     --header GameData/rom_metadata/header_ncch0.bin
 

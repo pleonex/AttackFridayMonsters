@@ -1,0 +1,862 @@
+offset:
+  - name: .text
+    ram: 0x00100000
+    file: 0x0
+
+  - name: .rodata
+    ram: 0x00266000
+    file: 0x166000
+
+  - name: .data
+    ram: 0x0027c000
+    file: 0x17c000
+
+definitions:
+  - address: 0x00279402
+    size: 78
+    encoding: utf-16
+    pointers:
+      - 0x00281b84
+
+  - address: 0x00279450
+    size: 60
+    encoding: utf-16
+    pointers:
+      - 0x00281BCC
+
+  - address: 0x0027948c
+    size: 48
+    encoding: utf-16
+    pointers:
+      - 0x00281bc8
+      - 0x00281bc0
+
+  - address: 0x002794bc
+    size: 122
+    encoding: utf-16
+    pointers:
+      - 0x00281bb4
+
+  - address: 0x00279536
+    size: 114
+    encoding: utf-16
+    pointers:
+      - 0x00281bb0
+
+  - address: 0x002795a8
+    size: 90
+    encoding: utf-16
+    pointers:
+      - 0x00281BAC
+
+  - address: 0x00279602
+    size: 88
+    encoding: utf-16
+    pointers:
+      - 0x00281ba8
+
+  - address: 0x0027965a
+    size: 50
+    encoding: utf-16
+    pointers:
+      - 0x00281BC4
+
+  - address: 0x0027968c
+    size: 42
+    encoding: utf-16
+    pointers:
+      - 0x281C44
+
+  - address: 0x002796b6
+    size: 50
+    encoding: utf-16
+    pointers:
+      - 0x00281c48
+
+  - address: 0x002796e8
+    size: 28
+    encoding: utf-16
+    pointers:
+      - 0x00281c40
+
+  - address: 0x00279704
+    size: 40
+    encoding: utf-16
+    pointers:
+      - 0x0019b784
+      - 0x00281b80
+
+  - address: 0x0027972c
+    size: 12
+    encoding: utf-16
+    pointers:
+      - 0x00281B88
+
+  - address: 0x0027986a
+    size: 16
+    encoding: utf-16
+    pointers:
+      - 0x0029416c
+
+  - address: 0x0027987a
+    size: 20
+    encoding: utf-16
+    pointers:
+      - 0x00294150
+
+  - address: 0x0027988e
+    size: 20
+    encoding: utf-16
+    pointers:
+      - 0x00294154
+
+  - address: 0x002798a2
+    size: 28
+    encoding: utf-16
+    pointers:
+      - 0x0029415c
+
+  - address: 0x002798be
+    size: 22
+    encoding: utf-16
+    pointers:
+      - 0x00294164
+
+  - address: 0x002798d4
+    size: 14
+    encoding: utf-16
+    pointers:
+      - 0x00294144
+
+  - address: 0x002798e2
+    size: 16
+    encoding: utf-16
+    pointers:
+      - 0x0029414c
+
+  - address: 0x002798f2
+    size: 24
+    encoding: utf-16
+    pointers:
+      - 0x00294168
+
+  - address: 0x0027990a
+    size: 24
+    encoding: utf-16
+    pointers:
+      - 0x00294160
+
+  - address: 0x00279922
+    size: 30
+    encoding: utf-16
+    pointers:
+      - 0x00294170
+
+  - address: 0x00279940
+    size: 20
+    encoding: utf-16
+    pointers:
+      - 0x001a4cc4
+      - 0x00294174
+      - 0x00294178
+      - 0x0029417c
+
+  - address: 0x00279954
+    size: 20
+    encoding: utf-16
+    pointers:
+      - 0x00294148
+
+  - address: 0x00279968
+    size: 18
+    encoding: utf-16
+    pointers:
+      - 0x00294158
+
+  - address: 0x0027997a
+    size: 30
+    encoding: utf-16
+    pointers:
+      - 0x00295ce0
+
+  - address: 0x00279998
+    size: 26
+    encoding: utf-16
+    pointers:
+      - 0x00295cd8
+
+  - address: 0x002799b2
+    size: 34
+    encoding: utf-16
+    pointers:
+      - 0x00295cdc
+
+  - address: 0x002799d4
+    size: 94
+    encoding: utf-16
+    pointers:
+      - 0x00295cf0
+
+  - address: 0x00279a32
+    size: 70
+    encoding: utf-16
+    pointers:
+      - 0x00295cf8
+
+  - address: 0x00279a78
+    size: 88
+    encoding: utf-16
+    pointers:
+      - 0x00295cf4
+
+  - address: 0x00279afe
+    size: 12
+    encoding: utf-16
+    pointers:
+      - 0x0018d698
+      - 0x00295cfc
+
+  - address: 0x00279b0a
+    size: 128
+    encoding: utf-16
+    pointers:
+      - 0x00295ce4
+
+  - address: 0x00279b8a
+    size: 134
+    encoding: utf-16
+    pointers:
+      - 0x00295cec
+
+  - address: 0x00279c10
+    size: 128
+    encoding: utf-16
+    pointers:
+      - 0x00295ce8
+
+  - address: 0x00279c90
+    size: 138
+    encoding: utf-16
+    pointers:
+      - 0x00295bb4
+
+  - address: 0x00279d1a
+    size: 12
+    encoding: utf-16
+    pointers:
+      - 0x00295d38
+
+  - address: 0x00279d26
+    size: 20
+    encoding: utf-16
+    pointers:
+      - 0x00295db8
+
+  - address: 0x00279d3a
+    size: 22
+    encoding: utf-16
+    pointers:
+      - 0x00295dc0
+
+  - address: 0x00279d50
+    size: 28
+    encoding: utf-16
+    pointers:
+      - 0x00295DBC
+
+  - address: 0x00279d90
+    size: 42
+    encoding: utf-16
+    pointers:
+      - 0x00295e64
+
+  - address: 0x00279dba
+    size: 40
+    encoding: utf-16
+    pointers:
+      - 0x00295e60
+
+  - address: 0x00279de2
+    size: 36
+    encoding: utf-16
+    pointers:
+      - 0x00295e88
+
+  - address: 0x00279e06
+    size: 38
+    encoding: utf-16
+    pointers:
+      - 0x00295e8c
+
+  - address: 0x00279e2c
+    size: 38
+    encoding: utf-16
+    pointers:
+      - 0x00295e74
+
+  - address: 0x00279e52
+    size: 42
+    encoding: utf-16
+    pointers:
+      - 0x00295e58
+
+  - address: 0x00279e7c
+    size: 50
+    encoding: utf-16
+    pointers:
+      - 0x00295e84
+
+  - address: 0x00279eae
+    size: 52
+    encoding: utf-16
+    pointers:
+      - 0x00295e7c
+
+  - address: 0x00279ee2
+    size: 50
+    encoding: utf-16
+    pointers:
+      - 0x00295e6c
+
+  - address: 0x00279f14
+    size: 46
+    encoding: utf-16
+    pointers:
+      - 0x00295e70
+
+  - address: 0x00279f42
+    size: 46
+    encoding: utf-16
+    pointers:
+      - 0x00295e78
+
+  - address: 0x00279f70
+    size: 46
+    encoding: utf-16
+    pointers:
+      - 0x00295e80
+
+  - address: 0x00279f9e
+    size: 50
+    encoding: utf-16
+    pointers:
+      - 0x00295e5c
+
+  - address: 0x00279fd0
+    size: 26
+    encoding: utf-16
+    pointers:
+      - 0x00295e90
+
+  - address: 0x00279fea
+    size: 52
+    encoding: utf-16
+    pointers:
+      - 0x00295e68
+
+  - address: 0x0027a01e
+    size: 10
+    encoding: utf-16
+    pointers:
+      - 0x00295f20
+
+  - address: 0x0027a028
+    size: 16
+    encoding: utf-16
+    pointers:
+      - 0x00295f24
+
+  - address: 0x0027a03e
+    size: 24
+    encoding: utf-16
+    pointers:
+      - 0x00295fec
+
+  - address: 0x0027a056
+    size: 26
+    encoding: utf-16
+    pointers:
+      - 0x001defbc
+      - 0x00295ff0
+
+  - address: 0x0027a070
+    size: 26
+    encoding: utf-16
+    pointers:
+      - 0x00296070
+
+  - address: 0x0027a090
+    size: 32
+    encoding: utf-16
+    pointers:
+      - 0x002960b4
+
+  - address: 0x0027a0b0
+    size: 32
+    encoding: utf-16
+    pointers:
+      - 0x002960ac
+
+  - address: 0x0027a0d0
+    size: 46
+    encoding: utf-16
+    pointers:
+      - 0x002960fc
+
+  - address: 0x0027a0fe
+    size: 16
+    encoding: utf-16
+    pointers:
+      - 0x00296168
+
+  - address: 0x0027a10e
+    size: 40
+    encoding: utf-16
+    pointers:
+      - 0x0029615c
+      - 0x002961a8
+
+  - address: 0x0027a136
+    size: 12
+    encoding: utf-16
+    pointers:
+      - 0x00296128
+
+  - address: 0x0027a142
+    size: 42
+    encoding: utf-16
+    pointers:
+      - 0x0029614c
+      - 0x002961a0
+
+  - address: 0x0027a16c
+    size: 26
+    encoding: utf-16
+    pointers:
+      - 0x00296178
+
+  - address: 0x0027a186
+    size: 40
+    encoding: utf-16
+    pointers:
+      - 0x0029612c
+      - 0x00296190
+
+  - address: 0x0027a1ae
+    size: 22
+    encoding: utf-16
+    pointers:
+      - 0x00296120
+
+  - address: 0x0027a1c4
+    size: 20
+    encoding: utf-16
+    pointers:
+      - 0x00296118
+
+  - address: 0x0027a1d8
+    size: 32
+    encoding: utf-16
+    pointers:
+      - 0x0029611c
+      - 0x00296188
+
+  - address: 0x0027a1f8
+    size: 30
+    encoding: utf-16
+    pointers:
+      - 0x00296114
+      - 0x00296184
+
+  - address: 0x0027a216
+    size: 22
+    encoding: utf-16
+    pointers:
+      - 0x00296140
+
+  - address: 0x0027a22c
+    size: 24
+    encoding: utf-16
+    pointers:
+      - 0x00296110
+
+  - address: 0x0027a244
+    size: 20
+    encoding: utf-16
+    pointers:
+      - 0x00296160
+
+  - address: 0x0027a258
+    size: 16
+    encoding: utf-16
+    pointers:
+      - 0x00296150
+
+  - address: 0x0027a268
+    size: 18
+    encoding: utf-16
+    pointers:
+      - 0x00296174
+
+  - address: 0x0027a27a
+    size: 36
+    encoding: utf-16
+    pointers:
+      - 0x00296134
+      - 0x00296194
+
+  - address: 0x0027a29e
+    size: 16
+    encoding: utf-16
+    pointers:
+      - 0x00296108
+
+  - address: 0x0027a2ae
+    size: 16
+    encoding: utf-16
+    pointers:
+      - 0x00296138
+
+  - address: 0x0027a2be
+    size: 26
+    encoding: utf-16
+    pointers:
+      - 0x00296164
+      - 0x002961ac
+
+  - address: 0x0027a2d8
+    size: 28
+    encoding: utf-16
+    pointers:
+      - 0x0029616c
+      - 0x002961b0
+
+  - address: 0x0027a2f4
+    size: 36
+    encoding: utf-16
+    pointers:
+      - 0x00296144
+      - 0x0029619c
+
+  - address: 0x0027a318
+    size: 36
+    encoding: utf-16
+    pointers:
+      - 0x00296154
+      - 0x002961a4
+
+  - address: 0x0027a33c
+    size: 18
+    encoding: utf-16
+    pointers:
+      - 0x00296148
+
+  - address: 0x0027a34e
+    size: 40
+    encoding: utf-16
+    pointers:
+      - 0x0029610c
+      - 0x00296180
+
+  - address: 0x0027a376
+    size: 24
+    encoding: utf-16
+    pointers:
+      - 0x00296158
+
+  - address: 0x0027a38e
+    size: 28
+    encoding: utf-16
+    pointers:
+      - 0x00296170
+
+  - address: 0x0027a3aa
+    size: 28
+    encoding: utf-16
+    pointers:
+      - 0x0029613c
+      - 0x00296198
+
+  - address: 0x0027a3c6
+    size: 32
+    encoding: utf-16
+    pointers:
+      - 0x00296104
+      - 0x0029617c
+
+  - address: 0x0027a3e6
+    size: 20
+    encoding: utf-16
+    pointers:
+      - 0x00296130
+
+  - address: 0x0027a3fa
+    size: 16
+    encoding: utf-16
+    pointers:
+      - 0x002961b4
+
+  - address: 0x0027a40a
+    size: 42
+    encoding: utf-16
+    pointers:
+      - 0x00296124
+      - 0x0029618c
+
+  - address: 0x0027a434
+    size: 80
+    encoding: utf-16
+    pointers:
+      - 0x00296994
+
+  - address: 0x0027a484
+    size: 78
+    encoding: utf-16
+    pointers:
+      - 0x00296998
+
+  - address: 0x0027a4d2
+    size: 102
+    encoding: utf-16
+    pointers:
+      - 0x002969ac
+
+  - address: 0x0027a538
+    size: 100
+    encoding: utf-16
+    pointers:
+      - 0x002969b0
+
+  - address: 0x0027a59c
+    size: 100
+    encoding: utf-16
+    pointers:
+      - 0x0029698c
+
+  - address: 0x0027a600
+    size: 98
+    encoding: utf-16
+    pointers:
+      - 0x00296990
+
+  - address: 0x0027a662
+    size: 100
+    encoding: utf-16
+    pointers:
+      - 0x0029699c
+
+  - address: 0x0027a6c6
+    size: 98
+    encoding: utf-16
+    pointers:
+      - 0x002969a0
+
+  - address: 0x0027a728
+    size: 100
+    encoding: utf-16
+    pointers:
+      - 0x002969a4
+
+  - address: 0x0027a78c
+    size: 98
+    encoding: utf-16
+    pointers:
+      - 0x002969a8
+
+  - address: 0x0027a7ee
+    size: 98
+    encoding: utf-16
+    pointers:
+      - 0x002969b4
+
+  - address: 0x0027a850
+    size: 96
+    encoding: utf-16
+    pointers:
+      - 0x002969b8
+
+  - address: 0x0027a8b0
+    size: 60
+    encoding: utf-16
+    pointers:
+      - 0x002969bc
+
+  - address: 0x0027a8ec
+    size: 58
+    encoding: utf-16
+    pointers:
+      - 0x002969C0
+
+  - address: 0x0029655c
+    size: 62
+    encoding: utf-16
+    pointers:
+      - 0x001a0398
+      - 0x001a0418
+      - 0x001a0494
+      - 0x001a04f0
+
+  - address: 0x0029659a
+    size: 28
+    encoding: utf-16
+    pointers:
+      - 0x001a27dc
+
+  - address: 0x002965b6
+    size: 58
+    encoding: utf-16
+    pointers:
+      - 0x001a22a4
+      - 0x001a22c8
+      - 0x001a27e0
+
+  - address: 0x002965f0
+    size: 56
+    encoding: utf-16
+    pointers:
+      - 0x001a27e4
+
+  - address: 0x00296628
+    size: 52
+    encoding: utf-16
+    pointers:
+      - 0x001a27e8
+
+  - address: 0x0029665c
+    size: 22
+    encoding: utf-16
+    pointers:
+      - 0x001a2824
+
+  - address: 0x00296672
+    size: 24
+    encoding: utf-16
+    pointers:
+      - 0x001a2b88
+
+  - address: 0x0029668a
+    size: 26
+    encoding: utf-16
+    pointers:
+      - 0x001a2b90
+
+  - address: 0x002966a4
+    size: 32
+    encoding: utf-16
+    pointers:
+      - 0x001a2b98
+
+  - address: 0x002966c4
+    size: 62
+    encoding: utf-16
+    pointers:
+      - 0x001a2bb8
+      - 0x001a2ca0
+
+  - address: 0x00296702
+    size: 28
+    encoding: utf-16
+    pointers:
+      - 0x001d1938
+      - 0x001d1bc0
+
+  - address: 0x0029677e
+    size: 30
+    encoding: utf-16
+    pointers:
+      - 0x001a214c
+
+  - address: 0x0029679c
+    size: 30
+    encoding: utf-16
+    pointers:
+      - 0x001a2150
+
+  - address: 0x002967ba
+    size: 30
+    encoding: utf-16
+    pointers:
+      - 0x001a2154
+
+  - address: 0x002967d8
+    size: 28
+    encoding: utf-16
+    pointers:
+      - 0x001a2158
+
+  - address: 0x002967f4
+    size: 30
+    encoding: utf-16
+    pointers:
+      - 0x001a215c
+
+  - address: 0x00296812
+    size: 42
+    encoding: utf-16
+    pointers:
+      - 0x001a255c
+      - 0x001a2804
+
+  - address: 0x0029683c
+    size: 68
+    encoding: utf-16
+    pointers:
+      - 0x001a2140
+
+  - address: 0x00296880
+    size: 26
+    encoding: utf-16
+    pointers:
+      - 0x001d1be0
+
+  - address: 0x0029689a
+    size: 18
+    encoding: utf-16
+    pointers:
+      - 0x001d1be4
+
+  - address: 0x002968b6
+    size: 12
+    encoding: utf-16
+    pointers:
+      - 0x001a04f4
+
+  - address: 0x002968c2
+    size: 12
+    encoding: utf-16
+    pointers:
+      - 0x001a04f8
+
+  - address: 0x002968ce
+    size: 16
+    encoding: utf-16
+    pointers:
+      - 0x001a04fc
+
+  - address: 0x002968de
+    size: 12
+    encoding: utf-16
+    pointers:
+      - 0x001a0500
+
+  - address: 0x002968ea
+    size: 14
+    encoding: utf-16
+    pointers:
+      - 0x001a0504
+
+  - address: 0x002968f8
+    size: 70
+    encoding: utf-16
+    pointers:
+      - 0x001a29ac
+      - 0x001a29cc
+      - 0x001a2b8c
+
+  - address: 0x0029693e
+    size: 76
+    encoding: utf-16
+    pointers:
+      - 0x001a2a2c
+      - 0x001a2a20
+      - 0x001a2b94

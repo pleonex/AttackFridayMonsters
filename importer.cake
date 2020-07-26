@@ -27,6 +27,7 @@ using AttackFridayMonsters.Formats;
 using AttackFridayMonsters.Formats.Compression;
 using AttackFridayMonsters.Formats.Container;
 using AttackFridayMonsters.Formats.Text;
+using AttackFridayMonsters.Formats.Text.Code;
 using AttackFridayMonsters.Formats.Text.Layout;
 using Lemon.Containers;
 using Lemon.Containers.Converters;
@@ -94,6 +95,11 @@ public class BuildData
                 node.Stream.WriteTo($"{LumaDirectory}/romfs/{path}");
             }
         }
+
+        Navigator.SearchNode(Root, $"/root/program/exheader")
+            .Stream.WriteTo($"{LumaDirectory}/exheader.bin");
+        Navigator.SearchNode(Root, $"/root/program/system/.code")
+            .Stream.WriteTo($"{LumaDirectory}/code.bin");
     }
 }
 
@@ -126,7 +132,52 @@ Task("Import-System")
     .IsDependentOn("Open-Game")
     .Does<BuildData>(data =>
 {
-    Warning("TODO: Import text into code.bin");
+    // Create a copy so we don't overwrite the original. This won't be needed
+    // once Lemon can read the exheader from the NCCH.
+    var exHeader = NodeFactory.FromMemory("exheader");
+    Navigator.SearchNode(data.Root, "/root/program").Add(exHeader);
+    NodeFactory.FromFile($"{data.ToolsDirectory}/exheader.bin")
+        .Stream.WriteTo(exHeader.Stream);
+
+    // Decompress and compress .code
+    var decompressConverter = new ExternalProgramConverter {
+       Program = $"{data.ToolsDirectory}/blz",
+       Arguments = "-d <inout>",
+    };
+     var compressionConverter = new ExternalProgramConverter {
+        Program = $"{data.ToolsDirectory}/blz",
+        Arguments = "-en <inout>",
+    };
+
+    var po = NodeFactory.FromFile($"{data.TextDirectory}/code.po")
+        .TransformWith<Binary2Po>()
+        .GetFormatAs<Po>();
+
+    // Safe warnings:
+    // 0x00279402 -> 0x0019b46c: pointer to pointer [removed]
+    // 0x00279c90 -> 0x00235664: pointer to pointer [removed]
+    // 0x0027a03e -> 0x001def7c: pointer to pointer [removed]
+    // 0x0027a070 -> 0x0023ec1c: pointer to pointer [removed]
+    // 0x0027a090 -> 0x00242d98: pointer to pointer [removed]
+    // 0x0027a0b0 -> 0x00242c24: pointer to pointer [removed]
+    // 0x0027a0d0 -> 0x00242cf8: pointer to pointer [removed]
+    // 0x0029659a -> 0x001a2184: pointer to pointer [removed]
+    // 0x002965f0 -> 0x001a22ec: pointer to pointer [removed]
+    // 0x002965f0 -> 0x001a2310: pointer to pointer [removed]
+    // 0x00296628 -> 0x001a2320: pointer to pointer [removed]
+    // 0x00296628 -> 0x001a2344: pointer to pointer [removed]
+    // 0x0029665c -> 0x001a26f4: pointer to pointer [removed]
+    // 0x00296672 -> 0x001a2974: pointer to pointer [removed]
+    // 0x00296672 -> 0x001a2990: pointer to pointer [removed]
+    // 0x0029668a -> 0x001a29f4: pointer to pointer [removed]
+    // 0x0029668a -> 0x001a2a10: pointer to pointer [removed]
+    // 0x002966a4 -> 0x001a2a60: pointer to pointer [removed]
+    // 0x002966a4 -> 0x001a2a7c: pointer to pointer [removed]
+    // 0x0029683c -> 0x001a1e6c: pointer to pointer [removed]
+    Navigator.SearchNode(data.Root, "/root/program/system/.code")
+        .TransformWith(decompressConverter)
+        .TransformWith<Code3dsPoImporter, (Po, DataStream)>((po, exHeader.Stream))
+        .TransformWith(compressionConverter);
 });
 
 Task("Unpack")
@@ -530,6 +581,9 @@ Task("Generate-FileSystem")
     program.Children["rom"]
         .TransformWith<NodeContainer2BinaryIvfc>()
         .Stream.WriteTo($"{data.OutputDirectory}/game.3ds.romfs");
+
+    program.Children["exheader"]
+            .Stream.WriteTo($"{data.OutputDirectory}/exheader.bin");
 });
 
 Task("Default")
