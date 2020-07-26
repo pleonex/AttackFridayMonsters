@@ -333,7 +333,7 @@ Task("Import-Scripts")
     DataStream scriptSys0 = DataStreamFactory.FromFile(
         $"{data.TextDirectory}/sys_data0.po",
         FileOpenMode.Read);
-    sysData.Children[0].ChangeFormat((new BinaryFormat(scriptSys0)));
+    sysData.Children[0].ChangeFormat(new BinaryFormat(scriptSys0), false);
     sysData.Children[0].TransformWith<Binary2Po>()
         .TransformWith<ScriptBlock2Po, DataStream>(originalSys0);
     originalSys0.Dispose();
@@ -342,7 +342,7 @@ Task("Import-Scripts")
     DataStream scriptSys1 = DataStreamFactory.FromFile(
         $"{data.TextDirectory}/sys_data1.po",
         FileOpenMode.Read);
-    sysData.Children[1].ChangeFormat((new BinaryFormat(scriptSys1)));
+    sysData.Children[1].ChangeFormat(new BinaryFormat(scriptSys1), false);
     sysData.Children[1].TransformWith<Binary2Po>()
         .TransformWith<ScriptBlock2Po, DataStream>(originalSys1);
     originalSys1.Dispose();
