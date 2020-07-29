@@ -20,11 +20,11 @@
 import java.io.IOException;
 import java.io.FileWriter;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Iterator;
 
 import ghidra.app.script.GhidraScript;
 import ghidra.program.flatapi.FlatProgramAPI;
+import ghidra.program.model.data.AbstractStringDataType;
 import ghidra.program.model.data.DataType;
 import ghidra.program.model.listing.Data;
 import ghidra.program.model.mem.MemoryBlock;
@@ -36,21 +36,14 @@ import org.apache.logging.log4j.Logger;
 
 public class ExportDefinedStrings extends GhidraScript {
     Logger logger;
-    HashMap<String, String> ghidraTypeEncoding;
 
     public ExportDefinedStrings()
     {
         logger = LogManager.getLogger(ExportDefinedStrings.class);
-
-        ghidraTypeEncoding = new HashMap<String, String>();
-        ghidraTypeEncoding.put("string", "ascii");
-        ghidraTypeEncoding.put("TerminatedCString", "ascii");
-        ghidraTypeEncoding.put("unicode", "utf-16");
-        ghidraTypeEncoding.put("TerminatedUnicode", "utf-16");
     }
 
     @Override
-    protected void run() throws IOException, Exception {
+    protected void run() throws Exception {
         String[] args = getScriptArgs();
         if (args.length != 1) {
             logger.error("USAGE: ExportDefinedString.java <output_file>");
@@ -96,23 +89,28 @@ public class ExportDefinedStrings extends GhidraScript {
         Data data = api.getFirstData();
         while (data != null) {
             DataType type = data.getDataType();
-            if (ghidraTypeEncoding.containsKey(type.getName())) {
-                exportString(data, outputWriter);
+            if (type instanceof AbstractStringDataType) {
+                AbstractStringDataType stringType = (AbstractStringDataType)type;
+                exportString(data, stringType, outputWriter);
             }
 
             data = api.getDataAfter(data);
         }
     }
 
-    private void exportString(Data data, FileWriter outputWriter)
+    private void exportString(Data data, AbstractStringDataType type, FileWriter outputWriter)
         throws IOException
     {
-        outputWriter.write("  # " + data.getValue().toString().replace("\n", "\\n") + "\n");
-        outputWriter.write("  - address: 0x" + data.getAddressString(false, true) + "\n");
-        outputWriter.write("    size: " + data.getLength() + "\n");
+        String address = data.getAddressString(false, true);
+        int length = data.getLength();
+        String value = data.getValue().toString();
+        value = value.replace("\n", "\\n").replace("\r", "\\r");
+        String charset = type.getCharsetName(data);
 
-        String encoding = ghidraTypeEncoding.get(data.getDataType().getName());
-        outputWriter.write("    encoding: " + encoding + "\n");
+        outputWriter.write("  # " + value + "\n");
+        outputWriter.write("  - address: 0x" + address + "\n");
+        outputWriter.write("    size: " + length + "\n");
+        outputWriter.write("    encoding: " + charset + "\n");
         outputWriter.write("    pointers:\n");
 
         for (Reference ref : data.getReferenceIteratorTo()) {
