@@ -44,6 +44,7 @@ namespace AttackFridayMonsters.Formats.Text.Code
 
         public Po Convert(BinaryFormat source)
         {
+
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
             if (block == null)
@@ -62,7 +63,7 @@ namespace AttackFridayMonsters.Formats.Text.Code
                 var encoding = Encoding.GetEncoding(definition.Encoding);
                 string text = reader.ReadString(definition.Size, encoding).Replace("\0", string.Empty);
 
-                string pointers = string.Join(",", definition.Pointers.Select(p => $"0x{p:X}"));
+                string pointers = string.Join(",", definition.Pointers?.Select(p => $"0x{p:X}") ?? Enumerable.Empty<string>());
 
                 var entry = new PoEntry {
                     Original = text,
