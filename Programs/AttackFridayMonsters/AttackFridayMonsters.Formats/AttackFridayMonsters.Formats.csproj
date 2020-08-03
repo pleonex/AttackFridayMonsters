@@ -4,7 +4,7 @@
     <OutputType>Library</OutputType>
     <AssemblyName>AttackFridayMonsters.Formats</AssemblyName>
     <Product>AoFM</Product>
-    <Version>1.0-alpha02</Version>
+    <Version>1.0</Version>
     <Description>Library to translate the game Attack of the Friday Monsters.</Description>
 
     <Authors>pleonex</Authors>
@@ -15,21 +15,21 @@
     <PackageProjectUrl>https://gitlab.com/gradienwords/AttackFridayMonsters/</PackageProjectUrl>
     <PackageTags>translation;localization;romhacking;fan-translation</PackageTags>
 
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>AttackFridayMonsters.Formats</RootNamespace>
     <CodeAnalysisRuleSet>..\StyleCop.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.2">
+    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="3.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.1-beta.61">
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Yarhl" Version="3.0.0-alpha10" />
-    <PackageReference Include="Yarhl.Media" Version="3.0.0-alpha10" />
-    <PackageReference Include="YamlDotNet" Version="6.1.2" />
+    <PackageReference Include="Yarhl" Version="3.0.0" />
+    <PackageReference Include="Yarhl.Media" Version="3.0.0" />
+    <PackageReference Include="YamlDotNet" Version="8.1.2" />
   </ItemGroup>
 </Project>

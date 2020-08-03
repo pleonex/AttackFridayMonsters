@@ -12,15 +12,15 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#addin nuget:?package=Yarhl&version=3.0.0-alpha10&loaddependencies=true&prerelease
-#addin nuget:?package=Yarhl.Media&version=3.0.0-alpha10&loaddependencies=true&prerelease
-#addin nuget:?package=YamlDotNet&version=6.1.2&loaddependencies=true
-#addin nuget:?package=Serilog&version=2.8.0
-#addin nuget:?package=Serilog.Sinks.Console&version=3.0.1
+#addin nuget:?package=Yarhl&version=3.0.0&loaddependencies=true
+#addin nuget:?package=Yarhl.Media&version=3.0.0&loaddependencies=true
+#addin nuget:?package=YamlDotNet&version=8.1.2&loaddependencies=true
+#addin nuget:?package=Serilog&version=2.9.0
+#addin nuget:?package=Serilog.Sinks.Console&version=3.1.1
 #addin nuget:?package=Serilog.Sinks.ColoredConsole&version=3.0.1
 
-#r "Programs/AttackFridayMonsters/AttackFridayMonsters.Formats/bin/Debug/netstandard2.0/AttackFridayMonsters.Formats.dll"
-#r "../Lemon/src/Lemon/bin/Debug/netstandard2.0/Lemon.dll"
+#r "GameData/tools/AttackFridayMonsters.Formats.dll"
+#r "GameData/tools/Lemon.dll"
 
 using System.Collections.Generic;
 using AttackFridayMonsters.Formats;
@@ -29,7 +29,7 @@ using AttackFridayMonsters.Formats.Container;
 using AttackFridayMonsters.Formats.Text;
 using AttackFridayMonsters.Formats.Text.Code;
 using AttackFridayMonsters.Formats.Text.Layout;
-using Lemon.Containers;
+using Lemon.Containers.Converters;
 using Yarhl.IO;
 using Yarhl.FileSystem;
 using Yarhl.FileFormat;
@@ -64,7 +64,7 @@ public class BuildData
 
     public Node GetNode(string path)
     {
-        return Navigator.SearchNode(Root, $"/root/program/rom/{path}");
+        return Navigator.SearchNode(Root, $"/root/content/program/rom/{path}");
     }
 }
 
@@ -75,8 +75,8 @@ Setup<BuildData>(setupContext => {
     Log.Logger = log;
 
     return new BuildData {
-        Game = Argument("game", "GameData/game.3ds"),
-        ToolsDirectory = Argument("tools", "GameData/tools"),
+        ToolsDirectory = "GameData/tools",
+        Game = Argument("game", "GameData/00040000000E7500 Attack of the Friday Monsters! (CTR-N-JKEP) (E).cia"),
         OutputDirectory = Argument("output", "GameData/extracted"),
     };
 });
@@ -84,11 +84,21 @@ Setup<BuildData>(setupContext => {
 Task("Open-Game")
     .Does<BuildData>(data =>
 {
-    data.Root = NodeFactory.FromFile(data.Game, "root");
-    ContainerManager.Unpack3DSNode(data.Root);
-    if (data.Root.Children.Count == 0) {
-        throw new Exception("Game folder is empty!");
+    if (!FileExists(data.Game)) {
+        throw new Exception($"The game file '{data.Game}' does not exist");
     }
+
+    data.Root = NodeFactory.FromFile(data.Game, "root")
+        .TransformWith<BinaryCia2NodeContainer>();
+
+    var programNode = data.Root.Children["content"].Children["program"];
+    if (programNode.Tags.ContainsKey("LEMON_NCCH_ENCRYPTED")) {
+        throw new Exception("Encrypted (legit) CIA not supported");
+    }
+
+    programNode.TransformWith<Binary2Ncch>();
+    programNode.Children["rom"].TransformWith<BinaryIvfc2NodeContainer>();
+    programNode.Children["system"].TransformWith<BinaryExeFs2NodeContainer>();
 });
 
 Task("Extract-System")
@@ -106,7 +116,7 @@ Task("Extract-System")
        Arguments = "-d <inout>",
     };
 
-    Navigator.SearchNode(data.Root, "/root/program/system/.code")
+    Navigator.SearchNode(data.Root, "/root/content/program/system/.code")
         .TransformWith(compressionConverter)
         .TransformWith<BinaryStrings2Po, DataStream>(stringDefinitions)
         .TransformWith<Po2Binary>()

@@ -15,7 +15,7 @@
 function(add_csharp_target)
     set(options "")
     set(oneValueArgs PROJECT OUTPUT DESTINATION)
-    set(multiValueArgs DEPENDS)
+    set(multiValueArgs "")
     cmake_parse_arguments(CSHARP_TARGET "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     # Check arguments
@@ -26,54 +26,23 @@ function(add_csharp_target)
         message(FATAL_ERROR "Missing C# output assembly name")
     endif()
 
-    get_filename_component(CSHARP_TARGET_PROJECT_NAME "${CSHARP_TARGET_OUTPUT}" NAME_WE)
-    get_filename_component(CSHARP_TARGET_PROJECT_DIR "${CSHARP_TARGET_PROJECT}" DIRECTORY)
-
-    # Get all the source files to depend on them and rebuild only if changes
-    # We depend on solutions and projects to rebuild on new files / delete files
-    # or new projects.
-    file(GLOB_RECURSE CSHARP_TARGET_SOURCES
-        "${CSHARP_TARGET_PROJECT_DIR}/*.cs"
-        "${CSHARP_TARGET_PROJECT_DIR}/*.csproj"
-        "${CSHARP_TARGET_PROJECT_DIR}/*.sln"
-    )
-
-    # We want to depend on the dependency folders in case they change too.
-    foreach(CSHARP_TARGET_DEPENDENCY ${CSHARP_TARGET_DEPENDS})
-        file(GLOB_RECURSE CSHARP_TARGET_DEPENDENCY_SOURCES
-            "${CSHARP_TARGET_DEPENDENCY}/*.cs"
-            "${CSHARP_TARGET_DEPENDENCY}/*.csproj"
-            "${CSHARP_TARGET_DEPENDENCY}/*.sln"
-        )
-        list(APPEND CSHARP_TARGET_SOURCES ${CSHARP_TARGET_DEPENDENCY_SOURCES})
-    endforeach()
-
-    # Add a custom command to build the project.
+    get_filename_component(CSHARP_TARGET_PROJECT_NAME "${CSHARP_TARGET_PROJECT}" NAME_WE)
     set(CSHARP_TARGET_OUTPUT_DIR "${CMAKE_BINARY_DIR}/${CSHARP_TARGET_PROJECT_NAME}")
-    add_custom_command(
-        OUTPUT
-        "${CSHARP_TARGET_OUTPUT_DIR}/${CSHARP_TARGET_OUTPUT}"
-        COMMAND
-        msbuild /v:minimal /m:8
-            /p:OutputPath=${CSHARP_TARGET_OUTPUT_DIR}
-            ${CSHARP_TARGET_PROJECT}
-        DEPENDS
-        ${CSHARP_TARGET_SOURCES}
-    )
 
-    # Add the target to run always. This target will trigger the custom command
-    # and build only if source changes.
+    # We use a custom target that runs always (it doesn't have a custom_command)
+    # because in the new SDK-style projects there is no way to know if new files
+    # has been added.
     add_custom_target(${CSHARP_TARGET_PROJECT_NAME} ALL
-        DEPENDS
-        "${CSHARP_TARGET_OUTPUT_DIR}/${CSHARP_TARGET_OUTPUT}"
+        COMMAND dotnet publish -o "${CSHARP_TARGET_OUTPUT_DIR}" "${CSHARP_TARGET_PROJECT}"
+        DEPENDS ${CSHARP_TARGET_PROJECT}
     )
 
-    # Finally install
+    # Finally install (publish)
     if(CSHARP_TARGET_DESTINATION)
         install(DIRECTORY "${CSHARP_TARGET_OUTPUT_DIR}/"
             DESTINATION "${CSHARP_TARGET_DESTINATION}"
             USE_SOURCE_PERMISSIONS
-            FILES_MATCHING PATTERN "*" PATTERN "*.pdb" EXCLUDE
+            FILES_MATCHING PATTERN "*"
         )
     endif()
 endfunction()

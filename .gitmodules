@@ -13,3 +13,6 @@
 [submodule "Spanish"]
 	path = Spanish
 	url = git@gitlab.com:gradienwords/AttackFridayMonsters-Spanish.git
+[submodule "Programs/Lemon"]
+	path = Programs/Lemon
+	url = https://github.com/SceneGate/Lemon

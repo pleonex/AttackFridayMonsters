@@ -52,7 +52,6 @@ namespace AttackFridayMonsters.Formats.Text
 
             string yamlText = new SerializerBuilder()
                 .WithNamingConvention(new UnderscoredNamingConvention())
-                .EmitDefaults()
                 .Build()
                 .Serialize(ymlClyt);
 

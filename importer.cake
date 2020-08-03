@@ -12,15 +12,15 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#addin nuget:?package=Yarhl&version=3.0.0-alpha10&loaddependencies=true&prerelease
-#addin nuget:?package=Yarhl.Media&version=3.0.0-alpha10&loaddependencies=true&prerelease
-#addin nuget:?package=YamlDotNet&version=6.1.2&loaddependencies=true
-#addin nuget:?package=Serilog&version=2.8.0
-#addin nuget:?package=Serilog.Sinks.Console&version=3.0.1
+#addin nuget:?package=Yarhl&version=3.0.0&loaddependencies=true
+#addin nuget:?package=Yarhl.Media&version=3.0.0&loaddependencies=true
+#addin nuget:?package=YamlDotNet&version=8.1.2&loaddependencies=true
+#addin nuget:?package=Serilog&version=2.9.0
+#addin nuget:?package=Serilog.Sinks.Console&version=3.1.1
 #addin nuget:?package=Serilog.Sinks.ColoredConsole&version=3.0.1
 
-#r "Programs/AttackFridayMonsters/AttackFridayMonsters.Formats/bin/Debug/netstandard2.0/AttackFridayMonsters.Formats.dll"
-#r "../Lemon/src/Lemon/bin/Debug/netstandard2.0/Lemon.dll"
+#r "GameData/tools/AttackFridayMonsters.Formats.dll"
+#r "GameData/tools/Lemon.dll"
 
 using System.Collections.Generic;
 using AttackFridayMonsters.Formats;
@@ -29,15 +29,21 @@ using AttackFridayMonsters.Formats.Container;
 using AttackFridayMonsters.Formats.Text;
 using AttackFridayMonsters.Formats.Text.Code;
 using AttackFridayMonsters.Formats.Text.Layout;
-using Lemon.Containers;
 using Lemon.Containers.Converters;
+using Lemon.Titles;
 using Yarhl.IO;
 using Yarhl.FileFormat;
 using Yarhl.FileSystem;
 using Yarhl.Media.Text;
 using Serilog;
 
-const string TitleId = "00040000000E7500";
+readonly string HomePath = System.Environment.GetEnvironmentVariable("HOME");
+readonly string CitraPathWindows = @$"{HomePath}\AppData\Roaming\Citra\load\mods";
+readonly string CitraPathUnix = $"{HomePath}/.local/share/citra-emu/load/mods";
+readonly string CitraPath = (System.Environment.OSVersion.Platform == PlatformID.Win32NT)
+    ? CitraPathWindows
+    : CitraPathUnix;
+
 var target = Argument("target", "Default");
 
 public class BuildData
@@ -46,15 +52,17 @@ public class BuildData
 
     public string Game { get; set; }
 
+    public TitleMetadata Title { get; set; }
+
     public string ToolsDirectory { get; set; }
 
     public string TranslationDirectory { get; set; }
 
     public string OutputDirectory { get; set; }
 
-    public string LumaDirectory { get; set; }
+    public string LayeredFsDirectory { get; set; }
 
-    public string InternalDirectory { get { return $"{TranslationDirectory}/Internal"; } }
+    public bool CopyToCitra { get; set; }
 
     public string ImageDirectory { get { return $"{TranslationDirectory}/Images"; } }
 
@@ -76,30 +84,32 @@ public class BuildData
             modifiedNodes.Add(path);
         }
 
-        return Navigator.SearchNode(Root, $"/root/program/rom/{path}");
+        return Navigator.SearchNode(Root, $"/root/content/program/rom/{path}");
     }
 
-    public void ExportToLuma()
+    public void ExportToLayeredFs(string outputPath)
     {
+        outputPath += $"/{Title.TitleId:X16}";
+
         foreach (var path in modifiedNodes) {
-            var node = Navigator.SearchNode(Root, $"/root/program/rom/{path}");
+            var node = Navigator.SearchNode(Root, $"/root/content/program/rom/{path}");
             if (node == null) {
                 continue;
             }
 
             if (node.IsContainer) {
                 foreach (var child in node.Children) {
-                    child.Stream.WriteTo($"{LumaDirectory}/romfs/{path}/{child.Name}");
+                    child.Stream.WriteTo($"{outputPath}/romfs/{path}/{child.Name}");
                 }
             } else {
-                node.Stream.WriteTo($"{LumaDirectory}/romfs/{path}");
+                node.Stream.WriteTo($"{outputPath}/romfs/{path}");
             }
         }
 
-        Navigator.SearchNode(Root, $"/root/program/exheader")
-            .Stream.WriteTo($"{LumaDirectory}/exheader.bin");
-        Navigator.SearchNode(Root, $"/root/program/system/.code")
-            .Stream.WriteTo($"{LumaDirectory}/code.bin");
+        Navigator.SearchNode(Root, $"/root/content/program/exheader")
+            .Stream.WriteTo($"{outputPath}/exheader.bin");
+        Navigator.SearchNode(Root, $"/root/content/program/system/.code")
+            .Stream.WriteTo($"{outputPath}/code.bin");
     }
 }
 
@@ -110,10 +120,11 @@ Setup<BuildData>(setupContext => {
     Log.Logger = log;
 
     return new BuildData {
-        Game = Argument("game", "GameData/game.3ds"),
-        ToolsDirectory = Argument("tools", "GameData/tools"),
+        ToolsDirectory = "GameData/tools",
+        Game = Argument("game", "GameData/00040000000E7500 Attack of the Friday Monsters! (CTR-N-JKEP) (E).cia"),
         OutputDirectory = Argument("output", "GameData/output"),
-        LumaDirectory = Argument("luma", $"GameData/output/luma/titles/{TitleId}"),
+        LayeredFsDirectory = Argument("layeredfs", $"GameData/output/luma/titles"),
+        CopyToCitra = Argument("copy-citra", true),
         TranslationDirectory = Argument("translation", "Spanish/es"),
     };
 });
@@ -121,32 +132,42 @@ Setup<BuildData>(setupContext => {
 Task("Open-Game")
     .Does<BuildData>(data =>
 {
-    data.Root = NodeFactory.FromFile(data.Game, "root");
-    ContainerManager.Unpack3DSNode(data.Root);
-    if (data.Root.Children.Count == 0) {
-        throw new Exception("Game folder is empty!");
+    if (!FileExists(data.Game)) {
+        throw new Exception($"The game file '{data.Game}' does not exist");
     }
+
+    var gameStream = DataStreamFactory.FromFile(data.Game, FileOpenMode.Read);
+    data.Root = new Node("root", new BinaryFormat(gameStream))
+        .TransformWith<BinaryCia2NodeContainer>();
+
+    data.Title = data.Root.Children["title"]
+        .TransformWith<Binary2TitleMetadata>()
+        .GetFormatAs<TitleMetadata>();
+
+    var programNode = data.Root.Children["content"].Children["program"];
+    if (programNode.Tags.ContainsKey("LEMON_NCCH_ENCRYPTED")) {
+        throw new Exception("Encrypted (legit) CIA not supported");
+    }
+
+    programNode.TransformWith<Binary2Ncch>();
+    programNode.Children["rom"].TransformWith<BinaryIvfc2NodeContainer>();
+    programNode.Children["system"].TransformWith<BinaryExeFs2NodeContainer>();
 });
 
 Task("Import-System")
     .IsDependentOn("Open-Game")
     .Does<BuildData>(data =>
 {
-    // Create a copy so we don't overwrite the original. This won't be needed
-    // once Lemon can read the exheader from the NCCH.
-    var exHeader = NodeFactory.FromMemory("exheader");
-    Navigator.SearchNode(data.Root, "/root/program").Add(exHeader);
-    NodeFactory.FromFile($"{data.ToolsDirectory}/exheader.bin")
-        .Stream.WriteTo(exHeader.Stream);
+    // Create a copy to make modifications
+    var exHeader = Navigator.SearchNode(data.Root, "/root/content/program/exheader");
+    var newExHeader = new BinaryFormat();
+    exHeader.Stream.WriteTo(newExHeader.Stream);
+    exHeader.ChangeFormat(newExHeader);
 
     // Decompress and compress .code
     var decompressConverter = new ExternalProgramConverter {
        Program = $"{data.ToolsDirectory}/blz",
        Arguments = "-d <inout>",
-    };
-     var compressionConverter = new ExternalProgramConverter {
-        Program = $"{data.ToolsDirectory}/blz",
-        Arguments = "-en <inout>",
     };
 
     var po = NodeFactory.FromFile($"{data.TextDirectory}/code.po")
@@ -174,10 +195,17 @@ Task("Import-System")
     // 0x002966a4 -> 0x001a2a60: pointer to pointer [removed]
     // 0x002966a4 -> 0x001a2a7c: pointer to pointer [removed]
     // 0x0029683c -> 0x001a1e6c: pointer to pointer [removed]
-    Navigator.SearchNode(data.Root, "/root/program/system/.code")
+    Navigator.SearchNode(data.Root, "/root/content/program/system/.code")
         .TransformWith(decompressConverter)
-        .TransformWith<Code3dsPoImporter, (Po, DataStream)>((po, exHeader.Stream))
-        .TransformWith(compressionConverter);
+        .TransformWith<Code3dsPoImporter, (Po, DataStream)>((po, exHeader.Stream));
+
+    // Citra doesn't support compressed code.bin, so we leave it decompressed
+    // and we update the flag from the extended header
+    exHeader.Stream.Position = 0x0D;
+    byte flags = exHeader.Stream.ReadByte();
+    flags &= 0xFE; // bit0: 1 code.bin is compressed, 0 decompressed
+    exHeader.Stream.Position = 0x0D;
+    exHeader.Stream.WriteByte(flags);
 });
 
 Task("Unpack")
@@ -588,32 +616,84 @@ Task("Pack")
     data.GetNode("gkk/episode/episode.bin").TransformWith<Ofs3ToBinary>();
 });
 
-Task("Generate-Luma")
+Task("Generate-LayeredFs")
     .IsDependentOn("Open-Game")
     .Does<BuildData>(data =>
 {
-    // Generate the luma folder
-    data.ExportToLuma();
+    data.ExportToLayeredFs(data.LayeredFsDirectory);
+
+    if (data.CopyToCitra) {
+        data.ExportToLayeredFs(CitraPath);
+    }
 });
 
-Task("Generate-FileSystem")
+Task("Generate-Patch")
     .IsDependentOn("Open-Game")
     .Does<BuildData>(data =>
 {
-    // Generate ExeFS and RomFS files because most emulators / CFW support
-    // this kind "layered FS". In the future, Lemon may implement NCSD / CIA
-    // generation so we could generate them too.
-    // Note that Citra is not stable yet to read the files.
-    var program = data.Root.Children["program"];
+    // Generate ExeFS and RomFS so we can create XDelta to patch them later.
+    var program = data.Root.Children["content"].Children["program"];
+
+    string exeFsPath = $"{data.OutputDirectory}/game.exefs";
     program.Children["system"]
         .TransformWith<BinaryExeFs2NodeContainer>()
-        .Stream.WriteTo($"{data.OutputDirectory}/game.3ds.exefs");
+        .Stream.WriteTo(exeFsPath);
+
+    string romFsPath = $"{data.OutputDirectory}/game.romfs";
     program.Children["rom"]
         .TransformWith<NodeContainer2BinaryIvfc>()
-        .Stream.WriteTo($"{data.OutputDirectory}/game.3ds.romfs");
+        .Stream.WriteTo(romFsPath);
 
-    program.Children["exheader"]
-            .Stream.WriteTo($"{data.OutputDirectory}/exheader.bin");
+    // We modify the extended header so we need to export it.
+    // Traditionally, the tools have been putting together the exheader and the
+    // access descriptor and they crash if they are not together, so let's do that.
+    string exHeaderPath = $"{data.OutputDirectory}/exheader.bin";
+    using (var compatibleExHeader = DataStreamFactory.FromFile(exHeaderPath, FileOpenMode.Write)) {
+        program.Children["exheader"].Stream.WriteTo(compatibleExHeader);
+        program.Children["access_descriptor"].Stream.WriteTo(compatibleExHeader);
+    }
+
+    // Extract the original CXI
+    string originalCxi = $"{data.OutputDirectory}/program_original.cxi";
+    if (!FileExists(originalCxi)) {
+        var gameStream = DataStreamFactory.FromFile(data.Game, FileOpenMode.Read);
+        using (Node game = new Node("root", new BinaryFormat(gameStream))) {
+            game.TransformWith<BinaryCia2NodeContainer>()
+                .Children["content"].Children["program"]
+                .Stream.WriteTo(originalCxi);
+        }
+    }
+
+    // Create the new CXI (Lemon doesn't support it yet so we use 3dstool)
+    string romTool = $"{data.ToolsDirectory}/3dstool";
+    string plainPath = $"{data.OutputDirectory}/plain.bin";
+    string headerPath = $"{data.OutputDirectory}/header.bin";
+    int result = 0;
+    if (!FileExists(plainPath) || !FileExists(headerPath)) {
+        result = StartProcess(
+            romTool,
+            $"-x -t cxi -f {originalCxi} --plain {plainPath} --header {headerPath}");
+        if (result != 0) {
+            throw new Exception("Failed to extract files from CXI");
+        }
+    }
+
+    string modifiedCxi = $"{data.OutputDirectory}/program_modified.cxi";
+    result = StartProcess(
+        romTool,
+        $"-c -t cxi -f {modifiedCxi} --exefs {exeFsPath} --romfs {romFsPath} " +
+        $"--exh {exHeaderPath} --plain {plainPath} --header {headerPath}");
+    if (result != 0) {
+        throw new Exception("Failed to generate new CXI");
+    }
+
+    // Create an XDelta patch
+    result = StartProcess(
+        $"{data.ToolsDirectory}/xdelta3",
+        $"-e -S -f -9 -s {originalCxi} {modifiedCxi} {data.OutputDirectory}/patch.xdelta");
+    if (result != 0) {
+        throw new Exception("Failed to generate patch");
+    }
 });
 
 Task("Default")
@@ -626,7 +706,7 @@ Task("Default")
     .IsDependentOn("Import-Images")
     .IsDependentOn("Import-Videos")
     .IsDependentOn("Pack")
-    .IsDependentOn("Generate-Luma")
-    .IsDependentOn("Generate-FileSystem");
+    .IsDependentOn("Generate-LayeredFs")
+    .IsDependentOn("Generate-Patch");
 
 RunTarget(target);
