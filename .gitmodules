@@ -16,3 +16,9 @@
 [submodule "Programs/Lemon"]
 	path = Programs/Lemon
 	url = https://github.com/SceneGate/Lemon
+[submodule "Programs/xdelta/xdelta"]
+	path = Programs/xdelta/xdelta
+	url = https://github.com/jmacd/xdelta
+[submodule "Programs/xdelta/xz"]
+	path = Programs/xdelta/xz
+	url = https://git.tukaani.org/xz.git

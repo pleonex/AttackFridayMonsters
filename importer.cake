@@ -44,6 +44,9 @@ readonly string CitraPath = (System.Environment.OSVersion.Platform == PlatformID
     ? CitraPathWindows
     : CitraPathUnix;
 
+const string TitleIdUsa = "00040000000E7600";
+const string TitleIdEur = "00040000000E7500";
+
 var target = Argument("target", "Default");
 
 public class BuildData
@@ -143,6 +146,11 @@ Task("Open-Game")
     data.Title = data.Root.Children["title"]
         .TransformWith<Binary2TitleMetadata>()
         .GetFormatAs<TitleMetadata>();
+
+    string titleId = data.Title.TitleId.ToString("X16");
+    if (titleId != TitleIdUsa && titleId != TitleIdEur) {
+        throw new Exception($"Invalid game with title ID: {titleId}");
+    }
 
     var programNode = data.Root.Children["content"].Children["program"];
     if (programNode.Tags.ContainsKey("LEMON_NCCH_ENCRYPTED")) {

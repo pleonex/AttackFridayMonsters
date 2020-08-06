@@ -17,6 +17,7 @@ project(AttackFridayMonstersTools VERSION 1.0 LANGUAGES C)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules")
 include(ExternalProject)
+include(CheckTypeSize)
 include(CSharpProject)
 
 # 1. 3dstool: create ROMs
@@ -82,3 +83,6 @@ install(
 
 # 8. code.bin helper file
 install(FILES "${PROJECT_SOURCE_DIR}/code_text.yml" DESTINATION tools)
+
+# 9. XDelta3
+add_subdirectory(xdelta)

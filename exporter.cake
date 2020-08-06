@@ -30,11 +30,15 @@ using AttackFridayMonsters.Formats.Text;
 using AttackFridayMonsters.Formats.Text.Code;
 using AttackFridayMonsters.Formats.Text.Layout;
 using Lemon.Containers.Converters;
+using Lemon.Titles;
 using Yarhl.IO;
 using Yarhl.FileSystem;
 using Yarhl.FileFormat;
 using Yarhl.Media.Text;
 using Serilog;
+
+const string TitleIdUsa = "00040000000E7600";
+const string TitleIdEur = "00040000000E7500";
 
 var target = Argument("target", "Default");
 
@@ -45,8 +49,6 @@ public class BuildData
     public string ToolsDirectory { get; set; }
 
     public string OutputDirectory { get; set; }
-
-    public string InternalDirectory { get { return $"{OutputDirectory}/Internal"; } }
 
     public string ImageDirectory { get { return $"{OutputDirectory}/Images"; } }
 
@@ -90,6 +92,14 @@ Task("Open-Game")
 
     data.Root = NodeFactory.FromFile(data.Game, "root")
         .TransformWith<BinaryCia2NodeContainer>();
+
+    string titleId = data.Root.Children["title"]
+        .TransformWith<Binary2TitleMetadata>()
+        .GetFormatAs<TitleMetadata>()
+        .TitleId.ToString("X16");
+    if (titleId != TitleIdUsa && titleId != TitleIdEur) {
+        throw new Exception($"Invalid game with title ID: {titleId}");
+    }
 
     var programNode = data.Root.Children["content"].Children["program"];
     if (programNode.Tags.ContainsKey("LEMON_NCCH_ENCRYPTED")) {
