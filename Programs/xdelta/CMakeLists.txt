@@ -17,6 +17,7 @@
 # liblzma
 ###############################################################################
 set(LIBLZMA_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/xz-install")
+file(MAKE_DIRECTORY "${LIBLZMA_INSTALL_DIR}/include")
 ExternalProject_add(xz
     SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/xz"
     INSTALL_DIR "${LIBLZMA_INSTALL_DIR}"

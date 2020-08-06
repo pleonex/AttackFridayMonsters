@@ -15,6 +15,7 @@ them you need the following programs:
 - [.NET Core SDK 3.1](https://dotnet.microsoft.com/download)
 - Python: 3.8
 - gcc / clang / Visual Studio
+  - In Unix with C++ compile and static libstdc++
 
 ### Preparation
 
