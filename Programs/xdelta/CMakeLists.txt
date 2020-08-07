@@ -43,15 +43,22 @@ set_target_properties(liblzma::liblzma PROPERTIES
     INTERFACE_LINK_LIBRARIES "Threads::Threads"
 )
 set_property(TARGET liblzma::liblzma APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
-set_target_properties(liblzma::liblzma PROPERTIES
-    IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
-    IMPORTED_LOCATION_DEBUG "${LIBLZMA_INSTALL_DIR}/lib/liblzma.lib"
-)
 set_property(TARGET liblzma::liblzma APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-set_target_properties(liblzma::liblzma PROPERTIES
-    IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
-    IMPORTED_LOCATION_RELEASE "${LIBLZMA_INSTALL_DIR}/lib/liblzma.lib"
-)
+if(WIN32)
+    set_target_properties(liblzma::liblzma PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
+        IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
+        IMPORTED_LOCATION_DEBUG "${LIBLZMA_INSTALL_DIR}/lib/liblzma.lib"
+        IMPORTED_LOCATION_RELEASE "${LIBLZMA_INSTALL_DIR}/lib/liblzma.lib"
+    )
+else()
+    set_target_properties(liblzma::liblzma PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
+        IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
+        IMPORTED_LOCATION_RELEASE "${LIBLZMA_INSTALL_DIR}/lib64/liblzma.a"
+        IMPORTED_LOCATION_DEBUG "${LIBLZMA_INSTALL_DIR}/lib64/liblzma.a"
+    )
+endif()
 
 ###############################################################################
 # XDelta
@@ -79,8 +86,14 @@ set(XDELTA_HEADERS
 set(XDELTA_SOURCES
     "${XDELTA_SOURCE_DIR}/xdelta3.c"
 )
+
 add_executable(xdelta3 ${XDELTA_HEADERS} ${XDELTA_SOURCES})
+
 target_link_libraries(xdelta3 liblzma::liblzma)
+if(UNIX)
+    target_link_libraries(xdelta3 m)
+endif()
+
 target_compile_definitions(xdelta3
     PRIVATE
         SIZEOF_SIZE_T=${SIZEOF_SIZE_T}
@@ -92,7 +105,7 @@ target_compile_definitions(xdelta3
         XD3_MAIN=1              # Build as app
         NOT_MAIN=0              # Build as app, no need of lib custom main
         XD3_ENCODER=1           # Build encoder also
-        REGRESSION_TEST=1       # Build command to run built-in tests
+        REGRESSION_TEST=0       # Build command to run built-in tests
         XD3_USE_LARGEFILE64=1   # Support files larger than 4 GB
         SECONDARY_DJW=1
         SECONDARY_FGK=1

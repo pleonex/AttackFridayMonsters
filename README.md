@@ -34,7 +34,8 @@ cd ../../
 dotnet tool restore
 
 python -m venv .env
-.env/bin/activate # in windows it's in the Scripts folder
+source .env/bin/activate # Unix
+.\.env\Scripts\Activate.ps1 # Windows with PowerShell
 pip install pypng
 ```
 
@@ -43,7 +44,9 @@ pip install pypng
 Run in a terminal:
 
 ```sh
-.env/bin/activate # in windows it's in the Scripts folder
+source .env/bin/activate # Unix
+export LD_LIBRARY_PATH=<repo>/GameData/tools:$LD_LIBRARY_PATH
+.\.env\Scripts\Activate.ps1 # Windows with PowerShell
 dotnet cake exporter.cake
 ```
 
@@ -84,7 +87,9 @@ the CUE tool `blz`.
 Run in a terminal:
 
 ```sh
-.env/bin/activate # in windows it's in the Scripts folder
+source .env/bin/activate # Unix
+export LD_LIBRARY_PATH=<repo>/GameData/tools:$LD_LIBRARY_PATH
+.\.env\Scripts\Activate.ps1 # Windows with PowerShell
 dotnet cake importer.cake
 ```
 

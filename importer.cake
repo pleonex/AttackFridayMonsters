@@ -109,7 +109,7 @@ public class BuildData
             }
         }
 
-        Navigator.SearchNode(Root, $"/root/content/program/exheader")
+        Navigator.SearchNode(Root, $"/root/content/program/extended_header")
             .Stream.WriteTo($"{outputPath}/exheader.bin");
         Navigator.SearchNode(Root, $"/root/content/program/system/.code")
             .Stream.WriteTo($"{outputPath}/code.bin");
@@ -167,7 +167,7 @@ Task("Import-System")
     .Does<BuildData>(data =>
 {
     // Create a copy to make modifications
-    var exHeader = Navigator.SearchNode(data.Root, "/root/content/program/exheader");
+    var exHeader = Navigator.SearchNode(data.Root, "/root/content/program/extended_header");
     var newExHeader = new BinaryFormat();
     exHeader.Stream.WriteTo(newExHeader.Stream);
     exHeader.ChangeFormat(newExHeader);
@@ -657,7 +657,7 @@ Task("Generate-Patch")
     // access descriptor and they crash if they are not together, so let's do that.
     string exHeaderPath = $"{data.OutputDirectory}/exheader.bin";
     using (var compatibleExHeader = DataStreamFactory.FromFile(exHeaderPath, FileOpenMode.Write)) {
-        program.Children["exheader"].Stream.WriteTo(compatibleExHeader);
+        program.Children["extended_header"].Stream.WriteTo(compatibleExHeader);
         program.Children["access_descriptor"].Stream.WriteTo(compatibleExHeader);
     }
 
