@@ -37,7 +37,7 @@ namespace AttackFridayMonsters.Formats.Text.Code
 
             string yaml = new TextReader(parameters).ReadToEnd();
             block = new DeserializerBuilder()
-                .WithNamingConvention(new CamelCaseNamingConvention())
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build()
                 .Deserialize<StringDefinitionBlock>(yaml);
         }

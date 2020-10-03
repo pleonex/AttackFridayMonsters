@@ -40,7 +40,7 @@ namespace AttackFridayMonsters.Formats.Text
                 throw new InvalidOperationException("YML file doesn't exist or is empty.");
 
             ClytYml yml = new DeserializerBuilder()
-                .WithNamingConvention(new UnderscoredNamingConvention())
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build()
                 .Deserialize<ClytYml>(importedYml);
 

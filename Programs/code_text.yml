@@ -251,18 +251,31 @@ definitions:
     encoding: utf-16
     pointers:
       - 0x00295db8
+    subpointers:
+      - address: 0x00296028
+        offset: 2
+      - address: 0x00296078
+        offset: 2
 
   - address: 0x00279d3a
     size: 22
     encoding: utf-16
     pointers:
       - 0x00295dc0
+    subpointers:
+      - address: 0x00296030
+        offset: 2
+      - address: 0x0029607C
+        offset: 2
 
   - address: 0x00279d50
     size: 28
     encoding: utf-16
     pointers:
       - 0x00295DBC
+    subpointers:
+      - address: 0x0029602C
+        offset: 2
 
   - address: 0x00279d90
     size: 42

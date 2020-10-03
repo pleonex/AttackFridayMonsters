@@ -704,7 +704,7 @@ Task("Generate-Patch")
     }
 });
 
-Task("Default")
+Task("Import")
     .IsDependentOn("Open-Game")
     .IsDependentOn("Import-System")
     .IsDependentOn("Unpack")
@@ -713,7 +713,18 @@ Task("Default")
     .IsDependentOn("Import-Scripts")
     .IsDependentOn("Import-Images")
     .IsDependentOn("Import-Videos")
-    .IsDependentOn("Pack")
+    .IsDependentOn("Pack");
+
+Task("Import-Citra")
+    .IsDependentOn("Import")
+    .IsDependentOn("Generate-LayeredFs");
+
+Task("Import-Patch")
+    .IsDependentOn("Import")
+    .IsDependentOn("Generate-Patch");
+
+Task("Default")
+    .IsDependentOn("Import")
     .IsDependentOn("Generate-LayeredFs")
     .IsDependentOn("Generate-Patch");
 

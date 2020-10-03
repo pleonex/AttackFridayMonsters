@@ -120,18 +120,28 @@ namespace AttackFridayMonsters.Formats.Text.Code
         static StringDefinition GetDefinition(string reference)
         {
             string[] segments = reference.Split(':');
-            if (segments.Length != 4) {
+            if (segments.Length != 4 && segments.Length != 5) {
                 throw new FormatException($"Invalid number of segments: {reference}");
             }
 
             var pointers = segments[3].Split(',')
                 .Select(x => long.Parse(x.Substring(2), NumberStyles.HexNumber));
 
+            var subpointers = Enumerable.Empty<Subpointer>();
+            if (segments.Length == 5) {
+                subpointers = segments[4].Split(',')
+                    .Select(x => x.Split('_'))
+                    .Select(x => (long.Parse(x[0].Substring(2), NumberStyles.HexNumber), x[1]))
+                    .Select(x => (x.Item1, int.Parse(x.Item2)))
+                    .Select(x => new Subpointer { Address = x.Item1, Offset = x.Item2 });
+            }
+
             return new StringDefinition {
                 Address = int.Parse(segments[0].Substring(2), NumberStyles.HexNumber),
                 Size = int.Parse(segments[1]),
                 Encoding = segments[2],
-                Pointers = new Collection<long>(pointers.ToList())
+                Pointers = new Collection<long>(pointers.ToList()),
+                Subpointers = new Collection<Subpointer>(subpointers.ToList()),
             };
         }
 
@@ -198,6 +208,13 @@ namespace AttackFridayMonsters.Formats.Text.Code
 
                 writer.Stream.Position = pointerAddr - ramOffset;
                 writer.Write((uint)definition.Address);
+            }
+
+            foreach (var subpointer in definition.Subpointers) {
+                long relativePointer = definition.Address + subpointer.Offset;
+
+                writer.Stream.Position = subpointer.Address - ramOffset;
+                writer.Write((uint)relativePointer);
             }
 
             return true;

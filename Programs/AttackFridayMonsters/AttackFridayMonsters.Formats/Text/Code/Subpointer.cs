@@ -14,18 +14,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace AttackFridayMonsters.Formats.Text.Code
 {
-    using System.Collections.ObjectModel;
-
-    public class StringDefinition
+    public class Subpointer
     {
         public long Address { get; set; }
 
-        public int Size { get; set; }
-
-        public string Encoding { get; set; }
-
-        public Collection<long> Pointers { get; set; }
-
-        public Collection<Subpointer> Subpointers { get; set; }
+        public int Offset { get; set; }
     }
 }
