@@ -209,6 +209,18 @@ definitions:
     pointers:
       - 0x00295cf4
 
+  - address: 0x00279ae8
+    size: 12
+    encoding: utf-16
+    pointers:
+      - 0x00295d00
+
+  - address: 0x00279af4
+    size: 10
+    encoding: utf-16
+    pointers:
+      - 0x00295d04
+
   - address: 0x00279afe
     size: 12
     encoding: utf-16
@@ -827,6 +839,13 @@ definitions:
     encoding: utf-16
     pointers:
       - 0x001d1be4
+
+  # Pointer is in code relative to other text.
+  # We took the space of the next text as it was moved anyway.
+  - address: 0x002968ac
+    size: 10
+    encoding: utf-16
+    pointers:
 
   - address: 0x002968b6
     size: 12
