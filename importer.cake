@@ -81,13 +81,25 @@ public class BuildData
 
     public Node Root { get; set; }
 
-    public Node GetNode(string path)
+    public Node GetNode(string path, bool modified = true)
     {
-        if (!modifiedNodes.Contains(path)) {
+        if (modified && !modifiedNodes.Contains(path)) {
             modifiedNodes.Add(path);
         }
 
         return Navigator.SearchNode(Root, $"/root/content/program/rom/{path}");
+    }
+
+    public void SetAsModified(Node node)
+    {
+        string path = node.Path;
+        if (path.StartsWith("/root/content/program/rom/")) {
+            path = path.Substring("/root/content/program/rom/".Length);
+        }
+
+        if (!modifiedNodes.Contains(path)) {
+            modifiedNodes.Add(path);
+        }
     }
 
     public void ExportToLayeredFs(string outputPath)
@@ -332,10 +344,12 @@ Task("Import-Scripts")
         Program = $"{data.ToolsDirectory}/lzx",
         Arguments = "-evb <inout>",
     };
-    var maps = data.GetNode("gkk/map_gz").Children
+    var maps = data.GetNode("gkk/map_gz", false).Children
         .Where(n => n.Name[0] == 'A' || n.Name[0] == 'B');
 
     foreach (var map in maps) {
+        data.SetAsModified(map);
+
         string mapName = map.Name.Substring(0, map.Name.IndexOf("."));
         string scriptFile = $"{data.ScriptDirectory}/{mapName}.po";
 
