@@ -36,7 +36,7 @@ namespace Patcher.Views
         {
             var version = Assembly.GetExecutingAssembly().GetName().Version;
             string versionText = $"{version.Major}.{version.Minor}";
-            Title = string.Format(LocalizationManager.MainWindowTitle, versionText);
+            Title = string.Format(L10n.Get("Fan-translation of Attack of the Friday Monsters ~ v{0}"), versionText);
             Icon = Icon.FromResource(ResourcesName.Icon);
 
             // On GTK3 did doesn't work
@@ -45,13 +45,13 @@ namespace Patcher.Views
             Resizable = false;
 
             var patchBtn = new Button {
-                Text = LocalizationManager.PatchButton,
+                Text = L10n.Get("Patch!", "Main window button"),
                 Font = SystemFonts.Bold(),
                 Command = viewModel.PatchCommand,
             };
 
             var creditsBtn = new Button {
-                Text = LocalizationManager.CreditsButton,
+                Text = L10n.Get("Credits", "Main window button"),
                 Command = viewModel.OpenCreditsCommand,
             };
 

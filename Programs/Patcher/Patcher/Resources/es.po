@@ -1,0 +1,85 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Attack of Friday Monsters Patcher\n"
+"Report-Msgid-Bugs-To: benito356@gmail.com\n"
+"POT-Creation-Date: 12/22/2020\n"
+"PO-Revision-Date: 2020-12-22 20:17+0000\n"
+"Last-Translator: Benito Palacios <benito356@gmail.com>\n"
+"Language-Team: GradienWords\n"
+"Language: es\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+msgid "Fan-translation of Attack of the Friday Monsters ~ v{0}"
+msgstr "Fan-traducción de Los monstruos atacan el viernes ~ v{0}"
+
+msgctxt "Main window button"
+msgid "Patch!"
+msgstr "¡Parchear!"
+
+msgid "Select the game dump (CIA)"
+msgstr "Selecciona el dump del juego (CIA)"
+
+msgid "Choose the output file"
+msgstr "Elige dónde guardar el juego parcheado"
+
+msgid "All files"
+msgstr "Todos los archivos"
+
+msgctxt "Main window button"
+msgid "Credits"
+msgstr "Créditos"
+
+msgctxt "Window title"
+msgid "Credits"
+msgstr "Créditos"
+
+msgid "Patching assistant Clippy"
+msgstr "Clippy, el mejor asistente de parcheado"
+
+msgctxt "Choose button in patcher"
+msgid "Select"
+msgstr "Seleccionar"
+
+msgid "Click in the button Select"
+msgstr "Haz click en el botón Seleccionar"
+
+msgid "Citra emulator"
+msgstr "Emulador Citra"
+
+msgid "Console"
+msgstr "Consola"
+
+msgctxt "Button in patcher"
+msgid "Patch!"
+msgstr "¡Parchear!"
+
+msgid "1. Buy the game in the Nintendo e-shop"
+msgstr "1. Compra el juego desde la e-shop de Nintendo."
+
+msgid ""
+"2. Dump the game to the microSD using the format no legit CIA\n"
+"   (e.g. using godmode9)"
+msgstr ""
+"2. Dumpea el juego en formato CIA **descifrado** (no legit) a la tarjeta microSD\n"
+"   (por ejemplo con godmode9)."
+
+msgid "3. Copy the game from the microSD to the computer."
+msgstr "3. Copia el juego de la tarjeta microSD al ordenador."
+
+msgid "4. Choose the CIA file:"
+msgstr "4. Selecciona el fichero CIA del juego:"
+
+msgid "5. Select how you will play the game:"
+msgstr "5. Selecciona dónde quieres jugar:"
+
+msgid "clippy_en.png"
+msgstr "clippy_es.png"
+
+msgid ""
+"Game successfully patched!\n"
+"Make sure you are using Citra version 1659 or higher."
+msgstr ""
+"¡Juego parcheado e instalado correctamente en Citra!\n"
+"Asegúrate de actualizar Citra y tener una versión igual o mayor a 1659"

@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+      <EmbeddedResource Include="Resources/*.po" />
       <EmbeddedResource Include="Resources/*.png" />
       <EmbeddedResource Include="Resources/*.json" />
       <EmbeddedResource Include="Resources/*.xdelta" />
@@ -15,6 +16,7 @@
     <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.0.0-preview4" />
     <PackageReference Include="SceneGate.Lemon" Version="0.1.0-preview.66" />
     <PackageReference Include="Yarhl" Version="3.1.0-preview.83" />
+    <PackageReference Include="Yarhl.Media" Version="3.1.0-preview.83" />
 
     <ProjectReference Include="../xdelta-sharp/xdelta/xdelta.csproj" />
   </ItemGroup>

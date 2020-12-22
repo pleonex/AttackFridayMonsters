@@ -16,14 +16,16 @@ namespace Patcher.Resources
 {
     public static class ResourcesName
     {
-        public static string Icon => "Patcher.Resources.icon.png";
+        public static string Prefix = typeof(ResourcesName).Namespace;
 
-        public static string MainBackground => "Patcher.Resources.bg.png";
+        public static string Icon => Prefix + ".icon.png";
 
-        public static string CreditsBackground => "Patcher.Resources.bg_credits_with_text.png";
+        public static string MainBackground => Prefix + ".bg.png";
 
-        public static string Patches => "Patcher.Resources.patches.json";
+        public static string CreditsBackground => Prefix + ".bg_credits_with_text.png";
 
-        public static string Clippy => "Patcher.Resources.clippy.png";
+        public static string Patches => Prefix + ".patches.json";
+
+        public static string Clippy => Prefix + "." + L10n.Get("clippy_en.png");
     }
 }

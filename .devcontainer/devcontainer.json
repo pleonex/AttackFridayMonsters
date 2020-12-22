@@ -17,7 +17,8 @@
         "esbenp.prettier-vscode",
         "yzhang.markdown-all-in-one",
         "davidanson.vscode-markdownlint",
-        "eamodio.gitlens"
+        "eamodio.gitlens",
+        "mrorz.language-gettext"
     ],
 
     "remoteUser": "vscode",

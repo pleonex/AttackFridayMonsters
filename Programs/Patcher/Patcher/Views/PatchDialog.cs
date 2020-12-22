@@ -1,3 +1,17 @@
+//  Copyright (c) 2020 GradienWords
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace Patcher.Views
 {
     using Eto.Drawing;
@@ -19,7 +33,7 @@ namespace Patcher.Views
 
         private void InitializeComponents()
         {
-            Title = "Asistente Clippy para parchear";
+            Title = L10n.Get("Patching assistant Clippy");
             Maximizable = false;
             Resizable = false;
 
@@ -29,69 +43,77 @@ namespace Patcher.Views
 
         Control GetCitraInstructions()
         {
-            return "¡Juego parcheado e instalado correctamente en Citra!\n" +
-                "Asegúrate de actualizar Citra y tener una versión igual o mayor a 1659";
+            return L10n.Get(
+                "Game successfully patched!Game successfully patched!\n" +
+                "Make sure you are using Citra version 1659 or higher.");
         }
 
         Control GetBaseInstructions()
         {
+            var selectGameBtn = new Button {
+                Text = L10n.Get("Select", "Choose button in patcher"),
+                Command = viewModel.SelectGameCommand,
+            };
+
+            var selectedPathBox = new TextBox {
+                ReadOnly = true,
+                PlaceholderText = L10n.Get("Click in the button Select"),
+                Width = 300,
+            };
+            selectedPathBox.TextBinding.BindDataContext<PatcherViewModel>(vm => vm.SelectedGamePath);
+
+            var verifySpinning = new Spinner { Enabled = true };
+            verifySpinning.BindDataContext(s => s.Visible, (PatcherViewModel vm) => vm.SelectGameCommand.IsRunning);
+
+            var verifyLabel = new Label {
+                Text = string.Empty,
+                Font = SystemFonts.Bold(),
+            };
+            verifyLabel.TextBinding.Bind(
+                Binding.Property(viewModel, vm => vm.SelectGameCommand.IsRunning)
+                    .Convert(r => r ? "Validando juego" : $"Formato: {viewModel.FileStatus}"));
+
             var citraRadioBtn = new RadioButton {
-                Text = "Emulador Citra",
+                Text = L10n.Get("Citra emulator"),
                 Checked = true
             };
 
             var consoleRadioBtn = new RadioButton(citraRadioBtn) {
-                Text = "Consola",
+                Text = L10n.Get("Console"),
+            };
+
+            var patchBtn = new Button {
+                Text = L10n.Get("Patch!", "Button in patcher"),
+                Font = SystemFonts.Bold(),
+                Command = viewModel.PatchCommand,
             };
 
             var table = new TableLayout {
                 Padding = 10,
                 Spacing = new Size(10, 10),
                 Rows = {
-                    new TableRow("1. Compra el juego desde la e-shop de Nintendo."),
-                    new TableRow("2. Dumpea el juego en formato CIA a la tarjeta microSD usando godmode9."),
-                    new TableRow("3. Copia el juego de la tarjeta microSD al ordenador."),
-                    new TableRow("4. Selecciona el fichero CIA del juego:"),
+                    new TableRow(L10n.Get("1. Buy the game in the Nintendo e-shop")),
+                    new TableRow(L10n.Get("2. Dump the game to the microSD using the format no legit CIA\n   (e.g. using godmode9)")),
+                    new TableRow(L10n.Get("3. Copy the game from the microSD to the computer.")),
+                    new TableRow(L10n.Get("4. Choose the CIA file:")),
                     new TableLayout {
                         Spacing = new Size(10, 10),
-                        Rows = {
-                            new TableRow {
-                                Cells = {
-                                    new Button {
-                                        Text = "Seleccionar",
-                                    },
-                                    new TextBox {
-                                        ReadOnly = true,
-                                        Text = "/store/Juegos/3DS/00040000000E7500 Attack of the Friday Monsters! (CTR-N-JKEP) (E).cia",
-                                        Width = 300,
-                                    },
-                                },
-                            },
-                        },
+                        Rows = { new TableRow(selectGameBtn, selectedPathBox) },
                     },
-                    new TableRow(new Label { Text = "Validando el juego...", Font = SystemFonts.Bold() } ),
-                    new TableRow("5. Selecciona dónde quieres jugar:"),
+                    new TableLayout {
+                        Spacing = new Size(10, 10),
+                        Rows = { new TableRow(verifySpinning, verifyLabel) },
+                    },
+                    new TableRow(L10n.Get("5. Select how you will play the game:")),
                     new TableLayout {
                         Spacing = new Size(10, 10),
                         Rows = {
-                            new TableRow(citraRadioBtn),
-                            new TableRow(consoleRadioBtn),
+                            new TableRow(citraRadioBtn, null),
+                            new TableRow(consoleRadioBtn, null),
                         },
                     },
                     new TableRow() { ScaleHeight = true },
-                    new TableLayout {
-                        Rows = {
-                            new TableRow {
-                                Cells = {
-                                    new Button {
-                                        Text = "¡Parchear!",
-                                        Font = SystemFonts.Bold()
-                                    },
-                                    new TableCell(null, true)
-                                },
-                            },
-                        },
-                    },
+                    new TableLayout(new TableRow(patchBtn, null)),
                     new TableRow(),
                 },
             };
@@ -100,13 +122,14 @@ namespace Patcher.Views
                 Content = table,
             };
 
+            Bitmap clippyImage = Bitmap.FromResource(ResourcesName.Clippy);
             drawable.Paint += (sender, e) =>
                 e.Graphics.DrawImage(
-                    image: Bitmap.FromResource(ResourcesName.Clippy),
-                    x: 285,
+                    image: clippyImage,
+                    x: table.Width - clippyImage.Width - 10,
                     y: 180,
-                    width: 218,
-                    height: 168);
+                    width: clippyImage.Width,
+                    height: clippyImage.Height);
 
             return drawable;
         }

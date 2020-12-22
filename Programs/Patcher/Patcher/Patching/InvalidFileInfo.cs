@@ -1,4 +1,4 @@
 namespace Patcher.Patching
 {
-    public record InvalidFileInfo(string Hash, InvalidFileReason Reason);
+    public record InvalidFileInfo(string Hash, FilePatchStatus Reason);
 }

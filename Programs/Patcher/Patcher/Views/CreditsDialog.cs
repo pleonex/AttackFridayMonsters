@@ -22,7 +22,7 @@ namespace Patcher.Views
     {
         public CreditsDialog()
         {
-            Title = LocalizationManager.CreditsWindowTitle;
+            Title = L10n.Get("Credits", "Window title");
             Maximizable = false;
             Resizable = false;
 

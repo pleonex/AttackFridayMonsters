@@ -1,7 +1,9 @@
 namespace Patcher.Patching
 {
-    public enum InvalidFileReason
+    public enum FilePatchStatus
     {
+        Unknown,
+        ValidFile,
         InvalidFormat,
         InvalidTitle,
         InvalidRegion,
