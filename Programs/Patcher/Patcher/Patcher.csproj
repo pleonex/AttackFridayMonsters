@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <EmbeddedResource Include="Resources/*.png" />
+      <EmbeddedResource Include="Resources/*.json" />
+      <EmbeddedResource Include="Resources/*.xdelta" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Eto.Forms" Version="2.5.8" />
+    <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.0.0-preview4" />
+    <PackageReference Include="SceneGate.Lemon" Version="0.1.0-preview.66" />
+    <PackageReference Include="Yarhl" Version="3.1.0-preview.83" />
+
+    <ProjectReference Include="../xdelta-sharp/xdelta/xdelta.csproj" />
+  </ItemGroup>
+
+</Project>

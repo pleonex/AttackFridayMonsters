@@ -22,3 +22,6 @@
 [submodule "Programs/xdelta/xz"]
 	path = Programs/xdelta/xz
 	url = https://git.tukaani.org/xz.git
+[submodule "Programs/Patcher/xdelta-sharp"]
+	path = Programs/Patcher/xdelta-sharp
+	url = https://github.com/pleonex/xdelta-sharp
