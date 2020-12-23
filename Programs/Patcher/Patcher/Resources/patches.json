@@ -2,8 +2,8 @@
   "Patches": [
   {
     "TitleId": "00040000000E7500",
-    "TitleVersion": "0",
-    "SourceHash": "A9DD6F79B72FE6ABCEE26ABCAAF2BD9F",
+    "TitleVersion": 0,
+    "SourceHash": "202C0A265C9F0286248D6C4EBC55599C",
     "ResourcePath": "Patcher.Resources.SpanishV0.0.xdelta",
     "LayeredFs": [
       "/root/content/program/extended_header",
@@ -174,7 +174,13 @@
   "InvalidFiles": [
     {
       "Hash": "",
-      "Reason": ""
+      "TitleId": "00040000000E7600",
+      "Reason": 5
+    },
+    {
+      "Hash": "",
+      "TitleId": "00040000000D0D00",
+      "Reason": 5
     }
   ]
 }

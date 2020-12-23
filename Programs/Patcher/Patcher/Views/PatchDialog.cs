@@ -14,8 +14,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace Patcher.Views
 {
+    using System;
     using Eto.Drawing;
     using Eto.Forms;
+    using Patcher.Patching;
     using Patcher.Resources;
     using Patcher.ViewModels;
 
@@ -31,6 +33,12 @@ namespace Patcher.Views
             InitializeComponents();
         }
 
+        public override void Close()
+        {
+            viewModel?.Dispose();
+            base.Close();
+        }
+
         private void InitializeComponents()
         {
             Title = L10n.Get("Patching assistant Clippy");
@@ -38,18 +46,50 @@ namespace Patcher.Views
             Resizable = false;
 
             Padding = new Padding(5);
-            Content = GetBaseInstructions();
+            this.BindDataContext(
+                s => s.Content,
+                Binding.Property((PatcherViewModel vm) => vm.PatchScene)
+                    .Convert(scene => GetControlFromScene(scene)));
         }
+
+        Control GetControlFromScene(PatchScene scene) =>
+            scene switch {
+                PatchScene.BaseInstructions => GetBaseInstructions(),
+                PatchScene.CitraInstructions => GetCitraInstructions(),
+                PatchScene.ConsoleInstructions => GetConsoleInstructions(),
+                _ => throw new InvalidOperationException("Invalid transition"),
+            };
 
         Control GetCitraInstructions()
         {
-            return L10n.Get(
-                "Game successfully patched!Game successfully patched!\n" +
-                "Make sure you are using Citra version 1659 or higher.");
+            return new Label { Text = L10n.Get(
+                "Game successfully patched! Just open the game in Citra to play.\n" +
+                "Make sure you are using Citra version 1659 or higher.") };
+        }
+
+        Control GetConsoleInstructions()
+        {
+            return new Label { Text = L10n.Get(
+                "Copy the new folder Luma to the root directory of your microSD\n" +
+                "and start the game as always!") };
         }
 
         Control GetBaseInstructions()
         {
+            string GetGameStatusText(FilePatchStatus status) =>
+                status switch {
+                    FilePatchStatus.Unknown => L10n.Get("Oops, error?", "File patch status"),
+                    FilePatchStatus.NoFile => L10n.Get("No file selected"),
+                    FilePatchStatus.ValidFile => L10n.Get("Game compatible with the patch!"),
+                    FilePatchStatus.InvalidFormat => L10n.Get("This is not a game in CIA format"),
+                    FilePatchStatus.InvalidRegion => L10n.Get("The patcher does not support this game region"),
+                    FilePatchStatus.InvalidTitle => L10n.Get("Invalid game..."),
+                    FilePatchStatus.InvalidVersion => L10n.Get("The patcher does not support this game version"),
+                    FilePatchStatus.InvalidDump => L10n.Get("Game dump is not valid. Make sure to dump your own game"),
+                    FilePatchStatus.GameIsEncrypted => L10n.Get("Game is encrypted. Redump the game decrypted"),
+                    _ => L10n.Get("Oops, error?", "File patch status"),
+                };
+
             var selectGameBtn = new Button {
                 Text = L10n.Get("Select", "Choose button in patcher"),
                 Command = viewModel.SelectGameCommand,
@@ -71,7 +111,15 @@ namespace Patcher.Views
             };
             verifyLabel.TextBinding.Bind(
                 Binding.Property(viewModel, vm => vm.SelectGameCommand.IsRunning)
-                    .Convert(r => r ? "Validando juego" : $"Formato: {viewModel.FileStatus}"));
+                    .Convert(r => r
+                        ? L10n.Get("Please wait while we check the game...")
+                        : GetGameStatusText(viewModel.FileStatus)));
+            verifyLabel.Bind(
+                l => l.TextColor,
+                Binding.Property(viewModel, vm => vm.FileStatus)
+                    .Convert(s => s == FilePatchStatus.ValidFile
+                        ? Colors.Green
+                        : Colors.Red));
 
             var citraRadioBtn = new RadioButton {
                 Text = L10n.Get("Citra emulator"),
@@ -127,7 +175,7 @@ namespace Patcher.Views
                 e.Graphics.DrawImage(
                     image: clippyImage,
                     x: table.Width - clippyImage.Width - 10,
-                    y: 180,
+                    y: 200,
                     width: clippyImage.Width,
                     height: clippyImage.Height);
 

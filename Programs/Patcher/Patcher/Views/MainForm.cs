@@ -26,6 +26,9 @@ namespace Patcher.Views
 
         public MainForm()
         {
+            Application.Instance.UnhandledException += (sender, e) =>
+                System.Console.WriteLine($"CRASH: {e.ExceptionObject}");
+
             viewModel = new MainViewModel();
             DataContext = viewModel;
 

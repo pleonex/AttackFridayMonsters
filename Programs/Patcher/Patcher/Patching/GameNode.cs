@@ -14,13 +14,17 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace Patcher.Patching
 {
-    using System.Collections.ObjectModel;
+    using Yarhl.FileSystem;
 
-    public record PatchInfo(
-        string TitleId,
-        short TitleVersion,
-        string SourceHash,
-        string ResourcePath,
-        Collection<string> LayeredFs
-    );
+    public class GameNode
+    {
+        public GameNode(Node root, GamePatch patch) =>
+            (Root, GamePatch) = (root, patch);
+
+        public Node Root { get; private set; }
+
+        public GamePatch GamePatch { get; private set; }
+
+        public PatchInfo PatchInfo { get; set; }
+    }
 }

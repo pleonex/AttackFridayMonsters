@@ -14,6 +14,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace Patcher.ViewModels
 {
+    using System;
     using System.Threading.Tasks;
     using Microsoft.Toolkit.Mvvm.ComponentModel;
     using Microsoft.Toolkit.Mvvm.Input;
@@ -21,16 +22,24 @@ namespace Patcher.ViewModels
     using Patcher.Resources;
     using Yarhl.FileSystem;
 
-    public class PatcherViewModel : ObservableObject
+    public class PatcherViewModel : ObservableObject, IDisposable
     {
+        PatchScene patchScene;
         string selectedGamePath;
-        Node gameNode;
+        GameNode game;
         FilePatchStatus fileStatus;
 
         public PatcherViewModel()
         {
+            PatchScene = PatchScene.BaseInstructions;
             SelectGameCommand = new AsyncRelayCommand(SelectAndVerifyGame);
             PatchCommand = new RelayCommand(Patch, () => FileStatus == FilePatchStatus.ValidFile);
+            FileStatus = FilePatchStatus.NoFile;
+        }
+
+        public PatchScene PatchScene {
+            get => patchScene;
+            set => SetProperty(ref patchScene, value);
         }
 
         public string SelectedGamePath {
@@ -46,9 +55,24 @@ namespace Patcher.ViewModels
             }
         }
 
+        public bool Disposed {
+            get;
+            private set;
+        }
+
         public AsyncRelayCommand SelectGameCommand { get; }
 
         public RelayCommand PatchCommand { get; }
+
+        public void Dispose()
+        {
+            if (Disposed) {
+                return;
+            }
+
+            Disposed = true;
+            game?.Root.Dispose();
+        }
 
         private async Task SelectAndVerifyGame()
         {
@@ -81,12 +105,23 @@ namespace Patcher.ViewModels
 
         private void VerifyGame()
         {
-            System.Threading.Thread.Sleep(5000);
-            FileStatus = FilePatchStatus.ValidFile;
+            try {
+                game?.Root.Dispose();
+                var node = NodeFactory.FromFile(SelectedGamePath, "root");
+                game = new GameNode(node, GamePatcher.Patch);
+                FileStatus = GameVerifier.Verify(game);
+            } catch (Exception ex) {
+                Console.WriteLine(ex);
+            }
+
+            // programNode.TransformWith<Binary2Ncch>();
+            // programNode.Children["rom"].TransformWith<BinaryIvfc2NodeContainer>();
+            // programNode.Children["system"].TransformWith<BinaryExeFs2NodeContainer>();
         }
 
         private void Patch()
         {
+            PatchScene = PatchScene.ConsoleInstructions;
         }
 
             // using var saveFileDialog = new SaveFileDialog {

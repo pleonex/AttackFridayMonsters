@@ -16,8 +16,6 @@ namespace Patcher.Patching
 {
     using System;
     using System.IO;
-    using System.Linq;
-    using System.Security.Cryptography;
     using System.Threading.Tasks;
     using Patcher.Resources;
     using Xdelta;
@@ -25,22 +23,26 @@ namespace Patcher.Patching
 
     public class GamePatcher
     {
-        private static GamePatch info = LoadPatchInfo();
+        public static GamePatch Patch { get; } = LoadPatchInfo();
 
         public event ProgressChangedHandler ProgressChanged;
 
         public event FinishedHandler FinishedHandler;
 
-        public async Task PatchAsync(string intputFile, string outputFile)
-        {
-            if (string.IsNullOrWhiteSpace(intputFile))
-                throw new ArgumentNullException(nameof(intputFile));
-            if (string.IsNullOrWhiteSpace(outputFile))
-                throw new ArgumentNullException(nameof(outputFile));
+        // public async Task PatchAsync(GameNode game)
+        // {
+        //     var assembly = typeof(GamePatcher).Assembly;
+        //     using Stream patch = assembly.GetManifestResourceStream(game.PatchInfo.ResourcePath);
 
-            PatchInfo patchInfo = GetPatchInfo(intputFile);
-            await PatchAsync(intputFile, patchInfo, outputFile).ConfigureAwait(false);
-        }
+        //     // using FileStream source = FileStreamFactory.OpenForRead(inputFile);
+        //     // var target = new MemoryStream();
+
+        //     // Decoder decoder = new Decoder(source, patch, target);
+        //     // decoder.ProgressChanged += progress => ProgressChanged?.Invoke(progress);
+        //     // decoder.Finished += () => FinishedHandler?.Invoke();
+
+        //     // await Task.Run(() => decoder.Run()).ConfigureAwait(false);
+        // }
 
         private static GamePatch LoadPatchInfo()
         {
@@ -51,52 +53,6 @@ namespace Patcher.Patching
             }
 
             return System.Text.Json.JsonSerializer.Deserialize<GamePatch>(text);
-        }
-
-        private async Task PatchAsync(string inputFile, PatchInfo patchInfo, string outputFile)
-        {
-            var assembly = typeof(GamePatcher).Assembly;
-            using Stream patch = assembly.GetManifestResourceStream(patchInfo.ResourcePath);
-
-            using FileStream source = FileStreamFactory.OpenForRead(inputFile);
-            using FileStream target = FileStreamFactory.CreateForWriteAndRead(outputFile);
-
-            Decoder decoder = new Decoder(source, patch, target);
-            decoder.ProgressChanged += progress => ProgressChanged?.Invoke(progress);
-            decoder.Finished += () => FinishedHandler?.Invoke();
-
-            await Task.Run(() => decoder.Run()).ConfigureAwait(false);
-        }
-
-        private static PatchInfo GetPatchInfo(string file)
-        {
-            string actualHash = GetHash(file);
-            PatchInfo patchInfo = info.Patches.FirstOrDefault(p => p.SourceHash == actualHash);
-
-            if (patchInfo is null) {
-                string reason = GetInvalidFileReason(file, actualHash);
-                throw new FormatException(reason);
-            }
-
-            return patchInfo;
-        }
-
-        private static string GetHash(string file)
-        {
-            using var md5 = MD5.Create();
-            using var stream = FileStreamFactory.OpenForRead(file);
-            byte[] hash = md5.ComputeHash(stream);
-            return BitConverter.ToString(hash).Replace("-", string.Empty);
-        }
-
-        private static string GetInvalidFileReason(string file, string hash)
-        {
-            InvalidFileInfo reason = info.InvalidFiles.FirstOrDefault(f => f.Hash == hash);
-            if (reason != null) {
-                return reason.Reason.ToString();
-            }
-
-            return "Unknown";
         }
     }
 }

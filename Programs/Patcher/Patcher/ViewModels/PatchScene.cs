@@ -12,15 +12,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-namespace Patcher.Patching
+namespace Patcher.ViewModels
 {
-    using System.Collections.ObjectModel;
-
-    public record PatchInfo(
-        string TitleId,
-        short TitleVersion,
-        string SourceHash,
-        string ResourcePath,
-        Collection<string> LayeredFs
-    );
+    public enum PatchScene
+    {
+        BaseInstructions,
+        CitraInstructions,
+        ConsoleInstructions,
+    }
 }
