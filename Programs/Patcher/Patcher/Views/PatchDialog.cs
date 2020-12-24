@@ -52,13 +52,16 @@ namespace Patcher.Views
                     .Convert(scene => GetControlFromScene(scene)));
         }
 
-        Control GetControlFromScene(PatchScene scene) =>
-            scene switch {
+        Control GetControlFromScene(PatchScene scene)
+        {
+            Logger.Log($"Changing patch scene to: {scene}");
+            return scene switch {
                 PatchScene.BaseInstructions => GetBaseInstructions(),
                 PatchScene.CitraInstructions => GetCitraInstructions(),
                 PatchScene.ConsoleInstructions => GetConsoleInstructions(),
                 _ => throw new InvalidOperationException("Invalid transition"),
             };
+        }
 
         Control GetCitraInstructions()
         {

@@ -50,8 +50,10 @@ namespace Patcher.ViewModels
         public FilePatchStatus FileStatus {
             get => fileStatus;
             set {
-                SetProperty(ref fileStatus, value);
-                PatchCommand.NotifyCanExecuteChanged();
+                Eto.Forms.Application.Instance.Invoke(() => {
+                    SetProperty(ref fileStatus, value);
+                    PatchCommand.NotifyCanExecuteChanged();
+                });
             }
         }
 
@@ -77,6 +79,7 @@ namespace Patcher.ViewModels
         private async Task SelectAndVerifyGame()
         {
             if (SelectGame()) {
+                Logger.Log($"Selected game: {SelectedGamePath}");
                 FileStatus = FilePatchStatus.Unknown;
                 await Task.Run(() => VerifyGame());
             }
@@ -96,6 +99,7 @@ namespace Patcher.ViewModels
 
             var result = openFileDialog.ShowDialog(Eto.Forms.Application.Instance.MainForm);
             if (result != Eto.Forms.DialogResult.Ok) {
+                Logger.Log($"Cancel open dialog: {result}");
                 return false;
             }
 
@@ -106,10 +110,13 @@ namespace Patcher.ViewModels
         private void VerifyGame()
         {
             try {
+                Logger.Log($"Was game node null? {game == null}");
                 game?.Root.Dispose();
+
                 var node = NodeFactory.FromFile(SelectedGamePath, "root");
                 game = new GameNode(node, GamePatcher.Patch);
                 FileStatus = GameVerifier.Verify(game);
+                Logger.Log($"New status: {FileStatus}");
             } catch (Exception ex) {
                 Console.WriteLine(ex);
             }

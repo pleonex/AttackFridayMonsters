@@ -27,7 +27,7 @@ namespace Patcher.Views
         public MainForm()
         {
             Application.Instance.UnhandledException += (sender, e) =>
-                System.Console.WriteLine($"CRASH: {e.ExceptionObject}");
+                Logger.Log($"CRASH: {e.ExceptionObject}");
 
             viewModel = new MainViewModel();
             DataContext = viewModel;
@@ -41,6 +41,7 @@ namespace Patcher.Views
             string versionText = $"{version.Major}.{version.Minor}";
             Title = string.Format(L10n.Get("Fan-translation of Attack of the Friday Monsters ~ v{0}"), versionText);
             Icon = Icon.FromResource(ResourcesName.Icon);
+            Logger.Log($"MainForm - Version: {versionText}");
 
             // On GTK3 did doesn't work
             // https://github.com/picoe/Eto/issues/1652

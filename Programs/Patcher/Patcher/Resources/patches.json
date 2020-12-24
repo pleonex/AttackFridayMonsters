@@ -4,7 +4,7 @@
     "TitleId": "00040000000E7500",
     "TitleVersion": 0,
     "SourceHash": "202C0A265C9F0286248D6C4EBC55599C",
-    "ResourcePath": "Patcher.Resources.SpanishV0.0.xdelta",
+    "ResourcePath": "Patcher.Resources.SpanishV1.0.xdelta",
     "LayeredFs": [
       "/root/content/program/extended_header",
       "/root/content/program/system/.code",

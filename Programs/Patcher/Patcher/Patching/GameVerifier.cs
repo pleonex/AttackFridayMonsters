@@ -28,51 +28,66 @@ namespace Patcher.Patching
             TitleMetadata title;
             try {
                 game.Root.TransformWith<BinaryCia2NodeContainer>();
+                Logger.Log("Transformed to CIA!");
 
                 title = game.Root.Children["title"]
                     .TransformWith<Binary2TitleMetadata>()
                     .GetFormatAs<TitleMetadata>();
+                Logger.Log("Transformed to TitleMetadata");
             } catch (Exception ex) {
-                Console.WriteLine(ex);
+                Logger.Log("Invalid format.");
+                Logger.Log(ex.ToString());
                 return FilePatchStatus.InvalidFormat;
             }
 
             string titleId = title.TitleId.ToString("X16");
+            Logger.Log($"Title ID: {titleId}");
+
             var invalidTitle = game.GamePatch.InvalidFiles.FirstOrDefault(f => f.TitleId == titleId);
             if (invalidTitle != null) {
+                Logger.Log($"Known invalid title ID: {invalidTitle.Reason}");
                 return invalidTitle.Reason;
             }
 
             var patches = game.GamePatch.Patches.Where(p => p.TitleId == titleId);
             if (!patches.Any()) {
+                Logger.Log("Couldn't find any patch for this title ID");
                 return FilePatchStatus.InvalidTitle;
             }
 
             var patch = patches.FirstOrDefault(p => p.TitleVersion == title.TitleVersion);
             if (patch == null) {
+                Logger.Log($"No known versions: {title.TitleVersion}");
                 return FilePatchStatus.InvalidVersion;
             }
 
             var programNode = game.Root.Children["content"].Children["program"];
             if (programNode.Tags.ContainsKey("LEMON_NCCH_ENCRYPTED")) {
+                Logger.Log($"Encrypted game! {programNode.Tags["LEMON_NCCH_ENCRYPTED"]}");
                 return FilePatchStatus.GameIsEncrypted;
             }
 
             string actualHash = GetHash(programNode.Stream);
+            Logger.Log($"File hash: {actualHash}");
+
             var invalidFile = game.GamePatch.InvalidFiles.FirstOrDefault(f => f.Hash == actualHash);
             if (invalidFile != null) {
+                Logger.Log($"Known invalid hash: {invalidFile.Reason}");
                 return invalidFile.Reason;
             }
 
             if (actualHash != patch.SourceHash) {
+                Logger.Log($"File doesn't match hash: {patch.SourceHash}");
                 return FilePatchStatus.InvalidDump;
             }
 
+            Logger.Log("Valid file!");
             return FilePatchStatus.ValidFile;
         }
 
         private static string GetHash(DataStream stream)
         {
+            Logger.Log($"Hash for offset:{stream.Offset}, size: {stream.Length}");
             using var md5 = MD5.Create();
 
             // Just below LOH

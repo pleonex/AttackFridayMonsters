@@ -33,12 +33,14 @@ namespace Patcher.ViewModels
 
         private void OpenCredits()
         {
+            Logger.Log("Opening credits");
             using var dialog = new CreditsDialog();
             dialog.ShowModal(Eto.Forms.Application.Instance.MainForm);
         }
 
         private void Patch()
         {
+            Logger.Log("Opening patcher");
             using var dialog = new PatcherDialog();
             dialog.ShowModal(Eto.Forms.Application.Instance.MainForm);
         }
