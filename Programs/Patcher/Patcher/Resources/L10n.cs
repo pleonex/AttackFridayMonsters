@@ -14,6 +14,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace Patcher.Resources
 {
+    using System;
     using Yarhl.FileFormat;
     using Yarhl.IO;
     using Yarhl.Media.Text;
@@ -23,8 +24,25 @@ namespace Patcher.Resources
         private const string Language = "es";
         private readonly static Po po = LoadPo(Language);
 
-        public static string Get(string original, string context = null) =>
-            po?.FindEntry(original, context)?.Text ?? original;
+        public static string Get(string original, string context = null)
+        {
+            if (po == null) {
+                return original;
+            }
+
+            PoEntry entry = po.FindEntry(original, context);
+            if (entry == null) {
+                Logger.Log($"PO is missing entry for: {original} || {context}");
+                return original;
+            }
+
+            if (string.IsNullOrEmpty(entry.Translated)) {
+                Logger.Log($"PO is missing translation for: {original} || {context}");
+                return original;
+            }
+
+            return entry.Translated;
+        }
 
         private static Po LoadPo(string language)
         {
@@ -33,11 +51,17 @@ namespace Patcher.Resources
             var assembly = typeof(L10n).Assembly;
             var stream = assembly.GetManifestResourceStream(resourceName);
             if (stream == null) {
+                Logger.Log($"Cannot find language resource: {resourceName}");
                 return null;
             }
 
-            using var binaryPo = new BinaryFormat(DataStreamFactory.FromStream(stream));
-            return (Po)ConvertFormat.With<Binary2Po>(binaryPo);
+            try {
+                using var binaryPo = new BinaryFormat(DataStreamFactory.FromStream(stream));
+                return (Po)ConvertFormat.With<Binary2Po>(binaryPo);
+            } catch (Exception ex) {
+                Logger.Log($"Error parsing language resource: {ex}");
+                return null;
+            }
         }
     }
 }

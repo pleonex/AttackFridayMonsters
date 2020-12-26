@@ -17,12 +17,18 @@ namespace Patcher.Patching
     using System;
     using System.Linq;
     using System.Security.Cryptography;
+    using System.Threading.Tasks;
     using SceneGate.Lemon.Containers.Converters;
     using SceneGate.Lemon.Titles;
     using Yarhl.IO;
 
     public static class GameVerifier
     {
+        public static async Task<FilePatchStatus> VerifyAsync(GameNode game)
+        {
+            return await Task.Run(() => Verify(game)).ConfigureAwait(false);
+        }
+
         public static FilePatchStatus Verify(GameNode game)
         {
             TitleMetadata title;
@@ -82,6 +88,7 @@ namespace Patcher.Patching
             }
 
             Logger.Log("Valid file!");
+            game.PatchInfo = patch;
             return FilePatchStatus.ValidFile;
         }
 

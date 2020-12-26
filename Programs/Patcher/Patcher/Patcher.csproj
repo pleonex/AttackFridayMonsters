@@ -14,9 +14,9 @@
   <ItemGroup>
     <PackageReference Include="Eto.Forms" Version="2.5.8" />
     <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.0.0-preview4" />
-    <PackageReference Include="SceneGate.Lemon" Version="0.1.0-preview.66" />
-    <PackageReference Include="Yarhl" Version="3.1.0-preview.83" />
-    <PackageReference Include="Yarhl.Media" Version="3.1.0-preview.83" />
+    <PackageReference Include="SceneGate.Lemon" Version="0.1.0-preview.69" />
+    <PackageReference Include="Yarhl" Version="3.1.1-preview.9" />
+    <PackageReference Include="Yarhl.Media" Version="3.1.1-preview.9" />
 
     <ProjectReference Include="../xdelta-sharp/xdelta/xdelta.csproj" />
   </ItemGroup>

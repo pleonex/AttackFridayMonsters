@@ -17,7 +17,7 @@ namespace Patcher.ViewModels
     public enum PatchScene
     {
         BaseInstructions,
-        CitraInstructions,
-        ConsoleInstructions,
+        Patching,
+        Close,
     }
 }

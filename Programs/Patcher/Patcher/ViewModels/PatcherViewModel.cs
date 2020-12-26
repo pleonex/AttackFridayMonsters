@@ -15,6 +15,7 @@
 namespace Patcher.ViewModels
 {
     using System;
+    using System.IO;
     using System.Threading.Tasks;
     using Microsoft.Toolkit.Mvvm.ComponentModel;
     using Microsoft.Toolkit.Mvvm.Input;
@@ -24,22 +25,29 @@ namespace Patcher.ViewModels
 
     public class PatcherViewModel : ObservableObject, IDisposable
     {
+        static readonly GamePatch gamePatch = LoadPatchInfo();
+        GameNode game;
+
         PatchScene patchScene;
         string selectedGamePath;
-        GameNode game;
+        string selectedOutputPath;
         FilePatchStatus fileStatus;
+        double patchProgress;
+        TargetDevice targetDevice;
 
         public PatcherViewModel()
         {
+            TargetDevice = TargetDevice.ConsoleLayeredFs;
             PatchScene = PatchScene.BaseInstructions;
             SelectGameCommand = new AsyncRelayCommand(SelectAndVerifyGame);
-            PatchCommand = new RelayCommand(Patch, () => FileStatus == FilePatchStatus.ValidFile);
+            SelectOutputCommand = new RelayCommand(SelectOutputDirectory);
+            PatchCommand = new AsyncRelayCommand(PatchAsync, () => FileStatus == FilePatchStatus.ValidFile);
             FileStatus = FilePatchStatus.NoFile;
         }
 
         public PatchScene PatchScene {
             get => patchScene;
-            set => SetProperty(ref patchScene, value);
+            private set => Eto.Forms.Application.Instance.Invoke(() => SetProperty(ref patchScene, value));
         }
 
         public string SelectedGamePath {
@@ -47,14 +55,29 @@ namespace Patcher.ViewModels
             private set => SetProperty(ref selectedGamePath, value);
         }
 
+        public string SelectedOutputPath {
+            get => selectedOutputPath;
+            private set => SetProperty(ref selectedOutputPath, value);
+        }
+
         public FilePatchStatus FileStatus {
             get => fileStatus;
-            set {
-                Eto.Forms.Application.Instance.Invoke(() => {
-                    SetProperty(ref fileStatus, value);
-                    PatchCommand.NotifyCanExecuteChanged();
-                });
-            }
+            private set => Eto.Forms.Application.Instance.Invoke(() => {
+                SetProperty(ref fileStatus, value);
+                PatchCommand.NotifyCanExecuteChanged();
+            });
+        }
+
+        public double PatchProgress {
+            get => patchProgress;
+            private set => Eto.Forms.Application.Instance.Invoke(() => {
+                SetProperty(ref patchProgress, value);
+            });
+        }
+
+        public TargetDevice TargetDevice {
+            get => targetDevice;
+            set => SetProperty(ref targetDevice, value);
         }
 
         public bool Disposed {
@@ -64,7 +87,9 @@ namespace Patcher.ViewModels
 
         public AsyncRelayCommand SelectGameCommand { get; }
 
-        public RelayCommand PatchCommand { get; }
+        public RelayCommand SelectOutputCommand { get; }
+
+        public AsyncRelayCommand PatchCommand { get; }
 
         public void Dispose()
         {
@@ -81,7 +106,7 @@ namespace Patcher.ViewModels
             if (SelectGame()) {
                 Logger.Log($"Selected game: {SelectedGamePath}");
                 FileStatus = FilePatchStatus.Unknown;
-                await Task.Run(() => VerifyGame());
+                await VerifyGameAsync();
             }
         }
 
@@ -107,43 +132,81 @@ namespace Patcher.ViewModels
             return true;
         }
 
-        private void VerifyGame()
+        private async Task VerifyGameAsync()
         {
             try {
                 Logger.Log($"Was game node null? {game == null}");
                 game?.Root.Dispose();
 
                 var node = NodeFactory.FromFile(SelectedGamePath, "root");
-                game = new GameNode(node, GamePatcher.Patch);
-                FileStatus = GameVerifier.Verify(game);
+                game = new GameNode(node, gamePatch);
+
+                FileStatus = await GameVerifier.VerifyAsync(game).ConfigureAwait(false);
                 Logger.Log($"New status: {FileStatus}");
             } catch (Exception ex) {
-                Console.WriteLine(ex);
+                Logger.Log(ex.ToString());
+            }
+        }
+
+        private void SelectOutputDirectory()
+        {
+            using var saveFileDialog = new Eto.Forms.SaveFileDialog {
+                CheckFileExists = false,
+                Filters = {
+                    new Eto.Forms.FileFilter("CTR Importable Archive (CIA)", "cia"),
+                    new Eto.Forms.FileFilter(L10n.Get("All files"), "*"),
+                },
+                FileName = (SelectedGamePath ?? "") + "_patched.cia",
+                Title = L10n.Get("Choose the output directory"),
+            };
+
+            var result = saveFileDialog.ShowDialog(Eto.Forms.Application.Instance.MainForm);
+            if (result != Eto.Forms.DialogResult.Ok) {
+                Logger.Log($"Cancel output dialog: {result}");
+                return;
             }
 
-            // programNode.TransformWith<Binary2Ncch>();
-            // programNode.Children["rom"].TransformWith<BinaryIvfc2NodeContainer>();
-            // programNode.Children["system"].TransformWith<BinaryExeFs2NodeContainer>();
+            SelectedOutputPath = saveFileDialog.FileName;
         }
 
-        private void Patch()
+        private async Task PatchAsync()
         {
-            PatchScene = PatchScene.ConsoleInstructions;
+            PatchScene = PatchScene.Patching;
+            try {
+                var patcher = new GamePatcher(gamePatch);
+                patcher.ProgressChanged += progress => PatchProgress = progress / 2;
+                await patcher.PatchAsync(game).ConfigureAwait(false);
+
+                var exporter = new GameExporterLayeredFs(game);
+                exporter.ProgressChanged += (sender, progress) => PatchProgress = 0.5 + (progress / 2);
+                if (TargetDevice == TargetDevice.CitraPcLayeredFs) {
+                    await exporter.ExportToCitraAsync().ConfigureAwait(false);
+                } else if (TargetDevice == TargetDevice.ConsoleLayeredFs) {
+                    await exporter.ExportToDirectoryAsync("").ConfigureAwait(false);
+                }
+            } catch (Exception ex) {
+                Eto.Forms.MessageBox.Show(ex.ToString(), Eto.Forms.MessageBoxType.Error);
+                return;
+            }
+
+            await Eto.Forms.Application.Instance
+                .InvokeAsync(() =>
+                    Eto.Forms.MessageBox.Show(
+                        L10n.Get("Game patched and exported correctly!"),
+                        Eto.Forms.MessageBoxType.Information))
+                .ConfigureAwait(false);
+            PatchScene = PatchScene.Close;
         }
 
-            // using var saveFileDialog = new SaveFileDialog {
-            //     CheckFileExists = false,
-            //     Filters = {
-            //         new FileFilter("CTR Importable Archive (CIA)", "cia"),
-            //         new FileFilter(LocalizationManager.OpenFileFilterAll, "*"),
-            //     },
-            //     FileName = inputName + "_patched.cia",
-            //     Title = L10n.Get("Choose the output file"),
-            // };
-            // if (saveFileDialog.ShowDialog(Application.Instance.MainForm) != DialogResult.Ok) {
-            //     return;
-            // }
+        private static GamePatch LoadPatchInfo()
+        {
+            string text;
+            var assembly = typeof(GamePatcher).Assembly;
+            using (var reader = new StreamReader(assembly.GetManifestResourceStream(ResourcesName.Patches))) {
+                text = reader.ReadToEnd();
+            }
 
-            // string outputFile = saveFileDialog.FileName;
+            return System.Text.Json.JsonSerializer.Deserialize<GamePatch>(text);
+        }
     }
 }

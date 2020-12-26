@@ -12,22 +12,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-namespace Patcher.Resources
+namespace Patcher.ViewModels
 {
-    public static class ResourcesName
+    public enum TargetDevice
     {
-        public static string Prefix = typeof(ResourcesName).Namespace;
-
-        public static string Icon => Prefix + ".icon.png";
-
-        public static string MainBackground => Prefix + ".bg.png";
-
-        public static string CreditsBackground => Prefix + ".bg_credits_with_text.png";
-
-        public static string PatchingBackground => Prefix + ".bg_patching.png";
-
-        public static string Patches => Prefix + ".patches.json";
-
-        public static string Clippy => Prefix + "." + L10n.Get("clippy_en.png");
+        ConsoleLayeredFs,
+        CitraPcLayeredFs,
     }
 }

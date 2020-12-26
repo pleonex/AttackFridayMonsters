@@ -17,42 +17,53 @@ namespace Patcher.Patching
     using System;
     using System.IO;
     using System.Threading.Tasks;
-    using Patcher.Resources;
     using Xdelta;
     using Yarhl.FileSystem;
+    using Yarhl.IO;
 
     public class GamePatcher
     {
-        public static GamePatch Patch { get; } = LoadPatchInfo();
+        private readonly GamePatch patch;
+
+        public GamePatcher(GamePatch patch) => this.patch = patch;
 
         public event ProgressChangedHandler ProgressChanged;
 
-        public event FinishedHandler FinishedHandler;
-
-        // public async Task PatchAsync(GameNode game)
-        // {
-        //     var assembly = typeof(GamePatcher).Assembly;
-        //     using Stream patch = assembly.GetManifestResourceStream(game.PatchInfo.ResourcePath);
-
-        //     // using FileStream source = FileStreamFactory.OpenForRead(inputFile);
-        //     // var target = new MemoryStream();
-
-        //     // Decoder decoder = new Decoder(source, patch, target);
-        //     // decoder.ProgressChanged += progress => ProgressChanged?.Invoke(progress);
-        //     // decoder.Finished += () => FinishedHandler?.Invoke();
-
-        //     // await Task.Run(() => decoder.Run()).ConfigureAwait(false);
-        // }
-
-        private static GamePatch LoadPatchInfo()
+        public async Task PatchAsync(GameNode game)
         {
-            string text;
-            var assembly = typeof(GamePatcher).Assembly;
-            using (var reader = new StreamReader(assembly.GetManifestResourceStream(ResourcesName.Patches))) {
-                text = reader.ReadToEnd();
+            if (game.PatchInfo == null) {
+                Logger.Log("PatchInfo is null");
+                throw new NotSupportedException("No patch available");
             }
 
-            return System.Text.Json.JsonSerializer.Deserialize<GamePatch>(text);
+            var programNode = game.Root.Children["content"].Children["program"];
+            if (programNode.Format is not BinaryFormat) {
+                throw new FormatException("NCCH is not binary");
+            }
+
+            await Task.Run(() => Patch(programNode, game.PatchInfo.ResourcePath))
+                .ConfigureAwait(false);
+        }
+
+        private void Patch(Node source, string patchResource)
+        {
+            // In memory, no need to dispose as we transfer ownership later to the node
+            var target = new BinaryFormat();
+
+            var assembly = typeof(GamePatcher).Assembly;
+            using Stream patch = assembly.GetManifestResourceStream(patchResource);
+
+            using var decoder = new Decoder(source.Stream, patch, target.Stream);
+            decoder.ProgressChanged += progress => {
+                Logger.Log($"Patching progress: {progress}");
+                ProgressChanged?.Invoke(progress);
+            };
+
+            Logger.Log("Starting to patch");
+            decoder.Run();
+
+            Logger.Log("Patching done!");
+            source.ChangeFormat(target);
         }
     }
 }

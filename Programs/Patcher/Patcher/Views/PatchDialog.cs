@@ -55,26 +55,82 @@ namespace Patcher.Views
         Control GetControlFromScene(PatchScene scene)
         {
             Logger.Log($"Changing patch scene to: {scene}");
-            return scene switch {
-                PatchScene.BaseInstructions => GetBaseInstructions(),
-                PatchScene.CitraInstructions => GetCitraInstructions(),
-                PatchScene.ConsoleInstructions => GetConsoleInstructions(),
-                _ => throw new InvalidOperationException("Invalid transition"),
+            if (scene == PatchScene.BaseInstructions) {
+                return GetBaseInstructions();
+            } else if (scene == PatchScene.Patching) {
+                return GetPatching();
+            } else if (scene == PatchScene.Close) {
+                Close();
+                return null;
+            }
+
+            throw new InvalidOperationException("Invalid transition");
+        }
+
+        Control GetPatching()
+        {
+            var progressBar = new ProgressBar {
+                MinValue = 0,
+                MaxValue = 100,
+            };
+            progressBar.Bind(
+                p => p.Value,
+                Binding.Property(viewModel, vm => vm.PatchProgress)
+                    .Convert(v => (int)(v * 100)));
+
+            return new TableLayout {
+                Padding = 10,
+                Spacing = new Size(10, 10),
+                Rows = {
+                    new TableRow("Patching..."),
+                    new TableRow(progressBar),
+                    new TableRow(new ImageView {
+                        Image = Bitmap.FromResource(ResourcesName.PatchingBackground),
+                    }),
+                },
             };
         }
 
         Control GetCitraInstructions()
         {
-            return new Label { Text = L10n.Get(
-                "Game successfully patched! Just open the game in Citra to play.\n" +
-                "Make sure you are using Citra version 1659 or higher.") };
+            var closeBtn = new Button {
+                Text = L10n.Get("Close", "Citra window"),
+            };
+            closeBtn.Click += (sender, e) => Close();
+
+            return new TableLayout {
+                Padding = 10,
+                Spacing = new Size(10, 10),
+                Rows = {
+                    new TableRow(L10n.Get(
+                        "Game successfully patched! Just open the game in Citra to play.\n" +
+                        "Make sure you are using Citra version 1659 or higher.")),
+                    new TableRow() { ScaleHeight = true },
+                    new TableLayout(new TableRow(closeBtn, null)),
+                    new TableRow(),
+                },
+            };
         }
 
         Control GetConsoleInstructions()
         {
-            return new Label { Text = L10n.Get(
-                "Copy the new folder Luma to the root directory of your microSD\n" +
-                "and start the game as always!") };
+            var closeBtn = new Button {
+                Text = L10n.Get("Close", "Console window"),
+            };
+            closeBtn.Click += (sender, e) => Close();
+
+            return new TableLayout {
+                Padding = 10,
+                Spacing = new Size(10, 10),
+                Rows = {
+                    new TableRow(L10n.Get(
+                        "Copy the new folder Luma to the root directory of your microSD\n" +
+                        "and start the game as always!")),
+                    new TableRow() { ScaleHeight = true },
+                    new TableLayout(new TableRow(closeBtn, null)),
+                    new TableRow(),
+                },
+            };
         }
 
         Control GetBaseInstructions()
@@ -126,12 +182,19 @@ namespace Patcher.Views
 
             var citraRadioBtn = new RadioButton {
                 Text = L10n.Get("Citra emulator"),
-                Checked = true
             };
+            citraRadioBtn.Bind(
+                c => c.Checked,
+                Binding.Property(viewModel, vm => vm.TargetDevice)
+                    .ToBool(TargetDevice.CitraPcLayeredFs));
 
             var consoleRadioBtn = new RadioButton(citraRadioBtn) {
                 Text = L10n.Get("Console"),
             };
+            consoleRadioBtn.Bind(
+                c => c.Checked,
+                Binding.Property(viewModel, vm => vm.TargetDevice)
+                    .ToBool(TargetDevice.ConsoleLayeredFs));
 
             var patchBtn = new Button {
                 Text = L10n.Get("Patch!", "Button in patcher"),
