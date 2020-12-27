@@ -173,7 +173,7 @@ namespace Patcher.ViewModels
                 if (TargetDevice == TargetDevice.CitraPcLayeredFs) {
                     await exporter.ExportToCitraAsync().ConfigureAwait(false);
                 } else if (TargetDevice == TargetDevice.ConsoleLayeredFs) {
-                    await exporter.ExportToDirectoryAsync("").ConfigureAwait(false);
+                    await exporter.ExportToDirectoryAsync(SelectedOutputPath).ConfigureAwait(false);
                 }
             } catch (Exception ex) {
                 Eto.Forms.MessageBox.Show(ex.ToString(), Eto.Forms.MessageBoxType.Error);
