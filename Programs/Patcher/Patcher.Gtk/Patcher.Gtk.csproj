@@ -7,8 +7,6 @@
 
     <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>
-    <PublishSingleFile>true</PublishSingleFile>
-    <PublishTrimmed>true</PublishTrimmed>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -16,16 +14,9 @@
     <PublishTrimmed>true</PublishTrimmed>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
-    <StartAction>Project</StartAction>
-    <ExternalConsole>false</ExternalConsole>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Patcher\Patcher.csproj" />
-  </ItemGroup>
 
-  <ItemGroup>
     <PackageReference Include="Eto.Platform.Gtk" Version="2.5.8" />
   </ItemGroup>
 

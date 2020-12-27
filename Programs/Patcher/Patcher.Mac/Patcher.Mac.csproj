@@ -7,8 +7,6 @@
 
     <RuntimeIdentifier>osx-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>
-    <PublishSingleFile>true</PublishSingleFile>
-    <PublishTrimmed>true</PublishTrimmed>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -18,9 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Patcher\Patcher.csproj" />
-  </ItemGroup>
 
-  <ItemGroup>
     <PackageReference Include="Eto.Platform.Mac64" Version="2.5.8" />
   </ItemGroup>
 
