@@ -118,7 +118,8 @@ namespace Patcher.Views
                     new TableRow(L10n.Get(
                         "Select where you want to export the luma folder.\n" +
                         "Copy this folder to the root directory of your microSD\n" +
-                        "and start the game as always!")),
+                        "and start the game as always!\n" +
+                        "Use Luma v10.2.1 or higher, or the game will crash.")),
                     new TableRow(selectOutputPicker),
                 },
             };
@@ -194,16 +195,12 @@ namespace Patcher.Views
             };
 
             var consoleControl = GetConsoleInstructions();
-            consoleControl.Bind(
-                c => c.Visible,
-                Binding.Property(viewModel, vm => vm.TargetDevice)
-                    .ToBool(TargetDevice.ConsoleLayeredFs));
-
             var citraControl = GetCitraInstructions();
-            citraControl.Bind(
-                c => c.Visible,
+            var infoLayout = new Panel();
+            infoLayout.Bind(
+                c => c.Content,
                 Binding.Property(viewModel, vm => vm.TargetDevice)
-                    .ToBool(TargetDevice.CitraPcLayeredFs));
+                    .Convert(t => t == TargetDevice.CitraPcLayeredFs ? citraControl : consoleControl));
 
             var table = new TableLayout {
                 Padding = 10,
@@ -227,11 +224,10 @@ namespace Patcher.Views
                         Rows = {
                             new TableRow(citraRadioBtn, null),
                             new TableRow(consoleRadioBtn, null),
-                            new TableRow(consoleControl),
-                            new TableRow(citraControl),
                         },
                     },
-                    new TableRow() { ScaleHeight = true },
+                    new TableRow(infoLayout),
+                    new TableRow(),
                     new TableLayout(new TableRow(patchBtn, null)),
                     new TableRow(),
                 },
