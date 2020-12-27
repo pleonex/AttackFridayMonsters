@@ -38,10 +38,9 @@ namespace Patcher.Views
         private void InitializeComponents()
         {
             var version = Assembly.GetExecutingAssembly().GetName().Version;
-            string versionText = $"{version.Major}.{version.Minor}";
-            Title = string.Format(L10n.Get("Fan-translation of Attack of the Friday Monsters ~ v{0}"), versionText);
+            Title = string.Format(L10n.Get("Fan-translation of Attack of the Friday Monsters ~ v{0}"), version);
             Icon = Icon.FromResource(ResourcesName.Icon);
-            Logger.Log($"MainForm - Version: {versionText}");
+            Logger.Log($"MainForm - Version: {version}");
 
             // On GTK3 did doesn't work
             // https://github.com/picoe/Eto/issues/1652
