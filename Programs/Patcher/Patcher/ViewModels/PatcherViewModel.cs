@@ -38,12 +38,12 @@ namespace Patcher.ViewModels
 
         public PatcherViewModel()
         {
-            TargetDevice = TargetDevice.ConsoleLayeredFs;
-            PatchScene = PatchScene.BaseInstructions;
             SelectGameCommand = new AsyncRelayCommand(SelectAndVerifyGame);
-            SelectOutputCommand = new RelayCommand(SelectOutputDirectory);
-            PatchCommand = new AsyncRelayCommand(PatchAsync, () => FileStatus == FilePatchStatus.ValidFile);
+            PatchCommand = new AsyncRelayCommand(PatchAsync, () => CanPatch);
+
+            TargetDevice = TargetDevice.CitraPcLayeredFs;
             FileStatus = FilePatchStatus.NoFile;
+            PatchScene = PatchScene.BaseInstructions;
         }
 
         public PatchScene PatchScene {
@@ -58,7 +58,10 @@ namespace Patcher.ViewModels
 
         public string SelectedOutputPath {
             get => selectedOutputPath;
-            private set => SetProperty(ref selectedOutputPath, value);
+            private set {
+                SetProperty(ref selectedOutputPath, value);
+                PatchCommand.NotifyCanExecuteChanged();
+            }
         }
 
         public FilePatchStatus FileStatus {
@@ -78,7 +81,10 @@ namespace Patcher.ViewModels
 
         public TargetDevice TargetDevice {
             get => targetDevice;
-            set => SetProperty(ref targetDevice, value);
+            set {
+                SetProperty(ref targetDevice, value);
+                PatchCommand.NotifyCanExecuteChanged();
+            }
         }
 
         public bool Disposed {
@@ -86,9 +92,10 @@ namespace Patcher.ViewModels
             private set;
         }
 
-        public AsyncRelayCommand SelectGameCommand { get; }
+        public bool CanPatch => (FileStatus == FilePatchStatus.ValidFile) &&
+            ((TargetDevice == TargetDevice.CitraPcLayeredFs) || !string.IsNullOrEmpty(SelectedOutputPath));
 
-        public RelayCommand SelectOutputCommand { get; }
+        public AsyncRelayCommand SelectGameCommand { get; }
 
         public AsyncRelayCommand PatchCommand { get; }
 
@@ -147,27 +154,6 @@ namespace Patcher.ViewModels
             } catch (Exception ex) {
                 Logger.Log(ex.ToString());
             }
-        }
-
-        private void SelectOutputDirectory()
-        {
-            using var saveFileDialog = new Eto.Forms.SaveFileDialog {
-                CheckFileExists = false,
-                Filters = {
-                    new Eto.Forms.FileFilter("CTR Importable Archive (CIA)", "cia"),
-                    new Eto.Forms.FileFilter(L10n.Get("All files"), "*"),
-                },
-                FileName = (SelectedGamePath ?? "") + "_patched.cia",
-                Title = L10n.Get("Choose the output directory"),
-            };
-
-            var result = saveFileDialog.ShowDialog(Eto.Forms.Application.Instance.MainForm);
-            if (result != Eto.Forms.DialogResult.Ok) {
-                Logger.Log($"Cancel output dialog: {result}");
-                return;
-            }
-
-            SelectedOutputPath = saveFileDialog.FileName;
         }
 
         private async Task PatchAsync()

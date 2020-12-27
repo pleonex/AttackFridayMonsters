@@ -15,6 +15,7 @@
 namespace Patcher.Views
 {
     using System;
+    using Eto;
     using Eto.Drawing;
     using Eto.Forms;
     using Patcher.Patching;
@@ -94,29 +95,30 @@ namespace Patcher.Views
         Control GetCitraInstructions()
         {
             return new TableLayout {
-                Padding = 10,
-                Spacing = new Size(10, 10),
+                Spacing = new Size(5, 5),
                 Rows = {
                     new TableRow(L10n.Get(
-                        "Game successfully patched! Just open the game in Citra to play.\n" +
-                        "Make sure you are using Citra version 1659 or higher.")),
-                    new TableRow() { ScaleHeight = true },
-                    new TableRow(),
+                        "Clippy will install the game and the patch in\n" +
+                        "the Citra folder of your PC.\n" +
+                        "No additional steps from you are required.")),
                 },
             };
         }
 
         Control GetConsoleInstructions()
         {
+            var selectOutputPicker = new FilePicker {
+                FileAction = FileAction.SelectFolder,
+            };
+            selectOutputPicker.BindDataContext(s => s.FilePath, (PatcherViewModel vm) => vm.SelectedOutputPath);
+
             return new TableLayout {
-                Padding = 10,
                 Spacing = new Size(10, 10),
                 Rows = {
                     new TableRow(L10n.Get(
                         "Copy the new folder Luma to the root directory of your microSD\n" +
                         "and start the game as always!")),
-                    new TableRow() { ScaleHeight = true },
-                    new TableRow(),
+                    new TableRow(selectOutputPicker),
                 },
             };
         }
@@ -190,6 +192,18 @@ namespace Patcher.Views
                 Command = viewModel.PatchCommand,
             };
 
+            var consoleControl = GetConsoleInstructions();
+            consoleControl.Bind(
+                c => c.Visible,
+                Binding.Property(viewModel, vm => vm.TargetDevice)
+                    .ToBool(TargetDevice.ConsoleLayeredFs));
+
+            var citraControl = GetCitraInstructions();
+            citraControl.Bind(
+                c => c.Visible,
+                Binding.Property(viewModel, vm => vm.TargetDevice)
+                    .ToBool(TargetDevice.CitraPcLayeredFs));
+
             var table = new TableLayout {
                 Padding = 10,
                 Spacing = new Size(10, 10),
@@ -212,6 +226,8 @@ namespace Patcher.Views
                         Rows = {
                             new TableRow(citraRadioBtn, null),
                             new TableRow(consoleRadioBtn, null),
+                            new TableRow(consoleControl),
+                            new TableRow(citraControl),
                         },
                     },
                     new TableRow() { ScaleHeight = true },
