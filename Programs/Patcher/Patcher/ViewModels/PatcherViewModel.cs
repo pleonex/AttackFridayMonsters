@@ -15,6 +15,7 @@
 namespace Patcher.ViewModels
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Threading.Tasks;
     using Microsoft.Toolkit.Mvvm.ComponentModel;
@@ -70,7 +71,7 @@ namespace Patcher.ViewModels
 
         public double PatchProgress {
             get => patchProgress;
-            private set => Eto.Forms.Application.Instance.Invoke(() => {
+            private set => Eto.Forms.Application.Instance.InvokeAsync(() => {
                 SetProperty(ref patchProgress, value);
             });
         }
@@ -175,7 +176,11 @@ namespace Patcher.ViewModels
             try {
                 var patcher = new GamePatcher(gamePatch);
                 patcher.ProgressChanged += progress => PatchProgress = progress / 2;
+
+                var watch = Stopwatch.StartNew();
                 await patcher.PatchAsync(game).ConfigureAwait(false);
+                watch.Stop();
+                Logger.Log($"Patched in: {watch.Elapsed}");
 
                 var exporter = new GameExporterLayeredFs(game);
                 exporter.ProgressChanged += (sender, progress) => PatchProgress = 0.5 + (progress / 2);
@@ -189,13 +194,11 @@ namespace Patcher.ViewModels
                 return;
             }
 
-            await Eto.Forms.Application.Instance
-                .InvokeAsync(() =>
-                    Eto.Forms.MessageBox.Show(
-                        L10n.Get("Game patched and exported correctly!"),
-                        Eto.Forms.MessageBoxType.Information))
-                .ConfigureAwait(false);
             PatchScene = PatchScene.Close;
+            Eto.Forms.Application.Instance.Invoke(() =>
+                Eto.Forms.MessageBox.Show(
+                    L10n.Get("Game patched and exported correctly!"),
+                    Eto.Forms.MessageBoxType.Information));
         }
 
         private static GamePatch LoadPatchInfo()

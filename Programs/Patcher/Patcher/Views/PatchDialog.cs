@@ -93,11 +93,6 @@ namespace Patcher.Views
 
         Control GetCitraInstructions()
         {
-            var closeBtn = new Button {
-                Text = L10n.Get("Close", "Citra window"),
-            };
-            closeBtn.Click += (sender, e) => Close();
-
             return new TableLayout {
                 Padding = 10,
                 Spacing = new Size(10, 10),
@@ -106,7 +101,6 @@ namespace Patcher.Views
                         "Game successfully patched! Just open the game in Citra to play.\n" +
                         "Make sure you are using Citra version 1659 or higher.")),
                     new TableRow() { ScaleHeight = true },
-                    new TableLayout(new TableRow(closeBtn, null)),
                     new TableRow(),
                 },
             };
@@ -114,11 +108,6 @@ namespace Patcher.Views
 
         Control GetConsoleInstructions()
         {
-            var closeBtn = new Button {
-                Text = L10n.Get("Close", "Console window"),
-            };
-            closeBtn.Click += (sender, e) => Close();
-
             return new TableLayout {
                 Padding = 10,
                 Spacing = new Size(10, 10),
@@ -127,7 +116,6 @@ namespace Patcher.Views
                         "Copy the new folder Luma to the root directory of your microSD\n" +
                         "and start the game as always!")),
                     new TableRow() { ScaleHeight = true },
-                    new TableLayout(new TableRow(closeBtn, null)),
                     new TableRow(),
                 },
             };

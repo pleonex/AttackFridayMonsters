@@ -21,8 +21,8 @@ msgstr "¡Parchear!"
 msgid "Select the game dump (CIA)"
 msgstr "Selecciona el dump del juego (CIA)"
 
-msgid "Choose the output file"
-msgstr "Elige dónde guardar el juego parcheado"
+msgid "Choose the output directory"
+msgstr "Elige dónde guardar el directorio del parche"
 
 msgid "All files"
 msgstr "Todos los archivos"
@@ -87,3 +87,34 @@ msgstr ""
 "¡Juego parcheado e instalado correctamente en Citra!\n"
 "Para jugar solo tienes que abrir el juego desde el emulador como siempre.\n"
 "Asegúrate de actualizar Citra y tener una versión igual o mayor a 1659."
+
+msgid "No file selected"
+msgstr "Ningún fichero seleccionado"
+
+msgid "Game compatible with the patch!"
+msgstr "¡Juego compatible!"
+
+msgid "Game patched and exported correctly!"
+msgstr "¡Parche instalado correctamente!"
+
+msgid "The patcher does not support this game region"
+msgstr "Esta región del juego no está soportado"
+
+msgctxt "File patch status"
+msgid "Oops, error?"
+msgstr "¡Cáspita! ¡Caracoles! Ha fallado..."
+
+msgid "This is not a game in CIA format"
+msgstr "El fichero no es un juego con formato CIA"
+
+msgid "Invalid game..."
+msgstr "Juego desconocido, asegúrate de seleccionar el buen título"
+
+msgid "The patcher does not support this game version"
+msgstr "El parcheador no soporta esta versión del juego"
+
+msgid "Game dump is not valid. Make sure to dump your own game"
+msgstr "Dump del juego inválido. Asegúrate de dumpear tu propio juego."
+
+msgid "Game is encrypted. Redump the game decrypted"
+msgstr "Juego cifrado. Dumpea de nuevo el juego descifrado (no legit)."
