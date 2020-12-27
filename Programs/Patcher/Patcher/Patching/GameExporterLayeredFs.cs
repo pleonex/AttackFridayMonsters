@@ -24,8 +24,8 @@ namespace Patcher.Patching
     public class GameExporterLayeredFs
     {
         static readonly string HomePath = System.Environment.GetEnvironmentVariable("HOME");
-        static readonly string CitraPathWindows = @$"{HomePath}\AppData\Roaming\Citra\load\mods";
-        static readonly string CitraPathUnix = $"{HomePath}/.local/share/citra-emu/load/mods";
+        static readonly string CitraPathWindows = @$"{HomePath}\AppData\Roaming\Citra";
+        static readonly string CitraPathUnix = $"{HomePath}/.local/share/citra-emu";
         static readonly string CitraPath = (System.Environment.OSVersion.Platform == PlatformID.Win32NT)
             ? CitraPathWindows
             : CitraPathUnix;
@@ -47,6 +47,7 @@ namespace Patcher.Patching
                     ExtractLayeredFs(lumaBase);
                 } catch (Exception ex) {
                     Logger.Log(ex.ToString());
+                    throw;
                 }
             }).ConfigureAwait(false);
             ProgressChanged?.Invoke(this, 1);
@@ -54,8 +55,56 @@ namespace Patcher.Patching
 
         public async Task ExportToCitraAsync()
         {
-            await Task.Delay(1000).ConfigureAwait(false);
+            await Task.Run(() => {
+                try {
+                    InstallCitraGame();
+
+                    Unpack();
+
+                    string citraLayered = Path.Combine(CitraPath, "load", "mods");
+                    ExtractLayeredFs(citraLayered);
+                } catch (Exception ex) {
+                    Logger.Log(ex.ToString());
+                    throw;
+                }
+            }).ConfigureAwait(false);
             ProgressChanged?.Invoke(this, 1);
+        }
+
+        private void InstallCitraGame()
+        {
+            Logger.Log($"Title: {Game.PatchInfo.TitleId}");
+            string id0 = Game.PatchInfo.TitleId.Substring(0, 8);
+            string id1 = Game.PatchInfo.TitleId.Substring(8, 8);
+            string titleDir = Path.Combine(
+                CitraPath,
+                "sdmc",
+                "Nintendo 3DS",
+                "00000000000000000000000000000000",
+                "00000000000000000000000000000000",
+                "title",
+                id0,
+                id1,
+                "content");
+            string programPath = Path.Combine(titleDir, "00000000.app");
+            string metadataPath = Path.Combine(titleDir, "00000000.tmd");
+            string manualPath = Path.Combine(titleDir, "00000001.app");
+            Logger.Log($"Checking dir: {titleDir}");
+
+            if (!File.Exists(programPath)) {
+                Logger.Log($"Writing program to {programPath}");
+                Game.Root.Children["content"].Children["program"].Stream.WriteTo(programPath);
+            }
+
+            if (!File.Exists(metadataPath)) {
+                Logger.Log($"Writing metadata to {metadataPath}");
+                Game.Root.Children["title"].Stream.WriteTo(metadataPath);
+            }
+
+            if (!File.Exists(manualPath)) {
+                Logger.Log($"Writing manual to {manualPath}");
+                Game.Root.Children["content"].Children["manual"].Stream.WriteTo(manualPath);
+            }
         }
 
         private void ExtractLayeredFs(string outputBaseDir)

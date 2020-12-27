@@ -83,7 +83,7 @@ namespace Patcher.Views
                 Padding = 10,
                 Spacing = new Size(10, 10),
                 Rows = {
-                    new TableRow("Patching..."),
+                    new TableRow(L10n.Get("Patching...")),
                     new TableRow(progressBar),
                     new TableRow(new ImageView {
                         Image = Bitmap.FromResource(ResourcesName.PatchingBackground),
@@ -116,7 +116,8 @@ namespace Patcher.Views
                 Spacing = new Size(10, 10),
                 Rows = {
                     new TableRow(L10n.Get(
-                        "Copy the new folder Luma to the root directory of your microSD\n" +
+                        "Select where you want to export the luma folder.\n" +
+                        "Copy this folder to the root directory of your microSD\n" +
                         "and start the game as always!")),
                     new TableRow(selectOutputPicker),
                 },

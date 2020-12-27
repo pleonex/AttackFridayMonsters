@@ -80,14 +80,6 @@ msgstr "clippy_es.png"
 msgid "Please wait while we check the game..."
 msgstr "Verificando la compatibilidad..."
 
-msgid ""
-"Game successfully patched! Just open the game in Citra to play.\n"
-"Make sure you are using Citra version 1659 or higher."
-msgstr ""
-"¡Juego parcheado e instalado correctamente en Citra!\n"
-"Para jugar solo tienes que abrir el juego desde el emulador como siempre.\n"
-"Asegúrate de actualizar Citra y tener una versión igual o mayor a 1659."
-
 msgid "No file selected"
 msgstr "Ningún fichero seleccionado"
 
@@ -95,7 +87,7 @@ msgid "Game compatible with the patch!"
 msgstr "¡Juego compatible!"
 
 msgid "Game patched and exported correctly!"
-msgstr "¡Parche instalado correctamente!"
+msgstr "¡Parche exportado correctamente!"
 
 msgid "The patcher does not support this game region"
 msgstr "Esta región del juego no está soportado"
@@ -118,3 +110,24 @@ msgstr "Dump del juego inválido. Asegúrate de dumpear tu propio juego."
 
 msgid "Game is encrypted. Redump the game decrypted"
 msgstr "Juego cifrado. Dumpea de nuevo el juego descifrado (no legit)."
+
+msgid ""
+"Select where you want to export the luma folder.\n"
+"Copy this folder to the root directory of your microSD\n"
+"and start the game as always!"
+msgstr ""
+"Elige dónde guardar el directorio 'luma'.\n"
+"Una vez termine el parcheador, copia esta carpeta al directorio raíz\n"
+"de tu microSD e inicia el juego en tu consola como siempre."
+
+msgid ""
+"Clippy will install the game and the patch in\n"
+"the Citra folder of your PC.\n"
+"No additional steps from you are required."
+msgstr ""
+"En este caso, Clippy instalará el juego junto al parche\n"
+"en la carpeta de Citra de tu ordenador.\n"
+"Una vez termine, simplemente inicia de nuevo Citra."
+
+msgid "Patching..."
+msgstr "Parcheando..."

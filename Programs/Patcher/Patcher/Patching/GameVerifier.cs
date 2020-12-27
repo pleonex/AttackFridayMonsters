@@ -20,6 +20,7 @@ namespace Patcher.Patching
     using System.Threading.Tasks;
     using SceneGate.Lemon.Containers.Converters;
     using SceneGate.Lemon.Titles;
+    using Yarhl.FileFormat;
     using Yarhl.IO;
 
     public static class GameVerifier
@@ -36,9 +37,8 @@ namespace Patcher.Patching
                 game.Root.TransformWith<BinaryCia2NodeContainer>();
                 Logger.Log("Transformed to CIA!");
 
-                title = game.Root.Children["title"]
-                    .TransformWith<Binary2TitleMetadata>()
-                    .GetFormatAs<TitleMetadata>();
+                title = (TitleMetadata)ConvertFormat.With<Binary2TitleMetadata>(
+                    game.Root.Children["title"].Format);
                 Logger.Log("Transformed to TitleMetadata");
             } catch (Exception ex) {
                 Logger.Log("Invalid format.");
