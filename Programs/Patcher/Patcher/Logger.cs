@@ -15,6 +15,7 @@
 namespace Patcher
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
 
     public static class Logger
@@ -33,7 +34,7 @@ namespace Patcher
 
         private static string GetLogFile()
         {
-            string appPath = Path.GetDirectoryName(typeof(Logger).Assembly.Location);
+            string appPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             return Path.Combine(appPath, "logs.txt");
         }
     }
