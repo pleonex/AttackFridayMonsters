@@ -184,6 +184,7 @@ namespace Patcher.ViewModels
             Eto.Forms.Application.Instance.Invoke(() =>
                 Eto.Forms.MessageBox.Show(
                     L10n.Get("Game patched and exported correctly!"),
+                    L10n.Get("Congratulations!", "patch status window"),
                     Eto.Forms.MessageBoxType.Information));
         }
 

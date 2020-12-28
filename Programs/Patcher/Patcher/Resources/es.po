@@ -136,3 +136,7 @@ msgstr "Parcheando..."
 
 msgid "Select output luma folder"
 msgstr "Selecciona dónde guardar el directorio luma"
+
+msgctxt "patch status window"
+msgid "Congratulations!"
+msgstr "¡Enhorabuena!"
