@@ -23,8 +23,9 @@ namespace Patcher.Patching
 
     public class GameExporterLayeredFs
     {
-        static readonly string HomePath = System.Environment.GetEnvironmentVariable("HOME");
-        static readonly string CitraPathWindows = @$"{HomePath}\AppData\Roaming\Citra";
+        static readonly string AppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        static readonly string CitraPathWindows = @$"{AppDataPath}\Citra";
+        static readonly string HomePath = Environment.GetEnvironmentVariable("HOME");
         static readonly string CitraPathUnix = $"{HomePath}/.local/share/citra-emu";
         static readonly string CitraPath = (System.Environment.OSVersion.Platform == PlatformID.Win32NT)
             ? CitraPathWindows

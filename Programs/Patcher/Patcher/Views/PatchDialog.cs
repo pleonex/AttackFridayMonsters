@@ -109,6 +109,7 @@ namespace Patcher.Views
         {
             var selectOutputPicker = new FilePicker {
                 FileAction = FileAction.SelectFolder,
+                Title = L10n.Get("Select output luma folder"),
             };
             selectOutputPicker.BindDataContext(s => s.FilePath, (PatcherViewModel vm) => vm.SelectedOutputPath);
 
@@ -227,7 +228,7 @@ namespace Patcher.Views
                         },
                     },
                     new TableRow(infoLayout),
-                    new TableRow(),
+                    new TableRow() { ScaleHeight = true },
                     new TableLayout(new TableRow(patchBtn, null)),
                     new TableRow(),
                 },

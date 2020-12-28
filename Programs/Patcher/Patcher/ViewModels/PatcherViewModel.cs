@@ -41,7 +41,7 @@ namespace Patcher.ViewModels
             SelectGameCommand = new AsyncRelayCommand(SelectAndVerifyGame);
             PatchCommand = new AsyncRelayCommand(PatchAsync, () => CanPatch);
 
-            TargetDevice = TargetDevice.CitraPcLayeredFs;
+            TargetDevice = TargetDevice.ConsoleLayeredFs;
             FileStatus = FilePatchStatus.NoFile;
             PatchScene = PatchScene.BaseInstructions;
         }
