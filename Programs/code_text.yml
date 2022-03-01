@@ -16,6 +16,7 @@ definitions:
     size: 78
     encoding: utf-16
     pointers:
+      - 0x0019b46c
       - 0x00281b84
 
   - address: 0x00279450
@@ -250,6 +251,7 @@ definitions:
     size: 138
     encoding: utf-16
     pointers:
+      - 0x00235664
       - 0x00295bb4
 
   - address: 0x00279d1a
@@ -395,6 +397,7 @@ definitions:
     size: 24
     encoding: utf-16
     pointers:
+      - 0x001def7c
       - 0x00295fec
 
   - address: 0x0027a056
@@ -408,24 +411,28 @@ definitions:
     size: 26
     encoding: utf-16
     pointers:
+      - 0x0023ec1c
       - 0x00296070
 
   - address: 0x0027a090
     size: 32
     encoding: utf-16
     pointers:
+      - 0x00242d98
       - 0x002960b4
 
   - address: 0x0027a0b0
     size: 32
     encoding: utf-16
     pointers:
+      - 0x00242c24
       - 0x002960ac
 
   - address: 0x0027a0d0
     size: 46
     encoding: utf-16
     pointers:
+      - 0x00242cf8
       - 0x002960fc
 
   - address: 0x0027a0fe
@@ -725,6 +732,7 @@ definitions:
     size: 28
     encoding: utf-16
     pointers:
+      - 0x001a2184
       - 0x001a27dc
 
   - address: 0x002965b6
@@ -739,36 +747,47 @@ definitions:
     size: 56
     encoding: utf-16
     pointers:
+      - 0x001a22ec
+      - 0x001a2310
       - 0x001a27e4
 
   - address: 0x00296628
     size: 52
     encoding: utf-16
     pointers:
+      - 0x001a2320
+      - 0x001a2344
       - 0x001a27e8
 
   - address: 0x0029665c
     size: 22
     encoding: utf-16
     pointers:
+      - 0x001a26f4
       - 0x001a2824
 
   - address: 0x00296672
     size: 24
     encoding: utf-16
     pointers:
+      - 0x001a2974
+      - 0x001a2990
       - 0x001a2b88
 
   - address: 0x0029668a
     size: 26
     encoding: utf-16
     pointers:
+      - 0x001a29f4
+      - 0x001a2a10
       - 0x001a2b90
 
   - address: 0x002966a4
     size: 32
     encoding: utf-16
     pointers:
+      - 0x001a2a60
+      - 0x001a2a7c
       - 0x001a2b98
 
   - address: 0x002966c4
@@ -826,6 +845,7 @@ definitions:
     size: 68
     encoding: utf-16
     pointers:
+      - 0x001a1e6c
       - 0x001a2140
 
   - address: 0x00296880
@@ -840,8 +860,8 @@ definitions:
     pointers:
       - 0x001d1be4
 
-  # Pointer is in code relative to other text.
-  # We took the space of the next text as it was moved anyway.
+    # Pointer is in code relative to other text.
+    # We took the space of the next text as it was moved anyway.
   - address: 0x002968ac
     size: 10
     encoding: utf-16

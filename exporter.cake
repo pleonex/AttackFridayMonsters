@@ -161,7 +161,8 @@ Task("Export-Fonts")
         Program = "python",
         Arguments = $"{scriptPath} -x -y -f <in>",
         WorkingDirectory = data.FontDirectory,
-        WorkingDirectoryAsOutput = true
+        WorkingDirectoryAsOutput = true,
+        FileName = "kk_KN_Font.bcfnt"
     };
 
     data.GetNode("gkk/lyt/title.arc/font/kk_KN_Font.bcfnt")
@@ -292,7 +293,7 @@ Task("Export-Images")
         "timg/mai_4.bclim",
         "timg/mai_5.bclim",
     };
-    ExtractBclimImages(data, "gkk/cardgame/cardlyt_d.arc", cardlytImages);
+    ExtractBclimImages(data, "cardlyt", "gkk/cardgame/cardlyt_d.arc", cardlytImages);
 
     var moviewLowImages = new[] {
         "timg/skip_ji.bclim",
@@ -411,7 +412,7 @@ Task("Export-Images")
         "timg/tub_tool.bclim",
         "timg/zenz_mk_a.bclim",
     };
-    ExtractBclimImages(data, "gkk/lyt/sub_screen.bin/File0.bin", subscreen0Images);
+    ExtractBclimImages(data, "sub_screen", "gkk/lyt/sub_screen.bin/File0.bin", subscreen0Images);
 
     var cardtexImages = new[] {
         "File66.bin",
@@ -424,7 +425,14 @@ Task("Export-Images")
 void ExtractBclimImages(BuildData data, string rootPath, params string[] children)
 {
     Node root = data.GetNode(rootPath);
-    string outDir = $"{data.ImageDirectory}/{root.Name}";
+    string rootName = System.IO.Path.GetFileNameWithoutExtension(root.Name);
+    ExtractBclimImages(data, rootName, rootPath, children);
+}
+
+void ExtractBclimImages(BuildData data, string rootName, string rootPath, params string[] children)
+{
+    Node root = data.GetNode(rootPath);
+    string outDir = $"{data.ImageDirectory}/{rootName}";
     var converter = new ExternalProgramConverter {
         Program = $"{data.ToolsDirectory}/bclimtool",
         Arguments = "-dfp <in> <out>",
@@ -432,7 +440,8 @@ void ExtractBclimImages(BuildData data, string rootPath, params string[] childre
 
     foreach (var child in children) {
         Node childNode = data.GetNode($"{rootPath}/{child}");
-        string pngPath = $"{outDir}/{childNode.Name}.png";
+        string childName = System.IO.Path.GetFileNameWithoutExtension(childNode.Name);
+        string pngPath = $"{outDir}/{childName}.png";
 
         childNode.TransformWith(converter)
             .Stream.WriteTo(pngPath);
@@ -442,15 +451,16 @@ void ExtractBclimImages(BuildData data, string rootPath, params string[] childre
 void ExtractCgfxImages(BuildData data, string rootPath, params string[] children)
 {
     Node root = data.GetNode(rootPath);
-    string outDir = $"{data.ImageDirectory}/{root.Name}";
+    string rootName = System.IO.Path.GetFileNameWithoutExtension(root.Name);
+    string outDir = $"{data.ImageDirectory}/{rootName}";
     var converter = new ExternalProgramNodeConverter {
         Program = $"{data.ToolsDirectory}/txobtool",
         Arguments = "-efd <in> <out>",
+        OutputDirectory = outDir,
     };
 
     foreach (var child in children) {
         Node childNode = data.GetNode($"{rootPath}/{child}");
-        converter.OutputDirectory = $"{outDir}/{childNode.Name}";
         childNode.TransformWith(converter);
     }
 }
